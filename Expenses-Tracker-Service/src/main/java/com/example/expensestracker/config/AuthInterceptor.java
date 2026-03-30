@@ -12,9 +12,10 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         
-        // Handle preflight requests
+        // Handle preflight requests explicitly
         if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-            return true;
+            response.setStatus(HttpServletResponse.SC_OK);
+            return false;
         }
 
         String authHeader = request.getHeader("Authorization");

@@ -1,106 +1,99 @@
 <div class="layout-container" (click)="closeAll($event)">
 
-  <!-- Sidebar Overlay (mobile) -->
-  <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="isMobileMenuOpen = false"></div>
-
-  <!-- Sidebar -->
-  <aside *ngIf="authService.isAuthenticated" class="sidebar" [class.open]="isMobileMenuOpen">
+  <!-- ═══ DESKTOP SIDEBAR (hidden on mobile) ═══ -->
+  <aside *ngIf="authService.isAuthenticated" class="sidebar">
     <div class="brand">
       <div class="logo">ET</div>
       <h2>Expense Tracker</h2>
-      <!-- Close button (mobile only) -->
-      <button class="sidebar-close" (click)="isMobileMenuOpen = false" aria-label="Close menu">✕</button>
     </div>
-    
     <nav class="nav-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="isMobileMenuOpen = false">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <span class="icon">📊</span> Dashboard
       </a>
-      <a routerLink="/transactions" routerLinkActive="active" (click)="isMobileMenuOpen = false">
+      <a routerLink="/transactions" routerLinkActive="active">
         <span class="icon">💸</span> Transactions
       </a>
-      <a routerLink="/assets" routerLinkActive="active" (click)="isMobileMenuOpen = false">
+      <a routerLink="/assets" routerLinkActive="active">
         <span class="icon">🏦</span> Assets
       </a>
-      <a routerLink="/liabilities" routerLinkActive="active" (click)="isMobileMenuOpen = false">
+      <a routerLink="/liabilities" routerLinkActive="active">
         <span class="icon">📉</span> Liabilities
       </a>
     </nav>
-
-    <!-- User section in sidebar (visible on mobile) -->
-    <div class="sidebar-user" *ngIf="authService.currentUserValue as user">
-      <div class="sidebar-avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
-      <div class="sidebar-user-info">
-        <span class="name font-bold">{{ user.name }}</span>
-        <span class="role text-xs text-muted">{{ user.username }}</span>
-      </div>
-    </div>
-    <div class="sidebar-actions">
-      <a routerLink="/profile" class="sidebar-action-btn" (click)="isMobileMenuOpen = false">
-        <span>⚙️</span> Update Profile
-      </a>
-      <button class="sidebar-action-btn danger" (click)="logout()">
-        <span>🚪</span> Logout
-      </button>
-    </div>
   </aside>
 
-  <!-- Mobile Header -->
-  <header *ngIf="authService.isAuthenticated" class="mobile-header">
-    <button class="menu-btn" (click)="toggleMenu()" aria-label="Open menu">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-    <div class="brand">
-      <div class="logo">ET</div>
-      <h2>Expense Tracker</h2>
-    </div>
-    <!-- Avatar on mobile header -->
-    <div class="mobile-avatar" *ngIf="authService.currentUserValue as user" (click)="toggleDropdown(); $event.stopPropagation()">
-      {{ user.name.charAt(0).toUpperCase() }}
-    </div>
-  </header>
-
-  <!-- Main Content -->
+  <!-- ═══ MAIN CONTENT ═══ -->
   <main class="main-content" [class.full-width]="!authService.isAuthenticated">
-    <!-- Desktop Topbar -->
+
+    <!-- Desktop topbar (user avatar / logout) -->
     <div *ngIf="authService.isAuthenticated" class="topbar">
-      <div class="user-profile" (click)="toggleDropdown(); $event.stopPropagation()" style="position: relative; cursor: pointer;" *ngIf="authService.currentUserValue as user">
+      <div class="user-profile" (click)="toggleDropdown(); $event.stopPropagation()"
+           style="position:relative; cursor:pointer;"
+           *ngIf="authService.currentUserValue as user">
         <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
         <div class="user-info">
           <span class="name font-bold">{{ user.name }}</span>
           <span class="role text-xs text-muted">{{ user.username }}</span>
         </div>
-        
         <div class="dropdown-menu" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
           <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
-            <span class="icon" style="margin-right: 8px;">⚙️</span> Update Profile
+            <span style="margin-right:8px">⚙️</span> Update Profile
           </a>
           <a class="dropdown-item text-danger" (click)="logout()">
-            <span class="icon" style="margin-right: 8px;">🚪</span> Logout
+            <span style="margin-right:8px">🚪</span> Logout
           </a>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Dropdown (outside sidebar) -->
-    <div class="mobile-dropdown" *ngIf="isDropdownOpen && authService.isAuthenticated" (click)="$event.stopPropagation()">
-      <div class="mobile-dropdown-user" *ngIf="authService.currentUserValue as user">
-        <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
-        <div class="user-info">
-          <span class="name font-bold">{{ user.name }}</span>
-          <span class="role text-xs text-muted">{{ user.username }}</span>
+    <!-- ═══ MOBILE TOP BANNER (shown only on mobile) ═══ -->
+    <div *ngIf="authService.isAuthenticated" class="mobile-topbar">
+      <!-- Brand row -->
+      <div class="mobile-brand-row">
+        <div class="brand-left">
+          <div class="logo">ET</div>
+          <span class="brand-name">Expense Tracker</span>
+        </div>
+        <!-- Avatar with dropdown -->
+        <div class="mobile-avatar-wrap" (click)="toggleDropdown(); $event.stopPropagation()"
+             *ngIf="authService.currentUserValue as user">
+          <div class="mobile-avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+          <!-- Mobile dropdown -->
+          <div class="mobile-dropdown" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
+            <div class="mobile-dropdown-user">
+              <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+              <div class="user-info">
+                <span class="name font-bold">{{ user.name }}</span>
+                <span class="role text-xs text-muted">{{ user.username }}</span>
+              </div>
+            </div>
+            <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
+              <span style="margin-right:8px">⚙️</span> Update Profile
+            </a>
+            <a class="dropdown-item text-danger" (click)="logout()">
+              <span style="margin-right:8px">🚪</span> Logout
+            </a>
+          </div>
         </div>
       </div>
-      <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
-        <span class="icon" style="margin-right: 8px;">⚙️</span> Update Profile
-      </a>
-      <a class="dropdown-item text-danger" (click)="logout()">
-        <span class="icon" style="margin-right: 8px;">🚪</span> Logout
-      </a>
+      <!-- Nav tabs row -->
+      <nav class="mobile-nav-tabs">
+        <a routerLink="/" routerLinkActive="tab-active" [routerLinkActiveOptions]="{exact:true}">
+          <span>📊</span><span class="tab-label">Dashboard</span>
+        </a>
+        <a routerLink="/transactions" routerLinkActive="tab-active">
+          <span>💸</span><span class="tab-label">Transactions</span>
+        </a>
+        <a routerLink="/assets" routerLinkActive="tab-active">
+          <span>🏦</span><span class="tab-label">Assets</span>
+        </a>
+        <a routerLink="/liabilities" routerLinkActive="tab-active">
+          <span>📉</span><span class="tab-label">Liabilities</span>
+        </a>
+      </nav>
     </div>
 
+    <!-- Page content -->
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>

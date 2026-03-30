@@ -52,8 +52,9 @@ export class ReportsComponent implements OnInit {
         this.largestPurchases = res.largest;
         this.comparison = res.comparison;
         
-        this.renderCharts();
         this.isLoading = false;
+        // Delay rendering slightly to ensure *ngIf has stamped the DOM
+        setTimeout(() => this.renderCharts(), 0);
       },
       error: (err) => {
         console.error(err);

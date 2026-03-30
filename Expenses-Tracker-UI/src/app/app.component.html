@@ -1,0 +1,62 @@
+<div class="layout-container">
+  <!-- Desktop Sidebar -->
+  <aside *ngIf="authService.isAuthenticated" class="sidebar" [class.open]="isMobileMenuOpen">
+    <div class="brand">
+      <div class="logo">ET</div>
+      <h2>Expense Tracker</h2>
+    </div>
+    
+    <nav class="nav-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="isMobileMenuOpen = false">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a routerLink="/transactions" routerLinkActive="active" (click)="isMobileMenuOpen = false">
+        <span class="icon">💸</span> Transactions
+      </a>
+      <a routerLink="/assets" routerLinkActive="active" (click)="isMobileMenuOpen = false">
+        <span class="icon">🏦</span> Assets
+      </a>
+      <a routerLink="/liabilities" routerLinkActive="active" (click)="isMobileMenuOpen = false">
+        <span class="icon">📉</span> Liabilities
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Mobile Header -->
+  <header *ngIf="authService.isAuthenticated" class="mobile-header">
+    <div class="brand">
+      <div class="logo">ET</div>
+      <h2>Finance</h2>
+    </div>
+    <button class="menu-btn" (click)="toggleMenu()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.full-width]="!authService.isAuthenticated">
+    <div *ngIf="authService.isAuthenticated" class="topbar">
+      <div class="user-profile flex-between" (click)="toggleDropdown()" style="position: relative; cursor: pointer;" *ngIf="authService.currentUserValue as user">
+        <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+        <div class="user-info">
+          <span class="name font-bold">{{ user.name }}</span>
+          <span class="role text-xs text-muted">{{ user.username }}</span>
+        </div>
+        
+        <div class="dropdown-menu" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
+          <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
+            <span class="icon" style="margin-right: 8px;">⚙️</span> Update Profile
+          </a>
+          <a class="dropdown-item text-danger" (click)="logout()">
+            <span class="icon" style="margin-right: 8px;">🚪</span> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

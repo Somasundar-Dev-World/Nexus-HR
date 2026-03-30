@@ -1,0 +1,35 @@
+<div class="auth-container">
+  <div class="auth-box card">
+    <div class="text-center mb-2">
+      <div class="logo">ET</div>
+      <h2 class="font-bold">Welcome Back</h2>
+      <p class="text-sm text-muted">Please sign in to your Expense Tracker account</p>
+    </div>
+
+    @if (error) {
+      <div class="alert alert-danger mb-2" style="background: #fee2e2; color: var(--danger); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.875rem;">
+        {{ error }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" name="username" [(ngModel)]="credentials.username" required>
+      </div>
+      
+      <div class="form-group mb-2">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" [(ngModel)]="credentials.password" required>
+      </div>
+      
+      <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid || isLoading" style="width: 100%; justify-content: center; padding: 0.75rem;">
+        {{ isLoading ? 'Signing In...' : 'Sign In' }}
+      </button>
+    </form>
+    
+    <div class="text-center mt-2">
+      <p class="text-sm text-muted">Don't have an account? <a routerLink="/register" style="color: var(--primary); font-weight: 500; text-decoration: none;">Create one here</a>.</p>
+    </div>
+  </div>
+</div>

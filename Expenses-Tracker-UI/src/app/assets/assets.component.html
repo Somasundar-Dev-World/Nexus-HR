@@ -1,0 +1,68 @@
+<div class="assets">
+  <div class="flex-between mb-2 nav-header">
+    <div>
+      <h1 class="font-bold text-main">Assets Portfolio</h1>
+      <p class="text-sm text-muted">Track the current value of your investments, properties, etc.</p>
+    </div>
+    <button class="btn btn-primary" (click)="showAddForm ? resetForm() : toggleAddForm()">
+      <span class="icon">➕</span> {{ showAddForm ? 'Cancel' : 'Add Asset' }}
+    </button>
+  </div>
+
+  @if (showAddForm) {
+    <div class="card mb-2 form-card">
+      <h3 class="mb-1">{{ editingId ? 'Edit Asset' : 'New Asset' }}</h3>
+      <form (ngSubmit)="saveAsset()" class="grid-form">
+        <div class="form-group">
+          <label class="form-label">Asset Name</label>
+          <input type="text" class="form-control" [(ngModel)]="newAsset.name" name="name" required placeholder="E.g., 401(k), Real Estate, Stock Portfolio">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Value</label>
+          <input type="number" class="form-control" [(ngModel)]="newAsset.currentValue" name="currentValue" required step="0.01">
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 1.25rem;">
+          <button type="submit" class="btn btn-primary">{{ editingId ? 'Update' : 'Save' }} Asset</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loader"></div>
+  }
+
+  @if (!isLoading) {
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Asset Name</th>
+              <th style="text-align: right;">Current Value</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of assets; track a.id) {
+              <tr>
+                <td data-label="Asset Name" class="font-medium">{{ a.name }}</td>
+                <td data-label="Value" style="text-align: right;" class="font-bold">
+                  {{ a.currentValue | currency }}
+                </td>
+                <td data-label="Action" style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="edit(a)">Edit</button>
+                  <button class="btn btn-danger-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="delete(a.id)">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" style="text-align: center; padding: 2rem;" class="text-muted">No assets found. Track your first asset to calculate net worth!</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

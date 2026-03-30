@@ -1,0 +1,68 @@
+<div class="liabilities">
+  <div class="flex-between mb-2 nav-header">
+    <div>
+      <h1 class="font-bold text-main">Liabilities Portfolio</h1>
+      <p class="text-sm text-muted">Track the exact balances of loans, mortgages, specific debts, etc.</p>
+    </div>
+    <button class="btn btn-primary" (click)="showAddForm ? resetForm() : toggleAddForm()">
+      <span class="icon">➕</span> {{ showAddForm ? 'Cancel' : 'Add Liability' }}
+    </button>
+  </div>
+
+  @if (showAddForm) {
+    <div class="card mb-2 form-card">
+      <h3 class="mb-1">{{ editingId ? 'Edit Liability' : 'New Liability' }}</h3>
+      <form (ngSubmit)="saveLiability()" class="grid-form">
+        <div class="form-group">
+          <label class="form-label">Liability Name</label>
+          <input type="text" class="form-control" [(ngModel)]="newLiability.name" name="name" required placeholder="E.g., Mortgage, Auto Loan, Credit Card">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Balance / Amount</label>
+          <input type="number" class="form-control" [(ngModel)]="newLiability.amount" name="amount" required step="0.01">
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 1.25rem;">
+          <button type="submit" class="btn btn-primary">{{ editingId ? 'Update' : 'Save' }} Liability</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loader"></div>
+  }
+
+  @if (!isLoading) {
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Liability Name</th>
+              <th style="text-align: right;">Current Balance</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of liabilities; track l.id) {
+              <tr>
+                <td data-label="Liability Name" class="font-medium">{{ l.name }}</td>
+                <td data-label="Amount" style="text-align: right;" class="font-bold text-danger">
+                  -{{ l.amount | currency }}
+                </td>
+                <td data-label="Action" style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="edit(l)">Edit</button>
+                  <button class="btn btn-danger-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="delete(l.id)">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" style="text-align: center; padding: 2rem;" class="text-muted">No liabilities found. Great job!</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

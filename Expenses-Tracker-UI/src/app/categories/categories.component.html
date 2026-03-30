@@ -1,0 +1,61 @@
+<div class="transactions">
+  <div class="flex-between mb-2 nav-header">
+    <div>
+      <h1 class="font-bold text-main">Categories</h1>
+      <p class="text-sm text-muted">Manage your custom expense categories.</p>
+      <a routerLink="/transactions" class="text-primary mt-1" style="display: inline-block; font-size: 0.875rem; font-weight: 500;">← Back to Transactions</a>
+    </div>
+    <button class="btn btn-primary" (click)="showAddForm ? resetForm() : toggleAddForm()">
+      <span class="icon">➕</span> {{ showAddForm ? 'Cancel' : 'Add Category' }}
+    </button>
+  </div>
+
+  @if (showAddForm) {
+    <div class="card mb-2 form-card">
+      <h3 class="mb-1">{{ editingId ? 'Edit Category' : 'New Category' }}</h3>
+      <form (ngSubmit)="saveCategory()" class="grid-form">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">Category Name</label>
+          <input type="text" class="form-control" [(ngModel)]="newCategory.name" name="name" required placeholder="E.g., Vacation, Streaming Services...">
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn btn-primary">{{ editingId ? 'Update' : 'Save' }} Category</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loader"></div>
+  }
+
+  @if (!isLoading) {
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of categories; track c.id) {
+              <tr>
+                <td data-label="Name" class="font-medium">{{ c.name }}</td>
+                <td data-label="Action" style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="edit(c)">Edit</button>
+                  <button class="btn btn-danger-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="delete(c.id)">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="2" style="text-align: center; padding: 2rem;" class="text-muted">No custom categories found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

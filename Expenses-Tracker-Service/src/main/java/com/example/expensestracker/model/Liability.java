@@ -12,6 +12,13 @@ public class Liability {
 
     private String name;
     private BigDecimal amount;
+    
+    private String institutionName;
+    private String accountNumber;
+    
+    @Column(length = 1000)
+    private String note;
+    
     private Long userId;
 
     public Liability() {
@@ -22,6 +29,7 @@ public class Liability {
         this.amount = amount;
     }
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -30,6 +38,15 @@ public class Liability {
 
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
+
+    public String getInstitutionName() { return institutionName; }
+    public void setInstitutionName(String institutionName) { this.institutionName = institutionName; }
+
+    public String getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }

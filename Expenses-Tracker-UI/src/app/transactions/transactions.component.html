@@ -1,126 +1,218 @@
 <div class="transactions">
+  <!-- Header -->
   <div class="flex-between mb-2 nav-header">
     <div>
       <h1 class="font-bold text-main">Transactions</h1>
-      <p class="text-sm text-muted">Manage all your income and expenses entries.</p>
+      <p class="text-sm text-muted">Manage your entries or import from bank CSV.</p>
     </div>
-    <button class="btn btn-primary" (click)="showAddForm ? resetForm() : toggleAddForm()">
-      <span class="icon">➕</span> {{ showAddForm ? 'Cancel' : 'Add Entry' }}
-    </button>
+    <div style="display: flex; gap: 0.75rem;">
+      <label class="btn btn-outline" style="cursor: pointer;">
+        <span class="icon">📥</span> Import CSV
+        <input type="file" (change)="onFileSelected($event)" accept=".csv" style="display: none;">
+      </label>
+      <button class="btn btn-primary" (click)="showAddForm ? resetForm() : toggleAddForm()">
+        <span class="icon">➕</span> {{ showAddForm ? 'Cancel' : 'Add Entry' }}
+      </button>
+    </div>
   </div>
 
+  <!-- CSV Preview Section -->
+  @if (showPreview) {
+    <div class="card mb-2 preview-card" style="border-color: var(--secondary); background: #f5f7ff;">
+      <div class="flex-between mb-1">
+        <h3 class="text-secondary font-bold">CSV Import Preview ({{ csvPreview.length }} rows)</h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-outline" (click)="showPreview = false">Discard</button>
+          <button class="btn btn-primary" (click)="uploadBulk()" [disabled]="isSaving">
+            @if (isSaving) { <span class="btn-spinner"></span> Saving... } @else { Confirm & Upload }
+          </button>
+        </div>
+      </div>
+      <div class="table-responsive small-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name/Desc</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Institution</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of csvPreview.slice(0, 5); track $index) {
+              <tr>
+                <td>{{ p.date }}</td>
+                <td>{{ p.name || p.description }}</td>
+                <td>{{ p.amount | currency }}</td>
+                <td><span [class.text-success]="p.type==='INCOME'" [class.text-danger]="p.type==='EXPENSE'">{{ p.type }}</span></td>
+                <td>{{ p.category }}</td>
+                <td>{{ p.institutionName }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        @if (csvPreview.length > 5) {
+          <p class="text-xs text-muted text-center mt-1">... and {{ csvPreview.length - 5 }} more rows</p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Add/Edit Form -->
   @if (showAddForm) {
     <div class="card mb-2 form-card">
-      <h3 class="mb-1">{{ editingId ? 'Edit Transaction' : 'New Transaction' }}</h3>
-      <form (ngSubmit)="saveTransaction()" class="grid-form">
-        <div class="form-group">
-          <label class="form-label">Type</label>
-          <select class="form-control" [(ngModel)]="newTransaction.type" name="type" required>
-            <option value="EXPENSE">Expense</option>
-            <option value="INCOME">Income</option>
-          </select>
+      <h3 class="mb-2">{{ editingId ? 'Edit Transaction' : 'New Transaction' }}</h3>
+      <form (ngSubmit)="saveTransaction()">
+        
+        <!-- Section: General -->
+        <div class="form-section mb-2">
+          <h4 class="text-xs text-muted font-bold mb-1 uppercase letter-spacing">General Information</h4>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select class="form-control" [(ngModel)]="newTransaction.type" name="type" required>
+                <option value="EXPENSE">Expense</option>
+                <option value="INCOME">Income</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount</label>
+              <input type="number" class="form-control" [(ngModel)]="newTransaction.amount" name="amount" required step="0.01">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-control" [(ngModel)]="newTransaction.date" name="date" required>
+            </div>
+          </div>
+          <div class="grid-2 mt-1">
+            <div class="form-group" *ngIf="newTransaction.type === 'EXPENSE'">
+              <label class="form-label">Category</label>
+              <select class="form-control" [(ngModel)]="newTransaction.category" (ngModelChange)="onCategoryChange($event)" name="category">
+                <option value="" disabled selected>Select category...</option>
+                @for (cat of suggestedCategories; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+                <option disabled>───────</option>
+                <option value="__CUSTOM__">+ Manage Custom...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description / Payee</label>
+              <input type="text" class="form-control" [(ngModel)]="newTransaction.description" name="description" required placeholder="Who or what?">
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Amount</label>
-          <input type="number" class="form-control" [(ngModel)]="newTransaction.amount" name="amount" required step="0.01">
+
+        <!-- Section: Account Info -->
+        <div class="form-section mb-2">
+          <h4 class="text-xs text-muted font-bold mb-1 uppercase letter-spacing">Account & Institution</h4>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Institution</label>
+              <input type="text" class="form-control" [(ngModel)]="newTransaction.institutionName" name="inst" placeholder="e.g. Chase, Wells Fargo">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account Name</label>
+              <input type="text" class="form-control" [(ngModel)]="newTransaction.accountName" name="accName" placeholder="e.g. Credit Card, Savings">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account # (Last 4)</label>
+              <input type="text" class="form-control" [(ngModel)]="newTransaction.accountNumber" name="accNum" placeholder="e.g. 1234">
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Date</label>
-          <input type="date" class="form-control" [(ngModel)]="newTransaction.date" name="date" required>
+
+        <!-- Section: Advanced -->
+        <div class="form-section mb-2">
+          <h4 class="text-xs text-muted font-bold mb-1 uppercase letter-spacing">Additional Details</h4>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Transaction Tags</label>
+              <input type="text" class="form-control" [(ngModel)]="newTransaction.transactionTags" name="tags" placeholder="Family, Medical, Work...">
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 1rem; padding-top: 1.8rem;">
+              <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" [(ngModel)]="newTransaction.taxDeductible" name="tax"> Tax Deductible
+              </label>
+            </div>
+          </div>
+          <div class="form-group mt-1">
+            <label class="form-label">Note</label>
+            <textarea class="form-control" [(ngModel)]="newTransaction.note" name="note" rows="2" placeholder="Any extra details..."></textarea>
+          </div>
         </div>
-        <div class="form-group" *ngIf="newTransaction.type === 'EXPENSE'">
-          <label class="form-label">Category</label>
-          <select class="form-control" [(ngModel)]="newTransaction.category" (ngModelChange)="onCategoryChange($event)" name="category">
-            <option value="" disabled selected>Select a category...</option>
-            @for (cat of suggestedCategories; track cat) {
-              <option [value]="cat">{{ cat }}</option>
-            }
-            <option disabled>───────</option>
-            <option value="__CUSTOM__">+ Manage Custom...</option>
-          </select>
-        </div>
-        <div class="form-group" style="grid-column: 1 / -1;">
-          <label class="form-label">Description</label>
-          <input type="text" class="form-control" [(ngModel)]="newTransaction.description" name="description" required placeholder="E.g., Salary, Groceries, Rent...">
-        </div>
-        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+          <button type="button" class="btn btn-outline" (click)="resetForm()">Cancel</button>
           <button type="submit" class="btn btn-primary" [disabled]="isSaving">
-            @if (isSaving) {
-              <span class="btn-spinner"></span> Saving...
-            } @else {
-              {{ editingId ? 'Update' : 'Save' }} Transaction
-            }
+            @if (isSaving) { <span class="btn-spinner"></span> Saving... } @else { {{ editingId ? 'Update' : 'Save' }} Transaction }
           </button>
         </div>
       </form>
     </div>
   }
 
-  <!-- Skeleton loader -->
+  <!-- Main Table -->
   @if (isLoading) {
     <div class="card">
-      <div class="sk-table-row" style="border-bottom:1px solid var(--border); padding-bottom:1rem; margin-bottom:0.5rem;">
-        @for (i of [1,2,3,4,5,6]; track i) {
-          <div class="skeleton sk-line" style="height:12px; width:80px"></div>
-        }
-      </div>
-      @for (i of [1,2,3,4,5]; track i) {
-        <div class="sk-table-row">
-          <div class="skeleton sk-line" style="width:80px"></div>
-          <div class="skeleton sk-line" style="width:140px"></div>
-          <div class="skeleton sk-badge"></div>
-          <div class="skeleton sk-badge"></div>
-          <div class="skeleton sk-line" style="width:70px; margin-left:auto"></div>
-          <div style="display:flex;gap:6px">
-            <div class="skeleton sk-btn" style="width:48px; height:30px"></div>
-            <div class="skeleton sk-btn" style="width:56px; height:30px"></div>
-          </div>
-        </div>
-      }
+        <!-- Skeleton logic remains same but wider -->
+        <div class="sk-table-row">@for (i of [1,2,3,4,5,6]; track i) { <div class="skeleton sk-line" style="width:100px"></div> }</div>
+        @for (i of [1,2,3,4]; track i) { <div class="sk-table-row">@for (j of [1,2,3,4,5,6]; track j) { <div class="skeleton sk-line"></div> }</div> }
     </div>
-  }
-
-  @if (!isLoading) {
-    <div class="card">
+  } @else {
+    <div class="card table-card">
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
               <th>Date</th>
-              <th>Description</th>
-              <th>Type</th>
+              <th>Description / Payee</th>
               <th>Category</th>
+              <th>Institution</th>
+              <th>Account</th>
               <th style="text-align: right;">Amount</th>
-              <th style="text-align: right;">Action</th>
+              <th style="text-align: center;">Tags</th>
+              <th style="text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody>
             @for (t of transactions; track t.id) {
-              <tr>
-                <td data-label="Date" class="text-sm">{{ t.date | date:'mediumDate' }}</td>
-                <td data-label="Description" class="font-medium">{{ t.description }}</td>
-                <td data-label="Type">
-                  <span style="padding:3px 8px;border-radius:4px;font-size:0.75rem;font-weight:bold;background:var(--bg-color);"
-                        [class.text-success]="t.type==='INCOME'" [class.text-danger]="t.type==='EXPENSE'">
-                    {{ t.type }}
-                  </span>
+              <tr [class.ignored]="t.ignoredFrom">
+                <td data-label="Date">
+                   <div class="text-sm font-bold">{{ t.date | date:'MMM d, y' }}</div>
+                   <div class="text-xs text-muted" *ngIf="t.originalDate && t.originalDate !== t.date">Orig: {{ t.originalDate }}</div>
                 </td>
-                <td data-label="Category" class="text-sm text-muted">
-                  <span *ngIf="t.category && t.type === 'EXPENSE'" style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">{{ t.category }}</span>
-                  <span *ngIf="!t.category || t.type === 'INCOME'">-</span>
+                <td data-label="Description">
+                   <div class="font-medium">{{ t.description }}</div>
+                   <div class="text-xs text-muted" *ngIf="t.note">{{ t.note }}</div>
                 </td>
-                <td data-label="Amount" style="text-align:right;" class="font-bold" [class.text-success]="t.type==='INCOME'">
-                  {{ t.type === 'INCOME' ? '+' : '-' }}{{ t.amount | currency }}
+                <td data-label="Category">
+                   <span class="badge">{{ t.category || '-' }}</span>
                 </td>
-                <td data-label="Action" style="text-align:right;display:flex;gap:0.5rem;justify-content:flex-end;">
-                  <button class="btn btn-outline" style="padding:0.3rem 0.5rem;font-size:0.75rem;" (click)="edit(t)">Edit</button>
-                  <button class="btn btn-danger-outline" style="padding:0.3rem 0.5rem;font-size:0.75rem;" (click)="delete(t.id)">Delete</button>
+                <td data-label="Institution" class="text-sm">
+                   {{ t.institutionName || '-' }}
+                </td>
+                <td data-label="Account" class="text-sm">
+                   {{ t.accountName }} <span *ngIf="t.accountNumber" class="text-xs text-muted">({{ t.accountNumber }})</span>
+                </td>
+                <td data-label="Amount" style="text-align: right;" class="font-bold" [class.text-success]="t.type==='INCOME'" [class.text-danger]="t.type==='EXPENSE'">
+                   {{ t.type === 'INCOME' ? '+' : '-' }}{{ t.amount | currency }}
+                </td>
+                <td data-label="Tags" style="text-align: center;">
+                   <span *ngIf="t.transactionTags" class="tag">{{ t.transactionTags }}</span>
+                   <span *ngIf="t.taxDeductible" class="tag tax" title="Tax Deductible">Tax</span>
+                </td>
+                <td data-label="Action" style="text-align: right;">
+                  <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+                    <button class="btn btn-outline small-btn" (click)="edit(t)">Edit</button>
+                    <button class="btn btn-danger-outline small-btn" (click)="delete(t.id)">Delete</button>
+                  </div>
                 </td>
               </tr>
             } @empty {
-              <tr>
-                <td colspan="6" style="text-align:center;padding:2rem;" class="text-muted">No transactions found. Adding an entry to get started!</td>
-              </tr>
+              <tr><td colspan="8" class="text-center text-muted" style="padding: 3rem;">No transactions found.</td></tr>
             }
           </tbody>
         </table>

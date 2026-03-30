@@ -12,22 +12,38 @@
   @if (showAddForm) {
     <div class="card mb-2 form-card">
       <h3 class="mb-1">{{ editingId ? 'Edit Asset' : 'New Asset' }}</h3>
-      <form (ngSubmit)="saveAsset()" class="grid-form">
-        <div class="form-group">
-          <label class="form-label">Asset Name</label>
-          <input type="text" class="form-control" [(ngModel)]="newAsset.name" name="name" required placeholder="E.g., 401(k), Real Estate, Stock Portfolio">
+      <form (ngSubmit)="saveAsset()">
+        <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Asset Name</label>
+              <input type="text" class="form-control" [(ngModel)]="newAsset.name" name="name" required placeholder="e.g. 401(k), Real Estate">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Value</label>
+              <input type="number" class="form-control" [(ngModel)]="newAsset.currentValue" name="currentValue" required step="0.01">
+            </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Current Value</label>
-          <input type="number" class="form-control" [(ngModel)]="newAsset.currentValue" name="currentValue" required step="0.01">
+
+        <div class="grid-2 mt-1">
+            <div class="form-group">
+              <label class="form-label">Institution</label>
+              <input type="text" class="form-control" [(ngModel)]="newAsset.institutionName" name="inst" placeholder="e.g. Fidelity, Vanguard">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account # (Optional)</label>
+              <input type="text" class="form-control" [(ngModel)]="newAsset.accountNumber" name="accNum" placeholder="Last 4 digits">
+            </div>
         </div>
-        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 1.25rem;">
+
+        <div class="form-group mt-1">
+            <label class="form-label">Note</label>
+            <textarea class="form-control" [(ngModel)]="newAsset.note" name="note" rows="2"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-outline" (click)="resetForm()">Cancel</button>
           <button type="submit" class="btn btn-primary" [disabled]="isSaving">
-            @if (isSaving) {
-              <span class="btn-spinner"></span> Saving...
-            } @else {
-              {{ editingId ? 'Update' : 'Save' }} Asset
-            }
+            @if (isSaving) { <span class="btn-spinner"></span> Saving... } @else { {{ editingId ? 'Update' : 'Save' }} Asset }
           </button>
         </div>
       </form>
@@ -37,29 +53,17 @@
   <!-- Skeleton loader -->
   @if (isLoading) {
     <div class="card">
-      <div class="sk-table-row" style="grid-template-columns: 2fr 1fr 100px; border-bottom:1px solid var(--border); padding-bottom:0.75rem; margin-bottom:0.5rem;">
-        @for (i of [1,2,3]; track i) { <div class="skeleton sk-line" style="height:12px; width:80px"></div> }
-      </div>
-      @for (i of [1,2,3]; track i) {
-        <div class="sk-table-row" style="grid-template-columns: 2fr 1fr 100px;">
-          <div class="skeleton sk-line" style="width:120px"></div>
-          <div class="skeleton sk-line" style="width:80px; margin-left:auto"></div>
-          <div style="display:flex;gap:6px;justify-content:flex-end">
-            <div class="skeleton sk-btn" style="width:44px;height:30px"></div>
-            <div class="skeleton sk-btn" style="width:54px;height:30px"></div>
-          </div>
-        </div>
-      }
+        <div class="sk-table-row">@for (i of [1,2,3,4]; track i) { <div class="skeleton sk-line" style="width:100px"></div> }</div>
+        @for (i of [1,2,3]; track i) { <div class="sk-table-row">@for (j of [1,2,3,4]; track j) { <div class="skeleton sk-line"></div> }</div> }
     </div>
-  }
-
-  @if (!isLoading) {
+  } @else {
     <div class="card">
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
               <th>Asset Name</th>
+              <th>Institution</th>
               <th style="text-align: right;">Current Value</th>
               <th style="text-align: right;">Action</th>
             </tr>
@@ -67,17 +71,23 @@
           <tbody>
             @for (a of assets; track a.id) {
               <tr>
-                <td data-label="Asset Name" class="font-medium">{{ a.name }}</td>
-                <td data-label="Value" style="text-align: right;" class="font-bold">{{ a.currentValue | currency }}</td>
-                <td data-label="Action" style="text-align:right;display:flex;gap:0.5rem;justify-content:flex-end;">
-                  <button class="btn btn-outline" style="padding:0.3rem 0.5rem;font-size:0.75rem;" (click)="edit(a)">Edit</button>
-                  <button class="btn btn-danger-outline" style="padding:0.3rem 0.5rem;font-size:0.75rem;" (click)="delete(a.id)">Delete</button>
+                <td data-label="Asset Name">
+                    <div class="font-medium">{{ a.name }}</div>
+                    <div class="text-xs text-muted" *ngIf="a.note">{{ a.note }}</div>
+                </td>
+                <td data-label="Institution">
+                    {{ a.institutionName || '-' }} <span *ngIf="a.accountNumber" class="text-xs text-muted">({{ a.accountNumber }})</span>
+                </td>
+                <td data-label="Value" style="text-align: right;" class="font-bold">
+                  {{ a.currentValue | currency }}
+                </td>
+                <td data-label="Action" style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                  <button class="btn btn-outline small-btn" (click)="edit(a)">Edit</button>
+                  <button class="btn btn-danger-outline small-btn" (click)="delete(a.id)">Delete</button>
                 </td>
               </tr>
             } @empty {
-              <tr>
-                <td colspan="3" style="text-align:center;padding:2rem;" class="text-muted">No assets found. Track your first asset to calculate net worth!</td>
-              </tr>
+              <tr><td colspan="4" class="text-center text-muted" style="padding: 2rem;">No assets found.</td></tr>
             }
           </tbody>
         </table>

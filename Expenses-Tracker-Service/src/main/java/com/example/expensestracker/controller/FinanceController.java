@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*") // For local UI tests
+@CrossOrigin(origins = "*")
 public class FinanceController {
 
     @Autowired
@@ -47,15 +47,34 @@ public class FinanceController {
         transaction.setUserId(userId);
         return transactionRepository.save(transaction);
     }
+
+    @PostMapping("/transactions/bulk")
+    public List<Transaction> addTransactionsBulk(@RequestAttribute("userId") Long userId, @RequestBody List<Transaction> transactions) {
+        for (Transaction t : transactions) {
+            t.setUserId(userId);
+        }
+        return transactionRepository.saveAll(transactions);
+    }
     
     @PutMapping("/transactions/{id}")
     public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction details) {
         return transactionRepository.findById(id).map(t -> {
-            t.setDescription(details.getDescription());
-            t.setAmount(details.getAmount());
             t.setDate(details.getDate());
-            t.setType(details.getType());
+            t.setOriginalDate(details.getOriginalDate());
+            t.setAccountType(details.getAccountType());
+            t.setAccountName(details.getAccountName());
+            t.setAccountNumber(details.getAccountNumber());
+            t.setInstitutionName(details.getInstitutionName());
+            t.setName(details.getName());
+            t.setCustomName(details.getCustomName());
+            t.setAmount(details.getAmount());
+            t.setDescription(details.getDescription());
             t.setCategory(details.getCategory());
+            t.setNote(details.getNote());
+            t.setIgnoredFrom(details.getIgnoredFrom());
+            t.setTaxDeductible(details.getTaxDeductible());
+            t.setTransactionTags(details.getTransactionTags());
+            t.setType(details.getType());
             return ResponseEntity.ok(transactionRepository.save(t));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -84,6 +103,9 @@ public class FinanceController {
         return assetRepository.findById(id).map(a -> {
             a.setName(details.getName());
             a.setCurrentValue(details.getCurrentValue());
+            a.setInstitutionName(details.getInstitutionName());
+            a.setAccountNumber(details.getAccountNumber());
+            a.setNote(details.getNote());
             return ResponseEntity.ok(assetRepository.save(a));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -112,6 +134,9 @@ public class FinanceController {
         return liabilityRepository.findById(id).map(l -> {
             l.setName(details.getName());
             l.setAmount(details.getAmount());
+            l.setInstitutionName(details.getInstitutionName());
+            l.setAccountNumber(details.getAccountNumber());
+            l.setNote(details.getNote());
             return ResponseEntity.ok(liabilityRepository.save(l));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -142,7 +167,6 @@ public class FinanceController {
             c.setName(details.getName());
             categoryRepository.save(c);
             
-            // Cascade update to raw strings
             if (oldName != null && !oldName.equals(details.getName())) {
                 List<Transaction> userT = transactionRepository.findByUserId(userId);
                 for (Transaction t : userT) {
@@ -171,27 +195,12 @@ public class FinanceController {
         List<Asset> assets = assetRepository.findByUserId(userId);
         List<Liability> liabilities = liabilityRepository.findByUserId(userId);
 
-        BigDecimal totalIncome = incomes.stream()
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalIncome = incomes.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalExpense = expenses.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalAssets = assets.stream().map(Asset::getCurrentValue).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalLiabilities = liabilities.stream().map(Liability::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal totalExpense = expenses.stream()
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalAssets = assets.stream()
-                .map(Asset::getCurrentValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalLiabilities = liabilities.stream()
-                .map(Liability::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // Net Worth = (Assets - Liabilities) + (Total Income - Total Expense)
         BigDecimal netWorth = totalAssets.subtract(totalLiabilities).add(totalIncome).subtract(totalExpense);
-        
-        // Very basic future prediction: Assuming average monthly trend continues for next month.
-        // For simplicity, let's just predict netWorth + (totalIncome - totalExpense).
         BigDecimal netCashFlow = totalIncome.subtract(totalExpense);
         BigDecimal predictedNetWorth1Month = netWorth.add(netCashFlow);
 

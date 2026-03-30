@@ -17,12 +17,16 @@ export class LiabilitiesComponent implements OnInit {
   showAddForm = false;
   editingId: number | null = null;
   
-  newLiability: Liability = { name: '', amount: 0 };
+  newLiability: Liability = this.getDefaultLiability();
 
   constructor(private financeService: FinanceService) {}
 
   ngOnInit() {
     this.loadLiabilities();
+  }
+
+  getDefaultLiability(): Liability {
+    return { name: '', amount: 0, institutionName: '', accountNumber: '', note: '' };
   }
 
   loadLiabilities() {
@@ -63,7 +67,7 @@ export class LiabilitiesComponent implements OnInit {
   resetForm() {
     this.showAddForm = false;
     this.editingId = null;
-    this.newLiability = { name: '', amount: 0 };
+    this.newLiability = this.getDefaultLiability();
   }
 
   toggleAddForm() {

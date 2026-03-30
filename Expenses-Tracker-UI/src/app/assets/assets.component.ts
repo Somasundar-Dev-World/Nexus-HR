@@ -17,12 +17,16 @@ export class AssetsComponent implements OnInit {
   showAddForm = false;
   editingId: number | null = null;
   
-  newAsset: Asset = { name: '', currentValue: 0 };
+  newAsset: Asset = this.getDefaultAsset();
 
   constructor(private financeService: FinanceService) {}
 
   ngOnInit() {
     this.loadAssets();
+  }
+
+  getDefaultAsset(): Asset {
+    return { name: '', currentValue: 0, institutionName: '', accountNumber: '', note: '' };
   }
 
   loadAssets() {
@@ -63,7 +67,7 @@ export class AssetsComponent implements OnInit {
   resetForm() {
     this.showAddForm = false;
     this.editingId = null;
-    this.newAsset = { name: '', currentValue: 0 };
+    this.newAsset = this.getDefaultAsset();
   }
 
   toggleAddForm() {

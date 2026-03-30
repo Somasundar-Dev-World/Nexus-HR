@@ -18,22 +18,34 @@ export class TransactionsComponent implements OnInit {
   showAddForm = false;
   editingId: number | null = null;
   
+  // CSV Preview
+  csvPreview: Transaction[] = [];
+  showPreview = false;
+
   defaultCategories = ['Food & Dining', 'Transportation', 'Utilities', 'Entertainment', 'Health & Fitness', 'Shopping', 'Other'];
   customCategories: string[] = [];
   suggestedCategories: string[] = [...this.defaultCategories];
 
-  newTransaction: Transaction = {
-    description: '',
-    amount: 0,
-    date: new Date().toISOString().split('T')[0],
-    type: 'EXPENSE',
-    category: ''
-  };
+  newTransaction: Transaction = this.getDefaultTransaction();
 
   constructor(private financeService: FinanceService, private router: Router) {}
 
   ngOnInit() {
     this.loadTransactions();
+  }
+
+  getDefaultTransaction(): Transaction {
+    return {
+      description: '',
+      amount: 0,
+      date: new Date().toISOString().split('T')[0],
+      type: 'EXPENSE',
+      category: '',
+      name: '',
+      accountName: '',
+      institutionName: '',
+      note: ''
+    };
   }
 
   loadTransactions() {
@@ -63,7 +75,6 @@ export class TransactionsComponent implements OnInit {
       .filter(t => t.type === 'EXPENSE' && t.category)
       .map(t => t.category!);
     
-    // Combine defaults, explicitly added custom categories, and historical ones
     this.suggestedCategories = Array.from(new Set([...this.defaultCategories, ...this.customCategories, ...historical]));
   }
 
@@ -88,10 +99,71 @@ export class TransactionsComponent implements OnInit {
     }
   }
 
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      const papa = (window as any).Papa;
+      if (!papa) {
+          alert('CSV Parser not loaded. Please refresh.');
+          return;
+      }
+
+      papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results: any) => {
+          this.processCsvData(results.data);
+        }
+      });
+    }
+  }
+
+  processCsvData(data: any[]) {
+    const parsed: Transaction[] = data.map(row => {
+      const amount = parseFloat(row.Amount) || 0;
+      return {
+        date: row.Date || new Date().toISOString().split('T')[0],
+        originalDate: row['Original Date'],
+        accountType: row['Account Type'],
+        accountName: row['Account Name'],
+        accountNumber: row['Account Number'],
+        institutionName: row['Institution Name'],
+        name: row.Name,
+        customName: row['Custom Name'],
+        amount: Math.abs(amount),
+        description: row.Description || row.Name || 'Imported Transaction',
+        type: amount < 0 ? 'INCOME' : 'EXPENSE',
+        category: row.Category,
+        note: row.Note,
+        ignoredFrom: row['Ignored From'],
+        taxDeductible: row['Tax Deductible']?.toLowerCase() === 'true',
+        transactionTags: row['Transaction Tags']
+      };
+    });
+
+    this.csvPreview = parsed;
+    this.showPreview = true;
+  }
+
+  uploadBulk() {
+    this.isSaving = true;
+    this.financeService.bulkAddTransactions(this.csvPreview).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.showPreview = false;
+        this.csvPreview = [];
+        this.loadTransactions();
+      },
+      error: (err) => {
+        console.error(err);
+        this.isSaving = false;
+      }
+    });
+  }
+
   edit(t: Transaction) {
     this.editingId = t.id!;
     this.newTransaction = { ...t };
-    // ensure date is YYYY-MM-DD
     if (this.newTransaction.date) {
         this.newTransaction.date = new Date(this.newTransaction.date).toISOString().split('T')[0];
     }
@@ -101,7 +173,7 @@ export class TransactionsComponent implements OnInit {
   resetForm() {
     this.showAddForm = false;
     this.editingId = null;
-    this.newTransaction = { description: '', amount: 0, date: new Date().toISOString().split('T')[0], type: 'EXPENSE', category: '' };
+    this.newTransaction = this.getDefaultTransaction();
   }
 
   toggleAddForm() {

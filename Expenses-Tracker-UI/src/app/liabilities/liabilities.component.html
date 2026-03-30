@@ -12,74 +12,81 @@
   @if (showAddForm) {
     <div class="card mb-2 form-card">
       <h3 class="mb-1">{{ editingId ? 'Edit Liability' : 'New Liability' }}</h3>
-      <form (ngSubmit)="saveLiability()" class="grid-form">
-        <div class="form-group">
-          <label class="form-label">Liability Name</label>
-          <input type="text" class="form-control" [(ngModel)]="newLiability.name" name="name" required placeholder="E.g., Mortgage, Auto Loan, Credit Card">
+      <form (ngSubmit)="saveLiability()">
+        <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Liability Name</label>
+              <input type="text" class="form-control" [(ngModel)]="newLiability.name" name="name" required placeholder="e.g. Mortgage, Auto Loan">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Balance / Amount</label>
+              <input type="number" class="form-control" [(ngModel)]="newLiability.amount" name="amount" required step="0.01">
+            </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Current Balance / Amount</label>
-          <input type="number" class="form-control" [(ngModel)]="newLiability.amount" name="amount" required step="0.01">
+
+        <div class="grid-2 mt-1">
+            <div class="form-group">
+              <label class="form-label">Institution</label>
+              <input type="text" class="form-control" [(ngModel)]="newLiability.institutionName" name="inst" placeholder="e.g. Wells Fargo, Chase">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account # (Optional)</label>
+              <input type="text" class="form-control" [(ngModel)]="newLiability.accountNumber" name="accNum" placeholder="Last 4 digits">
+            </div>
         </div>
-        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 1.25rem;">
+
+        <div class="form-group mt-1">
+            <label class="form-label">Note</label>
+            <textarea class="form-control" [(ngModel)]="newLiability.note" name="note" rows="2"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-outline" (click)="resetForm()">Cancel</button>
           <button type="submit" class="btn btn-primary" [disabled]="isSaving">
-            @if (isSaving) {
-              <span class="btn-spinner"></span> Saving...
-            } @else {
-              {{ editingId ? 'Update' : 'Save' }} Liability
-            }
+            @if (isSaving) { <span class="btn-spinner"></span> Saving... } @else { {{ editingId ? 'Update' : 'Save' }} Liability }
           </button>
         </div>
       </form>
     </div>
   }
 
-  <!-- Skeleton loader -->
   @if (isLoading) {
     <div class="card">
-      <div class="sk-table-row" style="grid-template-columns: 2fr 1fr 100px; border-bottom:1px solid var(--border); padding-bottom:0.75rem; margin-bottom:0.5rem;">
-        @for (i of [1,2,3]; track i) { <div class="skeleton sk-line" style="height:12px; width:80px"></div> }
-      </div>
-      @for (i of [1,2,3]; track i) {
-        <div class="sk-table-row" style="grid-template-columns: 2fr 1fr 100px;">
-          <div class="skeleton sk-line" style="width:120px"></div>
-          <div class="skeleton sk-line" style="width:80px; margin-left:auto"></div>
-          <div style="display:flex;gap:6px;justify-content:flex-end">
-            <div class="skeleton sk-btn" style="width:44px;height:30px"></div>
-            <div class="skeleton sk-btn" style="width:54px;height:30px"></div>
-          </div>
-        </div>
-      }
+        <div class="sk-table-row">@for (i of [1,2,3,4]; track i) { <div class="skeleton sk-line" style="width:100px"></div> }</div>
+        @for (i of [1,2,3]; track i) { <div class="sk-table-row">@for (j of [1,2,3,4]; track j) { <div class="skeleton sk-line"></div> }</div> }
     </div>
-  }
-
-  @if (!isLoading) {
+  } @else {
     <div class="card">
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
               <th>Liability Name</th>
-              <th style="text-align: right;">Current Balance</th>
+              <th>Institution</th>
+              <th style="text-align: right;">Balance</th>
               <th style="text-align: right;">Action</th>
             </tr>
           </thead>
           <tbody>
             @for (l of liabilities; track l.id) {
               <tr>
-                <td data-label="Liability Name" class="font-medium">{{ l.name }}</td>
-                <td data-label="Amount" style="text-align: right;" class="font-bold text-danger">
+                <td data-label="Liability Name">
+                    <div class="font-medium">{{ l.name }}</div>
+                    <div class="text-xs text-muted" *ngIf="l.note">{{ l.note }}</div>
+                </td>
+                <td data-label="Institution">
+                    {{ l.institutionName || '-' }} <span *ngIf="l.accountNumber" class="text-xs text-muted">({{ l.accountNumber }})</span>
+                </td>
+                <td data-label="Balance" style="text-align: right;" class="font-bold text-danger">
                   -{{ l.amount | currency }}
                 </td>
                 <td data-label="Action" style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                  <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="edit(l)">Edit</button>
-                  <button class="btn btn-danger-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="delete(l.id)">Delete</button>
+                  <button class="btn btn-outline small-btn" (click)="edit(l)">Edit</button>
+                  <button class="btn btn-danger-outline small-btn" (click)="delete(l.id)">Delete</button>
                 </td>
               </tr>
             } @empty {
-              <tr>
-                <td colspan="3" style="text-align: center; padding: 2rem;" class="text-muted">No liabilities found. Great job!</td>
-              </tr>
+              <tr><td colspan="4" class="text-center text-muted" style="padding: 2rem;">No liabilities found.</td></tr>
             }
           </tbody>
         </table>

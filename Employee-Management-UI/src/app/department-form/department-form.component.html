@@ -6,25 +6,25 @@
   <button class="btn btn-outline" routerLink="/departments">Cancel & Back</button>
 </div>
 
-<div class="form-layout" style="display: grid; grid-template-columns: minmax(0, 800px); justify-content: start;">
-  <div class="card" style="padding: 2rem;">
-    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-size: 1.125rem; font-weight: 600;">Department Details</h3>
+<div class="form-layout">
+  <div class="card form-card">
+    <h3>Department Details</h3>
     @if (errorMessage) {
       <div class="alert-danger">{{ errorMessage }}</div>
     }
     <form (ngSubmit)="saveDepartment()">
       
-      <div class="form-group" style="margin-bottom: 1.25rem;">
-        <label class="form-label" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main);">Department Name</label>
-        <input type="text" class="form-control" name="name" [(ngModel)]="department.name" required placeholder="e.g. Information Technology" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem;">
+      <div class="form-group">
+        <label class="form-label">Department Name</label>
+        <input type="text" class="form-control" name="name" [(ngModel)]="department.name" required placeholder="e.g. Information Technology">
       </div>
 
-      <div class="form-group" style="margin-bottom: 1.25rem;">
-        <label class="form-label" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main);">Description</label>
-        <textarea class="form-control" name="description" [(ngModel)]="department.description" rows="4" placeholder="Brief outline of operations..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit; font-size: 0.875rem; resize: vertical;"></textarea>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="description" [(ngModel)]="department.description" rows="4" placeholder="Brief outline of operations..."></textarea>
       </div>
 
-      <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+      <div class="form-actions">
         <button type="submit" class="btn btn-primary">{{ isEditMode ? 'Update' : 'Save Department' }}</button>
       </div>
     </form>

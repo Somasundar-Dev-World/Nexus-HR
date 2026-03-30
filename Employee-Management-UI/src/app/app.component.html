@@ -1,31 +1,40 @@
 <div class="app-container">
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" [class.open]="isSidebarOpen">
     <div class="brand">
       <img src="assets/logo.png" alt="Nexus HR Logo" class="brand-logo" />
       <h2>Nexus HR</h2>
+      <button class="mobile-close" (click)="closeSidebar()">✕</button>
     </div>
     <nav class="nav-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" (click)="closeSidebar()">
         <span class="icon">📊</span> Dashboard
       </a>
-      <a routerLink="/employees" routerLinkActive="active" class="nav-item">
+      <a routerLink="/employees" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
         <span class="icon">👥</span> Employees
       </a>
-      <a routerLink="/departments" routerLinkActive="active" class="nav-item">
+      <a routerLink="/departments" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
         <span class="icon">🏢</span> Departments
       </a>
-      <a routerLink="/add" routerLinkActive="active" class="nav-item">
+      <a routerLink="/add" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
         <span class="icon">➕</span> Add Employee
       </a>
     </nav>
   </aside>
 
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" [class.show]="isSidebarOpen" (click)="closeSidebar()"></div>
+
   <!-- Main Content -->
   <main class="main-content">
     <header class="topbar">
+      <button class="mobile-toggle" (click)="toggleSidebar()">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
       <div class="search-bar">
-        <input type="text" placeholder="Search everywhere..." class="search-input">
+        <input type="text" placeholder="Search..." class="search-input">
       </div>
       <div class="user-profile">
         <div class="avatar">R</div>

@@ -11,6 +11,7 @@ import { EmployeeService } from '../employee.service';
 })
 export class DashboardComponent implements OnInit {
   stats: any = { totalEmployees: 0, departments: 0, newHires: 0 };
+  userName: string = 'Admin';
 
   constructor(private employeeService: EmployeeService) {}
 

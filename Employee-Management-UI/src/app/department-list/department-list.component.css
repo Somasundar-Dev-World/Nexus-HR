@@ -1,0 +1,10 @@
+.table-responsive { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 1.25rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+.data-table th { background-color: #f8fafc; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr { transition: var(--transition); }
+.data-table tbody tr:hover { background-color: #f8fafc; }
+.font-medium { font-weight: 500; color: var(--text-main); }
+.text-muted { color: var(--text-muted); }
+.text-right { text-align: right !important; }

@@ -1,0 +1,40 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Departments</h1>
+    <p class="page-subtitle">Manage company departments and metadata.</p>
+  </div>
+  <button class="btn btn-primary" routerLink="/departments/add">
+    <span>+</span> Add Department
+  </button>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (dept of departments; track dept.id) {
+          <tr>
+            <td>#{{ dept.id }}</td>
+            <td class="font-medium">{{ dept.name }}</td>
+            <td class="text-muted">{{ dept.description }}</td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" [routerLink]="['/departments/edit', dept.id]">Edit</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 2rem;">No departments found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

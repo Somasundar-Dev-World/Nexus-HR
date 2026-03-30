@@ -1,0 +1,64 @@
+<div class="professional-header">
+  <div class="header-content">
+    <h1 class="page-title">Executive Dashboard</h1>
+    <p class="page-subtitle">Welcome back! Here's your organizational overview for today.</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary" routerLink="/add">
+      <span>+</span> Add New Employee
+    </button>
+  </div>
+</div>
+
+<div class="metrics-grid">
+  <div class="card metric-card clickable" routerLink="/employees">
+    <div class="metric-icon">👥</div>
+    <div class="metric-info">
+      <h3>Total Employees</h3>
+      <p class="value">{{ stats.totalEmployees }}</p>
+      <span class="trend positive">Live DB Sync</span>
+    </div>
+  </div>
+  <div class="card metric-card clickable" routerLink="/departments">
+    <div class="metric-icon">🏢</div>
+    <div class="metric-info">
+      <h3>Departments</h3>
+      <p class="value">{{ stats.departments }}</p>
+      <span class="trend neutral">Live DB Sync</span>
+    </div>
+  </div>
+  <div class="card metric-card clickable" routerLink="/employees">
+    <div class="metric-icon">✨</div>
+    <div class="metric-info">
+      <h3>New Hires</h3>
+      <p class="value">{{ stats.newHires }}</p>
+      <span class="trend positive">Live DB Sync</span>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-content">
+  <div class="card recent-activity">
+    <h3>Recent Activity</h3>
+    <ul class="activity-list">
+      <li>
+        <div class="activity-icon">🟢</div>
+        <div class="activity-details">
+          <p><strong>System</strong> initialized from REST API.</p>
+          <small>Just now</small>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<footer class="dashboard-footer">
+  <div class="footer-inner">
+    <p>&copy; 2026 Nexus HR System. Internal Use Only.</p>
+    <div class="footer-links">
+      <a href="javascript:void(0)">Support</a>
+      <a href="javascript:void(0)">Privacy Policy</a>
+      <a href="javascript:void(0)">Terms of Service</a>
+    </div>
+  </div>
+</footer>

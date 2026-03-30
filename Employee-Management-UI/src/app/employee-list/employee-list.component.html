@@ -1,0 +1,57 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Employees</h1>
+    <p class="page-subtitle">Manage your team members and their account permissions here.</p>
+  </div>
+  <button class="btn btn-primary" routerLink="/add">
+    <span>+</span> Add Employee
+  </button>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Role</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (emp of employees; track emp.id) {
+          <tr>
+            <td>
+              <div class="person-cell">
+                <div class="avatar-sm">{{ emp.firstName.slice(0,1) }}{{ emp.lastName.slice(0,1) }}</div>
+                <div>
+                  <div class="font-medium">{{ emp.firstName }} {{ emp.lastName }}</div>
+                  <div class="text-muted text-sm">{{ emp.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="font-medium">{{ emp.jobTitle }}</div>
+              <div class="text-muted text-sm">{{ emp.department?.name }}</div>
+            </td>
+            <td>
+               <span class="badge" [class.badge-success]="emp.status === 'Active'" [class.badge-warning]="emp.status !== 'Active'">
+                 {{ emp.status }}
+               </span>
+            </td>
+            <td>{{ emp.role }}</td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" [routerLink]="['/edit', emp.id]">Edit</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem;">No employees found in the database.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

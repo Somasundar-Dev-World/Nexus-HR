@@ -153,12 +153,22 @@ export class ReportsComponent implements OnInit {
   getIcon(cat: string): string {
     const c = cat.toLowerCase();
     if (c.includes('medical')) return '🩺';
-    if (c.includes('dining') || c.includes('food')) return '🍽️';
+    if (c.includes('dining') || c.includes('drink') || c.includes('food')) return '🍽️';
     if (c.includes('bill') || c.includes('utility')) return '📄';
-    if (c.includes('loan')) return '🏦';
+    if (c.includes('auto') || c.includes('transport') || c.includes('car')) return '🚗';
     if (c.includes('shopping')) return '🛍️';
-    if (c.includes('grocery')) return '🛒';
-    if (c.includes('transport') || c.includes('auto')) return '🚗';
+    if (c.includes('grocer')) return '🛒';
+    if (c.includes('loan')) return (c.includes('auto') || c.includes('car')) ? '🚗' : '🏦';
+    if (c.includes('tax')) return '🏛️';
+    if (c.includes('home') || c.includes('garden')) return '🏠';
+    if (c.includes('software') || c.includes('tech')) return '💻';
+    if (c.includes('entertainment') || c.includes('rec')) return '🎬';
+    if (c.includes('credit card')) return '💳';
+    if (c.includes('personal care')) return '🧴';
+    if (c.includes('legal')) return '⚖️';
+    if (c.includes('travel') || c.includes('vacation')) return '✈️';
+    if (c.includes('fee')) return '💸';
+    if (c.includes('party')) return '🍹';
     return '📦';
   }
 }

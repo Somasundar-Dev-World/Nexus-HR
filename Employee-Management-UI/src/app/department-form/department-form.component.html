@@ -9,6 +9,9 @@
 <div class="form-layout" style="display: grid; grid-template-columns: minmax(0, 800px); justify-content: start;">
   <div class="card" style="padding: 2rem;">
     <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-size: 1.125rem; font-weight: 600;">Department Details</h3>
+    @if (errorMessage) {
+      <div class="alert-danger">{{ errorMessage }}</div>
+    }
     <form (ngSubmit)="saveDepartment()">
       
       <div class="form-group" style="margin-bottom: 1.25rem;">

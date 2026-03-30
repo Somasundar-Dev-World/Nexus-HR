@@ -15,6 +15,7 @@ export class EmployeeFormComponent implements OnInit {
   isEditMode = false;
   employeeId?: number;
   departments: Department[] = [];
+  errorMessage: string = '';
 
   employee: Employee = {
     firstName: '',
@@ -59,15 +60,22 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   saveEmployee() {
+    this.errorMessage = '';
     if (this.isEditMode && this.employeeId) {
       this.employeeService.updateEmployee(this.employeeId, this.employee).subscribe({
         next: () => this.router.navigate(['/employees']),
-        error: (err) => console.error(err)
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = err.error?.message || 'Failed to update employee. Please check your inputs.';
+        }
       });
     } else {
       this.employeeService.createEmployee(this.employee).subscribe({
         next: () => this.router.navigate(['/employees']),
-        error: (err) => console.error(err)
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = err.error?.message || 'Failed to create employee. Please check your inputs.';
+        }
       });
     }
   }

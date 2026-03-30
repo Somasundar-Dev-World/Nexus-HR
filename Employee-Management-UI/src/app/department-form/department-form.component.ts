@@ -12,6 +12,7 @@ import { Department, DepartmentService } from '../department.service';
 export class DepartmentFormComponent implements OnInit {
   isEditMode = false;
   departmentId?: number;
+  errorMessage: string = '';
 
   department: Department = {
     name: '',
@@ -34,13 +35,22 @@ export class DepartmentFormComponent implements OnInit {
   }
 
   saveDepartment() {
+    this.errorMessage = '';
     if (this.isEditMode && this.departmentId) {
       this.service.updateDepartment(this.departmentId, this.department).subscribe({
-        next: () => this.router.navigate(['/departments'])
+        next: () => this.router.navigate(['/departments']),
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = err.error?.message || 'Failed to update department. Please check your inputs.';
+        }
       });
     } else {
       this.service.createDepartment(this.department).subscribe({
-        next: () => this.router.navigate(['/departments'])
+        next: () => this.router.navigate(['/departments']),
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = err.error?.message || 'Failed to create department. Please check your inputs.';
+        }
       });
     }
   }

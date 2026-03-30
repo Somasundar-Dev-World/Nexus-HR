@@ -19,10 +19,18 @@ export class AppComponent {
 
   toggleMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    if (this.isMobileMenuOpen) this.isDropdownOpen = false;
   }
 
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
+    if (this.isDropdownOpen) this.isMobileMenuOpen = false;
+  }
+
+  closeAll(event: Event) {
+    // Close both menus when clicking outside
+    this.isDropdownOpen = false;
+    // Don't close sidebar — it has its own overlay
   }
 
   logout() {

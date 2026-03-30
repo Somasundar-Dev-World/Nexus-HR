@@ -1,9 +1,15 @@
-<div class="layout-container">
-  <!-- Desktop Sidebar -->
+<div class="layout-container" (click)="closeAll($event)">
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="isMobileMenuOpen = false"></div>
+
+  <!-- Sidebar -->
   <aside *ngIf="authService.isAuthenticated" class="sidebar" [class.open]="isMobileMenuOpen">
     <div class="brand">
       <div class="logo">ET</div>
       <h2>Expense Tracker</h2>
+      <!-- Close button (mobile only) -->
+      <button class="sidebar-close" (click)="isMobileMenuOpen = false" aria-label="Close menu">✕</button>
     </div>
     
     <nav class="nav-links">
@@ -20,25 +26,47 @@
         <span class="icon">📉</span> Liabilities
       </a>
     </nav>
+
+    <!-- User section in sidebar (visible on mobile) -->
+    <div class="sidebar-user" *ngIf="authService.currentUserValue as user">
+      <div class="sidebar-avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+      <div class="sidebar-user-info">
+        <span class="name font-bold">{{ user.name }}</span>
+        <span class="role text-xs text-muted">{{ user.username }}</span>
+      </div>
+    </div>
+    <div class="sidebar-actions">
+      <a routerLink="/profile" class="sidebar-action-btn" (click)="isMobileMenuOpen = false">
+        <span>⚙️</span> Update Profile
+      </a>
+      <button class="sidebar-action-btn danger" (click)="logout()">
+        <span>🚪</span> Logout
+      </button>
+    </div>
   </aside>
 
   <!-- Mobile Header -->
   <header *ngIf="authService.isAuthenticated" class="mobile-header">
-    <div class="brand">
-      <div class="logo">ET</div>
-      <h2>Finance</h2>
-    </div>
-    <button class="menu-btn" (click)="toggleMenu()">
+    <button class="menu-btn" (click)="toggleMenu()" aria-label="Open menu">
       <span class="bar"></span>
       <span class="bar"></span>
       <span class="bar"></span>
     </button>
+    <div class="brand">
+      <div class="logo">ET</div>
+      <h2>Expense Tracker</h2>
+    </div>
+    <!-- Avatar on mobile header -->
+    <div class="mobile-avatar" *ngIf="authService.currentUserValue as user" (click)="toggleDropdown(); $event.stopPropagation()">
+      {{ user.name.charAt(0).toUpperCase() }}
+    </div>
   </header>
 
   <!-- Main Content -->
   <main class="main-content" [class.full-width]="!authService.isAuthenticated">
+    <!-- Desktop Topbar -->
     <div *ngIf="authService.isAuthenticated" class="topbar">
-      <div class="user-profile flex-between" (click)="toggleDropdown()" style="position: relative; cursor: pointer;" *ngIf="authService.currentUserValue as user">
+      <div class="user-profile" (click)="toggleDropdown(); $event.stopPropagation()" style="position: relative; cursor: pointer;" *ngIf="authService.currentUserValue as user">
         <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
         <div class="user-info">
           <span class="name font-bold">{{ user.name }}</span>
@@ -55,6 +83,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Mobile Dropdown (outside sidebar) -->
+    <div class="mobile-dropdown" *ngIf="isDropdownOpen && authService.isAuthenticated" (click)="$event.stopPropagation()">
+      <div class="mobile-dropdown-user" *ngIf="authService.currentUserValue as user">
+        <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+        <div class="user-info">
+          <span class="name font-bold">{{ user.name }}</span>
+          <span class="role text-xs text-muted">{{ user.username }}</span>
+        </div>
+      </div>
+      <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
+        <span class="icon" style="margin-right: 8px;">⚙️</span> Update Profile
+      </a>
+      <a class="dropdown-item text-danger" (click)="logout()">
+        <span class="icon" style="margin-right: 8px;">🚪</span> Logout
+      </a>
+    </div>
+
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>

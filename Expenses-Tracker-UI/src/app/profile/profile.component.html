@@ -38,7 +38,11 @@
       
       <div style="display: flex; justify-content: flex-end;">
         <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isLoading">
-          {{ isLoading ? 'Saving...' : 'Save Changes' }}
+          @if (isLoading) {
+            <span class="btn-spinner"></span> Saving...
+          } @else {
+            Save Changes
+          }
         </button>
       </div>
     </form>

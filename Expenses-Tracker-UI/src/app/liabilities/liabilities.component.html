@@ -22,14 +22,35 @@
           <input type="number" class="form-control" [(ngModel)]="newLiability.amount" name="amount" required step="0.01">
         </div>
         <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 1.25rem;">
-          <button type="submit" class="btn btn-primary">{{ editingId ? 'Update' : 'Save' }} Liability</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+            @if (isSaving) {
+              <span class="btn-spinner"></span> Saving...
+            } @else {
+              {{ editingId ? 'Update' : 'Save' }} Liability
+            }
+          </button>
         </div>
       </form>
     </div>
   }
 
+  <!-- Skeleton loader -->
   @if (isLoading) {
-    <div class="loader"></div>
+    <div class="card">
+      <div class="sk-table-row" style="grid-template-columns: 2fr 1fr 100px; border-bottom:1px solid var(--border); padding-bottom:0.75rem; margin-bottom:0.5rem;">
+        @for (i of [1,2,3]; track i) { <div class="skeleton sk-line" style="height:12px; width:80px"></div> }
+      </div>
+      @for (i of [1,2,3]; track i) {
+        <div class="sk-table-row" style="grid-template-columns: 2fr 1fr 100px;">
+          <div class="skeleton sk-line" style="width:120px"></div>
+          <div class="skeleton sk-line" style="width:80px; margin-left:auto"></div>
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            <div class="skeleton sk-btn" style="width:44px;height:30px"></div>
+            <div class="skeleton sk-btn" style="width:54px;height:30px"></div>
+          </div>
+        </div>
+      }
+    </div>
   }
 
   @if (!isLoading) {

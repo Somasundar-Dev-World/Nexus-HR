@@ -13,6 +13,7 @@ import { FinanceService, Liability } from '../finance.service';
 export class LiabilitiesComponent implements OnInit {
   liabilities: Liability[] = [];
   isLoading = true;
+  isSaving = false;
   showAddForm = false;
   editingId: number | null = null;
   
@@ -39,21 +40,16 @@ export class LiabilitiesComponent implements OnInit {
   }
 
   saveLiability() {
+    this.isSaving = true;
     if (this.editingId) {
       this.financeService.updateLiability(this.editingId, this.newLiability).subscribe({
-        next: () => {
-          this.resetForm();
-          this.loadLiabilities();
-        },
-        error: (err) => console.error(err)
+        next: () => { this.isSaving = false; this.resetForm(); this.loadLiabilities(); },
+        error: (err) => { console.error(err); this.isSaving = false; }
       });
     } else {
       this.financeService.addLiability(this.newLiability).subscribe({
-        next: () => {
-          this.resetForm();
-          this.loadLiabilities();
-        },
-        error: (err) => console.error(err)
+        next: () => { this.isSaving = false; this.resetForm(); this.loadLiabilities(); },
+        error: (err) => { console.error(err); this.isSaving = false; }
       });
     }
   }

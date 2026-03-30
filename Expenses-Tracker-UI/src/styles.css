@@ -122,6 +122,82 @@ h1, h2, h3 { font-weight: 600; color: var(--text-main); }
   .nav-links { width: 100%; justify-content: space-between; overflow-x: auto; padding-bottom: 0.5rem; }
 }
 
-/* Loaders */
-.loader { border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; width: 2rem; height: 2rem; animation: spin 0.8s linear infinite; margin: 2rem auto; }
+/* ═══════════════════════════════════════
+   LOADERS & SKELETON SCREENS
+═══════════════════════════════════════ */
+
+/* Classic spinner */
+.loader {
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  width: 2rem; height: 2rem;
+  animation: spin 0.8s linear infinite;
+  margin: 2rem auto;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Skeleton shimmer base */
+.skeleton {
+  background: linear-gradient(90deg, #f0f4f8 25%, #e2e8f0 50%, #f0f4f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Skeleton shapes */
+.sk-line   { height: 14px; border-radius: 6px; margin-bottom: 0.5rem; }
+.sk-title  { height: 22px; border-radius: 6px; margin-bottom: 0.75rem; width: 55%; }
+.sk-value  { height: 36px; border-radius: 8px; margin-bottom: 0.5rem; width: 70%; }
+.sk-badge  { height: 24px; width: 80px; border-radius: 20px; display: inline-block; }
+.sk-btn    { height: 38px; width: 100px; border-radius: 10px; }
+.sk-avatar { height: 36px; width: 36px; border-radius: 50%; }
+.sk-card   { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 1.5rem; }
+
+/* Skeleton card grid */
+.sk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Skeleton table row */
+.sk-table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 80px;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Button spinner (inline) */
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+.btn-spinner.dark {
+  border-color: rgba(0,0,0,0.15);
+  border-top-color: var(--text-main);
+}
+
+/* Full-page loading overlay */
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.page-loading .loader { margin: 0; }

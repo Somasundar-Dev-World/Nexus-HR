@@ -13,6 +13,7 @@ import { FinanceService, Asset } from '../finance.service';
 export class AssetsComponent implements OnInit {
   assets: Asset[] = [];
   isLoading = true;
+  isSaving = false;
   showAddForm = false;
   editingId: number | null = null;
   
@@ -39,21 +40,16 @@ export class AssetsComponent implements OnInit {
   }
 
   saveAsset() {
+    this.isSaving = true;
     if (this.editingId) {
       this.financeService.updateAsset(this.editingId, this.newAsset).subscribe({
-        next: () => {
-          this.resetForm();
-          this.loadAssets();
-        },
-        error: (err) => console.error(err)
+        next: () => { this.isSaving = false; this.resetForm(); this.loadAssets(); },
+        error: (err) => { console.error(err); this.isSaving = false; }
       });
     } else {
       this.financeService.addAsset(this.newAsset).subscribe({
-        next: () => {
-          this.resetForm();
-          this.loadAssets();
-        },
-        error: (err) => console.error(err)
+        next: () => { this.isSaving = false; this.resetForm(); this.loadAssets(); },
+        error: (err) => { console.error(err); this.isSaving = false; }
       });
     }
   }

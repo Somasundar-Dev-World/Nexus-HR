@@ -44,14 +44,40 @@
           <input type="text" class="form-control" [(ngModel)]="newTransaction.description" name="description" required placeholder="E.g., Salary, Groceries, Rent...">
         </div>
         <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
-          <button type="submit" class="btn btn-primary">{{ editingId ? 'Update' : 'Save' }} Transaction</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+            @if (isSaving) {
+              <span class="btn-spinner"></span> Saving...
+            } @else {
+              {{ editingId ? 'Update' : 'Save' }} Transaction
+            }
+          </button>
         </div>
       </form>
     </div>
   }
 
+  <!-- Skeleton loader -->
   @if (isLoading) {
-    <div class="loader"></div>
+    <div class="card">
+      <div class="sk-table-row" style="border-bottom:1px solid var(--border); padding-bottom:1rem; margin-bottom:0.5rem;">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="skeleton sk-line" style="height:12px; width:80px"></div>
+        }
+      </div>
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="sk-table-row">
+          <div class="skeleton sk-line" style="width:80px"></div>
+          <div class="skeleton sk-line" style="width:140px"></div>
+          <div class="skeleton sk-badge"></div>
+          <div class="skeleton sk-badge"></div>
+          <div class="skeleton sk-line" style="width:70px; margin-left:auto"></div>
+          <div style="display:flex;gap:6px">
+            <div class="skeleton sk-btn" style="width:48px; height:30px"></div>
+            <div class="skeleton sk-btn" style="width:56px; height:30px"></div>
+          </div>
+        </div>
+      }
+    </div>
   }
 
   @if (!isLoading) {
@@ -74,26 +100,26 @@
                 <td data-label="Date" class="text-sm">{{ t.date | date:'mediumDate' }}</td>
                 <td data-label="Description" class="font-medium">{{ t.description }}</td>
                 <td data-label="Type">
-                  <span style="padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: var(--bg-color);" 
+                  <span style="padding:3px 8px;border-radius:4px;font-size:0.75rem;font-weight:bold;background:var(--bg-color);"
                         [class.text-success]="t.type==='INCOME'" [class.text-danger]="t.type==='EXPENSE'">
                     {{ t.type }}
                   </span>
                 </td>
                 <td data-label="Category" class="text-sm text-muted">
-                  <span *ngIf="t.category && t.type === 'EXPENSE'" style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ t.category }}</span>
+                  <span *ngIf="t.category && t.type === 'EXPENSE'" style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">{{ t.category }}</span>
                   <span *ngIf="!t.category || t.type === 'INCOME'">-</span>
                 </td>
-                <td data-label="Amount" style="text-align: right;" class="font-bold" [class.text-success]="t.type==='INCOME'">
+                <td data-label="Amount" style="text-align:right;" class="font-bold" [class.text-success]="t.type==='INCOME'">
                   {{ t.type === 'INCOME' ? '+' : '-' }}{{ t.amount | currency }}
                 </td>
-                <td data-label="Action" style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                  <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="edit(t)">Edit</button>
-                  <button class="btn btn-danger-outline" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" (click)="delete(t.id)">Delete</button>
+                <td data-label="Action" style="text-align:right;display:flex;gap:0.5rem;justify-content:flex-end;">
+                  <button class="btn btn-outline" style="padding:0.3rem 0.5rem;font-size:0.75rem;" (click)="edit(t)">Edit</button>
+                  <button class="btn btn-danger-outline" style="padding:0.3rem 0.5rem;font-size:0.75rem;" (click)="delete(t.id)">Delete</button>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" style="text-align: center; padding: 2rem;" class="text-muted">No transactions found. Adding an entry to get started!</td>
+                <td colspan="6" style="text-align:center;padding:2rem;" class="text-muted">No transactions found. Adding an entry to get started!</td>
               </tr>
             }
           </tbody>

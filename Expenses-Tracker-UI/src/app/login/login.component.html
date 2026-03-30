@@ -24,7 +24,11 @@
       </div>
       
       <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid || isLoading" style="width: 100%; justify-content: center; padding: 0.75rem;">
-        {{ isLoading ? 'Signing In...' : 'Sign In' }}
+        @if (isLoading) {
+          <span class="btn-spinner"></span> Signing In...
+        } @else {
+          Sign In
+        }
       </button>
     </form>
     

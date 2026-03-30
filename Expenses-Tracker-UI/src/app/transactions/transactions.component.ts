@@ -14,6 +14,7 @@ import { FinanceService, Transaction } from '../finance.service';
 export class TransactionsComponent implements OnInit {
   transactions: Transaction[] = [];
   isLoading = true;
+  isSaving = false;
   showAddForm = false;
   editingId: number | null = null;
   
@@ -73,21 +74,16 @@ export class TransactionsComponent implements OnInit {
   }
 
   saveTransaction() {
+    this.isSaving = true;
     if (this.editingId) {
       this.financeService.updateTransaction(this.editingId, this.newTransaction).subscribe({
-        next: () => {
-          this.resetForm();
-          this.loadTransactions();
-        },
-        error: (err) => console.error(err)
+        next: () => { this.isSaving = false; this.resetForm(); this.loadTransactions(); },
+        error: (err) => { console.error(err); this.isSaving = false; }
       });
     } else {
       this.financeService.addTransaction(this.newTransaction).subscribe({
-        next: () => {
-          this.resetForm();
-          this.loadTransactions();
-        },
-        error: (err) => console.error(err)
+        next: () => { this.isSaving = false; this.resetForm(); this.loadTransactions(); },
+        error: (err) => { console.error(err); this.isSaving = false; }
       });
     }
   }

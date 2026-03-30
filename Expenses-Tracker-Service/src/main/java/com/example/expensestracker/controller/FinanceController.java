@@ -53,10 +53,59 @@ public class FinanceController {
 
     @PostMapping("/transactions/bulk")
     public List<Transaction> addTransactionsBulk(@RequestAttribute("userId") Long userId, @RequestBody List<Transaction> transactions) {
-        for (Transaction t : transactions) {
-            t.setUserId(userId);
+        // Fetch existing transactions to deduplicate
+        List<Transaction> existingTransactions = transactionRepository.findByUserId(userId);
+        
+        // Map existing by composite key: Date + Amount + Description + Account
+        Map<String, Transaction> existingMap = new HashMap<>();
+        for (Transaction t : existingTransactions) {
+            existingMap.put(generateCompositeKey(t), t);
         }
-        return transactionRepository.saveAll(transactions);
+
+        List<Transaction> finalToSave = new ArrayList<>();
+        
+        for (Transaction incoming : transactions) {
+            String key = generateCompositeKey(incoming);
+            if (existingMap.containsKey(key)) {
+                // UPDATE existing record with any NEW data from CSV
+                Transaction existing = existingMap.get(key);
+                updateIfAvailable(existing, incoming);
+                finalToSave.add(existing);
+            } else {
+                // NEW record
+                incoming.setUserId(userId);
+                finalToSave.add(incoming);
+            }
+        }
+        
+        return transactionRepository.saveAll(finalToSave);
+    }
+    
+    private String generateCompositeKey(Transaction t) {
+        // Handle potential nulls
+        String date = (t.getDate() != null) ? t.getDate().toString() : "0000-01-01";
+        String amount = (t.getAmount() != null) ? t.getAmount().stripTrailingZeros().toPlainString() : "0.00";
+        String desc = (t.getDescription() != null) ? t.getDescription().trim().toLowerCase() : "none";
+        String acc = (t.getAccountNumber() != null) ? t.getAccountNumber().trim() : "none";
+        
+        return date + "|" + amount + "|" + desc + "|" + acc;
+    }
+
+    private void updateIfAvailable(Transaction existing, Transaction incoming) {
+        // Protect manual edits: Only update if existing is null/empty but incoming has data
+        if ((existing.getCategory() == null || existing.getCategory().isEmpty()) && incoming.getCategory() != null) {
+            existing.setCategory(incoming.getCategory());
+        }
+        if (incoming.getOriginalDate() != null) existing.setOriginalDate(incoming.getOriginalDate());
+        if (incoming.getInstitutionName() != null) existing.setInstitutionName(incoming.getInstitutionName());
+        if (incoming.getAccountName() != null) existing.setAccountName(incoming.getAccountName());
+        if (incoming.getAccountType() != null) existing.setAccountType(incoming.getAccountType());
+        if (incoming.getNote() != null && (existing.getNote() == null || existing.getNote().isEmpty())) {
+            existing.setNote(incoming.getNote());
+        }
+        if (incoming.getIgnoredFrom() != null) existing.setIgnoredFrom(incoming.getIgnoredFrom());
+        if (incoming.getTaxDeductible() != null) existing.setTaxDeductible(incoming.getTaxDeductible());
+        if (incoming.getTransactionTags() != null) existing.setTransactionTags(incoming.getTransactionTags());
     }
     
     @PutMapping("/transactions/{id}")

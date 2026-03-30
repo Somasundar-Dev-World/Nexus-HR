@@ -21,6 +21,7 @@ export class TransactionsComponent implements OnInit {
   // CSV Preview
   csvPreview: Transaction[] = [];
   showPreview = false;
+  uploadStatus: string | null = null;
 
   defaultCategories = ['Food & Dining', 'Transportation', 'Utilities', 'Entertainment', 'Health & Fitness', 'Shopping', 'Other'];
   customCategories: string[] = [];
@@ -143,20 +144,25 @@ export class TransactionsComponent implements OnInit {
 
     this.csvPreview = parsed;
     this.showPreview = true;
+    this.uploadStatus = null;
   }
 
   uploadBulk() {
     this.isSaving = true;
+    const totalToUpload = this.csvPreview.length;
     this.financeService.bulkAddTransactions(this.csvPreview).subscribe({
-      next: () => {
+      next: (saved) => {
         this.isSaving = false;
         this.showPreview = false;
         this.csvPreview = [];
         this.loadTransactions();
+        this.uploadStatus = `Successfully processed ${totalToUpload} transactions (duplicates were merged).`;
+        setTimeout(() => this.uploadStatus = null, 5000);
       },
       error: (err) => {
         console.error(err);
         this.isSaving = false;
+        this.uploadStatus = "Error uploading transactions. Please check your file.";
       }
     });
   }

@@ -15,6 +15,11 @@
       </button>
     </div>
   </div>
+  
+  <!-- Upload Status Message -->
+  <div *ngIf="uploadStatus" class="alert-banner mb-2">
+    <span class="icon">✅</span> {{ uploadStatus }}
+  </div>
 
   <!-- CSV Preview Section -->
   @if (showPreview) {
@@ -220,3 +225,21 @@
     </div>
   }
 </div>
+
+.alert-banner {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

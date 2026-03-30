@@ -1,0 +1,55 @@
+<div class="reports">
+  <!-- Header -->
+  <div class="flex-between mb-2 nav-header">
+    <div>
+      <h1 class="font-bold text-main">Financial Reports</h1>
+      <p class="text-sm text-muted">Deep dive into your spending habits and trends.</p>
+    </div>
+    <div class="date-filter">
+      <select class="form-control" style="background:#fff">
+        <option>All-Time View</option>
+        <option>This Month</option>
+        <option>Last 3 Months</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Big KPIs -->
+  <div class="kpi-grid mb-2">
+    <div class="card kpi-card">
+        <span class="kpi-label">Top Category</span>
+        <div class="kpi-value text-secondary">{{ summary.topCategory }}</div>
+    </div>
+    <div class="card kpi-card">
+        <span class="kpi-label">Avg. Monthly Spent</span>
+        <div class="kpi-value">{{ summary.avgMonthlySpend | currency }}</div>
+    </div>
+    <div class="card kpi-card">
+        <span class="kpi-label">Financial Health</span>
+        <div class="kpi-value text-success" title="Dummy calculation for now">Positive</div>
+    </div>
+  </div>
+
+  <!-- Charts Area -->
+  <div class="charts-layout">
+    <div class="card chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Spending by Category</h3>
+            <p class="chart-subtitle">Direct breakdown of your expenses.</p>
+        </div>
+        <div class="chart-container" id="categoryChart">
+            @if (isLoading) { <div class="loader-wrap"><span class="loader"></span></div> }
+        </div>
+    </div>
+
+    <div class="card chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Monthly Trend</h3>
+            <p class="chart-subtitle">Historical Income vs. Expense analysis.</p>
+        </div>
+        <div class="chart-container" id="trendChart">
+             @if (isLoading) { <div class="loader-wrap"><span class="loader"></span></div> }
+        </div>
+    </div>
+  </div>
+</div>

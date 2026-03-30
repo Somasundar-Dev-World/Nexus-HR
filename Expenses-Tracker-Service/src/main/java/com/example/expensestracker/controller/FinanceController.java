@@ -14,12 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class FinanceController {
 
     @Autowired
@@ -212,5 +216,36 @@ public class FinanceController {
         report.put("predictedNetWorthNextMonth", predictedNetWorth1Month);
         
         return report;
+    }
+
+    @GetMapping("/reports/category-spending")
+    public Map<String, BigDecimal> getCategorySpending(@RequestAttribute("userId") Long userId) {
+        List<Transaction> expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+        return expenses.stream()
+                .filter(t -> t.getCategory() != null)
+                .collect(Collectors.groupingBy(
+                        Transaction::getCategory,
+                        Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
+                ));
+    }
+
+    @GetMapping("/reports/monthly-trend")
+    public Map<String, Map<String, BigDecimal>> getMonthlyTrend(@RequestAttribute("userId") Long userId) {
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+
+        // TreeMap keeps the months sorted
+        Map<String, Map<String, BigDecimal>> trend = new TreeMap<>();
+
+        for (Transaction t : transactions) {
+            String month = t.getDate().format(formatter);
+            trend.putIfAbsent(month, new HashMap<>());
+            Map<String, BigDecimal> monthData = trend.get(month);
+            
+            String type = t.getType().name();
+            monthData.put(type, monthData.getOrDefault(type, BigDecimal.ZERO).add(t.getAmount()));
+        }
+
+        return trend;
     }
 }

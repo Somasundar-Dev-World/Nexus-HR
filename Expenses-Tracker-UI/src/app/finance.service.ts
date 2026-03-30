@@ -59,6 +59,8 @@ export class FinanceService {
   constructor(private http: HttpClient) { }
 
   getSummary(): Observable<FinancialSummary> { return this.http.get<FinancialSummary>(`${this.apiUrl}/reports/summary`); }
+  getCategorySpending(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/category-spending`); }
+  getMonthlyTrend(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/monthly-trend`); }
   
   getTransactions(): Observable<Transaction[]> { return this.http.get<Transaction[]>(`${this.apiUrl}/transactions`); }
   addTransaction(t: Transaction): Observable<Transaction> { return this.http.post<Transaction>(`${this.apiUrl}/transactions`, t); }

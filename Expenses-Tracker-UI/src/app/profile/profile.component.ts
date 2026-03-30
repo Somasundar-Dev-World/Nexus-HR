@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -20,7 +21,7 @@ export class ProfileComponent implements OnInit {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:8081/api/user/profile').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/user/profile`).subscribe({
       next: (data) => {
         this.profile.username = data.username;
         this.profile.name = data.name;
@@ -34,7 +35,7 @@ export class ProfileComponent implements OnInit {
     this.successMsg = '';
     this.errorMsg = '';
     
-    this.http.put<any>('http://localhost:8081/api/user/profile', this.profile).subscribe({
+    this.http.put<any>(`${environment.apiUrl}/user/profile`, this.profile).subscribe({
       next: (data) => {
         this.isLoading = false;
         this.successMsg = 'Profile updated successfully!';

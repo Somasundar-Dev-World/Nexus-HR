@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface Transaction { id?: number; description: string; amount: number; date: string; type: 'INCOME' | 'EXPENSE'; category?: string; }
 export interface Category { id?: number; name: string; }
@@ -10,7 +11,7 @@ export interface FinancialSummary { totalIncome: number; totalExpense: number; t
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
-  private apiUrl = 'http://localhost:8081/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

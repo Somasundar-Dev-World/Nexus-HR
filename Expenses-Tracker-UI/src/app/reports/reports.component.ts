@@ -96,7 +96,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
                 label: 'Total Spent',
                 formatter: (w: any) => {
                   const total = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
-                  return '$' + total.toLocaleString();
+                  return '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 }
               }
             }
@@ -131,31 +131,33 @@ export class ReportsComponent implements OnInit, AfterViewInit {
         { name: 'Expense', data: expenseSeries }
       ],
       chart: {
-        type: 'area',
+        type: 'bar',
         height: 350,
         toolbar: { show: false },
         zoom: { enabled: false }
       },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '55%',
+          borderRadius: 6,
+          borderRadiusApplication: 'end'
+        }
+      },
       colors: ['#10b981', '#f43f5e'],
       dataLabels: { enabled: false },
-      stroke: { curve: 'smooth', width: 3 },
+      stroke: { show: true, width: 2, colors: ['transparent'] },
       xaxis: { categories: months },
       yaxis: {
+        min: 0,
         labels: {
           formatter: (val: number) => '$' + val.toLocaleString()
         }
       },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.45,
-          opacityTo: 0.05,
-          stops: [20, 100]
-        }
-      },
+      fill: { opacity: 1 },
       grid: {
-        borderColor: '#f1f1f1'
+        borderColor: '#f1f1f1',
+        strokeDashArray: 4
       },
       tooltip: {
         y: { formatter: (val: number) => '$' + val.toLocaleString() }

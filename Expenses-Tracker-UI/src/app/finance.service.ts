@@ -61,6 +61,9 @@ export class FinanceService {
   getSummary(): Observable<FinancialSummary> { return this.http.get<FinancialSummary>(`${this.apiUrl}/reports/summary`); }
   getCategorySpending(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/category-spending`); }
   getMonthlyTrend(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/monthly-trend`); }
+  getFrequentMerchants(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/reports/frequent-merchants`); }
+  getLargestPurchases(): Observable<Transaction[]> { return this.http.get<Transaction[]>(`${this.apiUrl}/reports/largest-purchases`); }
+  getSpendingComparison(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/spending-comparison`); }
   
   getTransactions(): Observable<Transaction[]> { return this.http.get<Transaction[]>(`${this.apiUrl}/transactions`); }
   addTransaction(t: Transaction): Observable<Transaction> { return this.http.post<Transaction>(`${this.apiUrl}/transactions`, t); }

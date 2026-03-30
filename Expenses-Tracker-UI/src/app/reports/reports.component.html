@@ -1,55 +1,149 @@
-<div class="reports">
-  <!-- Header -->
-  <div class="flex-between mb-2 nav-header">
-    <div>
-      <h1 class="font-bold text-main">Financial Reports</h1>
-      <p class="text-sm text-muted">Deep dive into your spending habits and trends.</p>
+<div class="spending-module" *ngIf="!isLoading">
+  <!-- Top Navigation Tabs (Last Month, This Month, etc.) -->
+  <div class="spending-header">
+    <div class="title-row">
+      <h1 class="page-title">Spending</h1>
     </div>
-    <div class="date-filter">
-      <select class="form-control" style="background:#fff">
-        <option>All-Time View</option>
-        <option>This Month</option>
-        <option>Last 3 Months</option>
-      </select>
+    <div class="tabs-row">
+      <button class="nav-tab">Last Month</button>
+      <button class="nav-tab active">This Month</button>
+      <button class="nav-tab">Custom</button>
     </div>
   </div>
 
-  <!-- Big KPIs -->
-  <div class="kpi-grid mb-2">
-    <div class="card kpi-card">
-        <span class="kpi-label">Top Category</span>
-        <div class="kpi-value text-secondary">{{ summary.topCategory }}</div>
-    </div>
-    <div class="card kpi-card">
-        <span class="kpi-label">Avg. Monthly Spent</span>
-        <div class="kpi-value">{{ summary.avgMonthlySpend | currency }}</div>
-    </div>
-    <div class="card kpi-card">
-        <span class="kpi-label">Financial Health</span>
-        <div class="kpi-value text-success" title="Dummy calculation for now">Positive</div>
+  <!-- Top Bar Chart (Historical Spending) -->
+  <div class="card trend-card mb-2">
+    <div class="card-body">
+      <div id="trendBarChart" style="min-height: 200px;"></div>
     </div>
   </div>
 
-  <!-- Charts Area -->
-  <div class="charts-layout">
-    <div class="card chart-card">
-        <div class="chart-header">
-            <h3 class="chart-title">Spending by Category</h3>
-            <p class="chart-subtitle">Direct breakdown of your expenses.</p>
+  <!-- Main Grid Layout (2 columns: main breakdown + sidebar) -->
+  <div class="spending-grid">
+    
+    <!-- LEFT COLUMN: Spending Breakdown & Categories -->
+    <div class="main-column">
+      <div class="card breakdown-card mb-2">
+        <div class="card-header border-none">
+          <div class="flex-between">
+            <h3 class="card-title">Spending Breakdown</h3>
+            <div class="flex-center">
+              <span class="text-xs text-muted mr-1">Include bills</span>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+          </div>
         </div>
-        <div class="chart-container" id="categoryChart">
-            @if (isLoading) { <div class="loader-wrap"><span class="loader"></span></div> }
+        <div class="card-body donut-wrap">
+          <div id="donutChart"></div>
         </div>
+        
+        <!-- Category Detailed Table (below donut) -->
+        <div class="category-table">
+          <div class="table-header">
+            <span>Category</span>
+            <span>% Spend</span>
+            <span>Change</span>
+            <span class="text-right">Amount</span>
+          </div>
+          <div class="category-item" *ngFor="let cat of categoryList">
+            <div class="cat-meta">
+              <span class="cat-icon">{{ getIcon(cat.name) }}</span>
+              <span class="cat-name">{{ cat.name }}</span>
+            </div>
+            <div class="cat-percent text-muted">{{ cat.percent }}% of spend</div>
+            <div class="cat-change">
+              <span class="trend-icon" [ngClass]="cat.change > 0 ? 'up' : 'down'">
+                {{ cat.change > 0 ? '↑' : '↓' }}
+              </span>
+              <span class="trend-val">{{ cat.change }}%</span>
+            </div>
+            <div class="cat-amount text-right font-bold">{{ cat.amount | currency }}</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="card chart-card">
-        <div class="chart-header">
-            <h3 class="chart-title">Monthly Trend</h3>
-            <p class="chart-subtitle">Historical Income vs. Expense analysis.</p>
+    <!-- RIGHT COLUMN: Sidebar (Summary, Frequent Spend, Largest Purchases) -->
+    <div class="sidebar-column">
+      
+      <!-- Summary Summary -->
+      <div class="card sidebar-card mb-1">
+        <div class="card-header border-none flex-between">
+            <h3 class="card-title">Summary</h3>
+            <span class="text-xs text-muted">Current Month</span>
         </div>
-        <div class="chart-container" id="trendChart">
-             @if (isLoading) { <div class="loader-wrap"><span class="loader"></span></div> }
+        <div class="card-body">
+          <div class="summary-item">
+            <div class="summary-icon income-bg">➕</div>
+            <div class="summary-meta">
+              <div class="summary-label">Income</div>
+              <div class="summary-sub">Events this month</div>
+            </div>
+            <div class="summary-val text-success font-bold">+{{ comparison.currentIncome | currency }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-icon bills-bg">📄</div>
+            <div class="summary-meta">
+              <div class="summary-label">Bills</div>
+              <div class="summary-sub" [ngClass]="comparison.billsChange > 0 ? 'text-danger' : 'text-success'">
+                  {{ comparison.billsChange | number:'1.0-0' }}% vs prev. month
+              </div>
+            </div>
+            <div class="summary-val font-bold">{{ comparison.currentBills | currency }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-icon spend-bg">💸</div>
+            <div class="summary-meta">
+              <div class="summary-label">Spending</div>
+              <div class="summary-sub" [ngClass]="comparison.spendingChange > 0 ? 'text-danger' : 'text-success'">
+                  {{ comparison.spendingChange | number:'1.0-0' }}% vs prev. month
+              </div>
+            </div>
+            <div class="summary-val font-bold">{{ comparison.currentSpending | currency }}</div>
+          </div>
         </div>
+      </div>
+
+      <!-- Frequent Spend -->
+      <div class="card sidebar-card mb-1">
+        <div class="card-header border-none"><h3 class="card-title">Frequent Spend</h3></div>
+        <div class="card-body">
+          <div class="frequent-item" *ngFor="let m of frequentMerchants">
+            <div class="freq-badge">{{ m.count }}x</div>
+            <div class="freq-meta">
+               <div class="freq-name truncate">{{ m.name }}</div>
+               <div class="freq-avg text-xs text-muted">Average {{ m.average | currency }}</div>
+            </div>
+            <div class="freq-total font-bold">{{ m.total | currency }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Largest Purchases -->
+      <div class="card sidebar-card">
+         <div class="card-header border-none"><h3 class="card-title">Largest Purchases</h3></div>
+         <div class="card-body">
+            <div class="largest-item" *ngFor="let p of largestPurchases">
+               <div class="larg-icon">{{ getIcon(p.category || '') }}</div>
+               <div class="larg-meta">
+                  <div class="larg-name truncate">{{ p.description || p.name }}</div>
+                  <div class="larg-category text-xs text-muted">{{ p.category }}</div>
+               </div>
+               <div class="larg-amount font-bold text-danger">-{{ p.amount | currency }}</div>
+            </div>
+         </div>
+      </div>
+
     </div>
   </div>
+</div>
+
+<!-- Simple Skeleton on loading -->
+<div class="spending-module" *ngIf="isLoading">
+    <div class="skeleton-header skeleton"></div>
+    <div class="skeleton-chart skeleton mb-2"></div>
+    <div class="spending-grid">
+        <div class="main-column"><div class="skeleton-list skeleton"></div></div>
+        <div class="sidebar-column"><div class="skeleton-sidebar skeleton"></div></div>
+    </div>
 </div>

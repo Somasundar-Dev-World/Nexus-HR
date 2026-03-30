@@ -14,11 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -247,5 +247,92 @@ public class FinanceController {
         }
 
         return trend;
+    }
+
+    @GetMapping("/reports/frequent-merchants")
+    public List<Map<String, Object>> getFrequentMerchants(@RequestAttribute("userId") Long userId) {
+        List<Transaction> expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+        
+        Map<String, List<Transaction>> groupedByMerchant = expenses.stream()
+                .filter(t -> t.getDescription() != null)
+                .collect(Collectors.groupingBy(Transaction::getDescription));
+
+        return groupedByMerchant.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> map = new HashMap<>();
+                    String name = entry.getKey();
+                    List<Transaction> ts = entry.getValue();
+                    BigDecimal total = ts.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal avg = total.divide(BigDecimal.valueOf(ts.size()), 2, RoundingMode.HALF_UP);
+                    
+                    map.put("name", name);
+                    map.put("count", ts.size());
+                    map.put("total", total);
+                    map.put("average", avg);
+                    return map;
+                })
+                .sorted((a, b) -> Integer.compare((int) b.get("count"), (int) a.get("count")))
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/reports/largest-purchases")
+    public List<Transaction> getLargestPurchases(@RequestAttribute("userId") Long userId) {
+        List<Transaction> expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+        return expenses.stream()
+                .sorted((a, b) -> b.getAmount().compareTo(a.getAmount()))
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/reports/spending-comparison")
+    public Map<String, Object> getSpendingComparison(@RequestAttribute("userId") Long userId) {
+        LocalDate now = LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(now);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+
+        BigDecimal currentIncome = sumByMonthAndType(transactions, currentMonth, TransactionType.INCOME);
+        BigDecimal currentExpense = sumByMonthAndType(transactions, currentMonth, TransactionType.EXPENSE);
+        BigDecimal currentBills = sumBillsByMonth(transactions, currentMonth);
+
+        BigDecimal previousIncome = sumByMonthAndType(transactions, previousMonth, TransactionType.INCOME);
+        BigDecimal previousExpense = sumByMonthAndType(transactions, previousMonth, TransactionType.EXPENSE);
+        BigDecimal previousBills = sumBillsByMonth(transactions, previousMonth);
+
+        Map<String, Object> comparison = new HashMap<>();
+        comparison.put("currentIncome", currentIncome);
+        comparison.put("currentSpending", currentExpense);
+        comparison.put("currentBills", currentBills);
+        
+        comparison.put("incomeChange", calculateChange(currentIncome, previousIncome));
+        comparison.put("spendingChange", calculateChange(currentExpense, previousExpense));
+        comparison.put("billsChange", calculateChange(currentBills, previousBills));
+
+        return comparison;
+    }
+
+    private BigDecimal sumByMonthAndType(List<Transaction> transactions, YearMonth ym, TransactionType type) {
+        return transactions.stream()
+                .filter(t -> YearMonth.from(t.getDate()).equals(ym) && t.getType() == type)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal sumBillsByMonth(List<Transaction> transactions, YearMonth ym) {
+        return transactions.stream()
+                .filter(t -> YearMonth.from(t.getDate()).equals(ym) && t.getType() == TransactionType.EXPENSE)
+                .filter(t -> {
+                    String cat = (t.getCategory() != null) ? t.getCategory().toLowerCase() : "";
+                    return cat.contains("bill") || cat.contains("utility") || cat.contains("mortgage") || cat.contains("rent") || cat.contains("loan");
+                })
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calculateChange(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
+        return current.subtract(previous).divide(previous, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
     }
 }

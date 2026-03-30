@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {

@@ -15,7 +15,8 @@
     <div class="metric-icon">👥</div>
     <div class="metric-info">
       <h3>Total Employees</h3>
-      <p class="value">{{ stats.totalEmployees }}</p>
+      @if (isLoading) { <p class="value skeleton-value">...</p> }
+      @else { <p class="value">{{ stats.totalEmployees }}</p> }
       <span class="trend positive">Live DB Sync</span>
     </div>
   </div>
@@ -23,7 +24,8 @@
     <div class="metric-icon">🏢</div>
     <div class="metric-info">
       <h3>Departments</h3>
-      <p class="value">{{ stats.departments }}</p>
+      @if (isLoading) { <p class="value skeleton-value">...</p> }
+      @else { <p class="value">{{ stats.departments }}</p> }
       <span class="trend neutral">Live DB Sync</span>
     </div>
   </div>
@@ -31,7 +33,8 @@
     <div class="metric-icon">✨</div>
     <div class="metric-info">
       <h3>New Hires</h3>
-      <p class="value">{{ stats.newHires }}</p>
+      @if (isLoading) { <p class="value skeleton-value">...</p> }
+      @else { <p class="value">{{ stats.newHires }}</p> }
       <span class="trend positive">Live DB Sync</span>
     </div>
   </div>

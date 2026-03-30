@@ -9,32 +9,39 @@
 </div>
 
 <div class="card">
-  <div class="table-responsive">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Description</th>
-          <th class="text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (dept of departments; track dept.id) {
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Connecting to server... This may take up to 60 seconds on first load.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
           <tr>
-            <td>#{{ dept.id }}</td>
-            <td class="font-medium">{{ dept.name }}</td>
-            <td class="text-muted">{{ dept.description }}</td>
-            <td class="text-right">
-              <button class="btn btn-outline btn-sm" [routerLink]="['/departments/edit', dept.id]">Edit</button>
-            </td>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th class="text-right">Actions</th>
           </tr>
-        } @empty {
-          <tr>
-            <td colspan="4" style="text-align: center; padding: 2rem;">No departments found.</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (dept of departments; track dept.id) {
+            <tr>
+              <td>#{{ dept.id }}</td>
+              <td class="font-medium">{{ dept.name }}</td>
+              <td class="text-muted">{{ dept.description }}</td>
+              <td class="text-right">
+                <button class="btn btn-outline btn-sm" [routerLink]="['/departments/edit', dept.id]">Edit</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 2rem;">No departments found. Add your first department!</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>

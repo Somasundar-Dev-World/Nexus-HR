@@ -11,13 +11,14 @@ import { Department, DepartmentService } from '../department.service';
 })
 export class DepartmentListComponent implements OnInit {
   departments: Department[] = [];
+  isLoading = true;
 
   constructor(private departmentService: DepartmentService) {}
 
   ngOnInit() {
     this.departmentService.getDepartments().subscribe({
-      next: (data) => this.departments = data,
-      error: (err) => console.error(err)
+      next: (data) => { this.departments = data; this.isLoading = false; },
+      error: (err) => { console.error(err); this.isLoading = false; }
     });
   }
 }

@@ -11,13 +11,14 @@ import { Employee, EmployeeService } from '../employee.service';
 })
 export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
+  isLoading = true;
 
   constructor(private employeeService: EmployeeService) {}
 
   ngOnInit() {
     this.employeeService.getEmployees().subscribe({
-      next: (data) => this.employees = data,
-      error: (err) => console.error(err)
+      next: (data) => { this.employees = data; this.isLoading = false; },
+      error: (err) => { console.error(err); this.isLoading = false; }
     });
   }
 }

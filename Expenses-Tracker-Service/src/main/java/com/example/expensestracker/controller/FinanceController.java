@@ -253,7 +253,7 @@ public class FinanceController {
         BigDecimal totalAssets = assets.stream().map(Asset::getCurrentValue).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalLiabilities = liabilities.stream().map(Liability::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal netWorth = totalAssets.subtract(totalLiabilities).add(totalIncome).subtract(totalExpense);
+        BigDecimal netWorth = totalAssets.subtract(totalLiabilities);
         BigDecimal netCashFlow = totalIncome.subtract(totalExpense);
         BigDecimal predictedNetWorth1Month = netWorth.add(netCashFlow);
 

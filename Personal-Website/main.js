@@ -59,6 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Success: Show Premium Modal
                     formStatus.classList.add('active');
                     contactForm.reset();
+
+                    // GA4: Track Lead Conversion
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'generate_lead', {
+                            'event_category': 'Engagement',
+                            'event_label': 'Contact Form Success'
+                        });
+                    }
                 } else {
                     const data = await response.json();
                     alert(data.errors ? data.errors.map(error => error.message).join(", ") : "Oops! There was a problem submitting your form.");
@@ -75,6 +83,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeStatusBtn) {
         closeStatusBtn.addEventListener('click', () => {
             formStatus.classList.remove('active');
+        });
+    }
+
+    // ═══ GA4: TRACK RESUME CLICKS ═══
+    const resumeBtn = document.querySelector('.btn-nav');
+    if (resumeBtn) {
+        resumeBtn.addEventListener('click', () => {
+            if (typeof gtag === 'function') {
+                gtag('event', 'view_resume', {
+                    'event_category': 'Engagement',
+                    'event_label': 'LinkedIn Resume Click'
+                });
+            }
         });
     }
 

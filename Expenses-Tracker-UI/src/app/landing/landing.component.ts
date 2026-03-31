@@ -12,12 +12,9 @@ import { AuthService } from '../auth.service';
 })
 export class LandingComponent implements OnInit {
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(public authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    // Auto-forward if already logged in
-    if (this.authService.isAuthenticated) {
-      this.router.navigate(['/dashboard']);
-    }
+    // Users can now view the landing page even if logged in
   }
 }

@@ -6,8 +6,13 @@
       <span class="brand-name">Expense Tracker</span>
     </div>
     <div class="nav-ctas">
-      <a routerLink="/login" class="nav-link">Log In</a>
-      <a routerLink="/register" class="btn btn-nav">Get Started</a>
+      <ng-container *ngIf="!authService.isAuthenticated; else loggedInNav">
+        <a routerLink="/login" class="nav-link">Log In</a>
+        <a routerLink="/register" class="btn btn-nav">Get Started</a>
+      </ng-container>
+      <ng-template #loggedInNav>
+        <a routerLink="/dashboard" class="btn btn-nav">Go to Dashboard</a>
+      </ng-template>
     </div>
   </div>
 </header>
@@ -22,8 +27,13 @@
         Master your spending, track your assets, and hit your financial goals with high-fidelity reports inspired by Rocket Money.
       </p>
       <div class="hero-actions">
-        <a routerLink="/register" class="btn btn-hero">Start Free Journey</a>
-        <a routerLink="/login" class="btn btn-outline-hero">Login to Dashboard</a>
+        <ng-container *ngIf="!authService.isAuthenticated; else loggedInHero">
+          <a routerLink="/register" class="btn btn-hero">Start Free Journey</a>
+          <a routerLink="/login" class="btn btn-outline-hero">Login to Dashboard</a>
+        </ng-container>
+        <ng-template #loggedInHero>
+          <a routerLink="/dashboard" class="btn btn-hero">Return to Dashboard</a>
+        </ng-template>
       </div>
       <div class="hero-stats">
         <div class="stat-item"><b>1k+</b> Users</div>

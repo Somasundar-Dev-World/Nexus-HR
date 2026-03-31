@@ -102,3 +102,26 @@ input:checked + .slider:before { transform: translateX(22px); }
   .cat-percent, .cat-change { display: none; }
   .spending-module { padding: 1rem; }
 }
+
+/* Custom Date Picker */
+.custom-range-picker {
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  animation: slideDownInner 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.picker-flex { display: flex; align-items: flex-end; gap: 2rem; flex-wrap: wrap; }
+.picker-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.picker-group label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.025em; }
+.picker-group input { 
+  border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.6rem 1rem; font-size: 0.9rem; 
+  color: #1e293b; background: #f8fafc; transition: all 0.2s; border: 1px solid #cbd5e1;
+}
+.picker-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); outline: none; background: #fff; }
+.picker-info { flex: 1; min-width: 250px; color: #64748b; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end; }
+
+@keyframes slideDownInner {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -8,6 +8,24 @@
       <button class="nav-tab" [class.active]="selectedPeriod === 'all-time'" (click)="setPeriod('all-time')">All Time</button>
       <button class="nav-tab" [class.active]="selectedPeriod === 'last-month'" (click)="setPeriod('last-month')">Last Month</button>
       <button class="nav-tab" [class.active]="selectedPeriod === 'this-month'" (click)="setPeriod('this-month')">This Month</button>
+      <button class="nav-tab" [class.active]="selectedPeriod === 'custom'" (click)="setPeriod('custom')">Custom</button>
+    </div>
+  </div>
+
+  <!-- Custom Date Range Picker -->
+  <div class="custom-range-picker card mb-2 animate-down" *ngIf="selectedPeriod === 'custom' && !isLoading">
+    <div class="picker-flex">
+      <div class="picker-group">
+        <label>From Date</label>
+        <input type="date" [(ngModel)]="customStart" (change)="fetchAllData()" class="form-control">
+      </div>
+      <div class="picker-group">
+        <label>To Date</label>
+        <input type="date" [(ngModel)]="customEnd" (change)="fetchAllData()" class="form-control">
+      </div>
+      <div class="picker-info">
+        <span class="icon">📅</span> Select any period to analyze your spending habits.
+      </div>
     </div>
   </div>
 

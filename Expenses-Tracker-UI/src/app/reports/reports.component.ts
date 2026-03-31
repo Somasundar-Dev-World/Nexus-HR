@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { FinanceService, Transaction } from '../finance.service';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.css'
 })
@@ -14,6 +15,10 @@ export class ReportsComponent implements OnInit {
   isLoading = true;
   selectedPeriod: string = 'this-month';
   
+  // Custom Range State
+  customStart: string = "";
+  customEnd: string = "";
+
   // Data for sections
   categoryList: any[] = [];
   monthlyTrend: any = {};
@@ -30,10 +35,19 @@ export class ReportsComponent implements OnInit {
 
   categoryDonutData: any = { series: [], labels: [] };
   
-  constructor(private financeService: FinanceService) {}
+  constructor(private financeService: FinanceService) {
+    this.initCustomDates();
+  }
 
   ngOnInit() {
     this.fetchAllData();
+  }
+
+  initCustomDates() {
+    const now = new Date();
+    this.customEnd = now.toISOString().split('T')[0];
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+    this.customStart = thirtyDaysAgo.toISOString().split('T')[0];
   }
 
   setPeriod(period: string) {
@@ -59,6 +73,9 @@ export class ReportsComponent implements OnInit {
     } else if (this.selectedPeriod === 'all-time') {
       start = undefined;
       end = undefined;
+    } else if (this.selectedPeriod === 'custom') {
+      start = this.customStart;
+      end = this.customEnd;
     }
 
     return { start, end };
@@ -110,6 +127,12 @@ export class ReportsComponent implements OnInit {
   }
 
   renderCharts() {
+    // Clear and redraw
+    const trendEl = document.querySelector("#trendBarChart");
+    const donutEl = document.querySelector("#donutChart");
+    if (trendEl) trendEl.innerHTML = "";
+    if (donutEl) donutEl.innerHTML = "";
+
     this.renderTrendChart();
     this.renderDonutChart();
   }
@@ -143,6 +166,12 @@ export class ReportsComponent implements OnInit {
   }
 
   renderDonutChart() {
+    if (this.categoryDonutData.series.length === 0) {
+      const donutEl = document.querySelector("#donutChart");
+      if (donutEl) donutEl.innerHTML = "<div class='text-muted text-center py-5'>No data for this range.</div>";
+      return;
+    }
+
     const options = {
       series: this.categoryDonutData.series,
       labels: this.categoryDonutData.labels,

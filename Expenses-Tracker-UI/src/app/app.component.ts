@@ -20,6 +20,10 @@ export class AppComponent {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
+  isLandingPage(): boolean {
+    return this.router.url === '/' || this.router.url === '/home';
+  }
+
   closeAll(event: Event) {
     this.isDropdownOpen = false;
   }

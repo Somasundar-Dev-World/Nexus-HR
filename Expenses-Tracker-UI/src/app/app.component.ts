@@ -20,8 +20,9 @@ export class AppComponent {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  isLandingPage(): boolean {
-    return this.router.url === '/' || this.router.url === '/home';
+  isPublicPage(): boolean {
+    const publicRoutes = ['/', '/home', '/author'];
+    return publicRoutes.includes(this.router.url);
   }
 
   closeAll(event: Event) {

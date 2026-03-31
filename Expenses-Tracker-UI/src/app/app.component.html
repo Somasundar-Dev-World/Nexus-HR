@@ -2,10 +2,12 @@
 
   <!-- ═══ DESKTOP SIDEBAR (hidden on mobile) ═══ -->
   <aside *ngIf="authService.isAuthenticated" class="sidebar">
-    <div class="brand">
-      <div class="logo">ET</div>
-      <h2>Expense Tracker</h2>
-    </div>
+    <a routerLink="/" class="brand-link">
+      <div class="brand">
+        <div class="logo">ET</div>
+        <h2>Expense Tracker</h2>
+      </div>
+    </a>
     <nav class="nav-links">
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <span class="icon">📊</span> Dashboard
@@ -53,10 +55,12 @@
     <div *ngIf="authService.isAuthenticated" class="mobile-topbar">
       <!-- Brand row -->
       <div class="mobile-brand-row">
-        <div class="brand-left">
-          <div class="logo">ET</div>
-          <span class="brand-name">Expense Tracker</span>
-        </div>
+        <a routerLink="/" class="brand-link">
+          <div class="brand-left">
+            <div class="logo">ET</div>
+            <span class="brand-name">Expense Tracker</span>
+          </div>
+        </a>
         <!-- Avatar with dropdown -->
         <div class="mobile-avatar-wrap" (click)="toggleDropdown(); $event.stopPropagation()"
              *ngIf="authService.currentUserValue as user">

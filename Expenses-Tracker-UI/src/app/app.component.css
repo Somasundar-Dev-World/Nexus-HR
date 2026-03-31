@@ -21,6 +21,16 @@
   overflow-y: auto;
 }
 
+.brand-link {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.brand-link:hover {
+  opacity: 0.8;
+}
+
 .brand {
   display: flex;
   align-items: center;

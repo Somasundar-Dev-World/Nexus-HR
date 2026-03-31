@@ -10,6 +10,7 @@ import com.example.expensestracker.repository.LiabilityRepository;
 import com.example.expensestracker.repository.TransactionRepository;
 import com.example.expensestracker.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -268,8 +269,20 @@ public class FinanceController {
     }
 
     @GetMapping("/reports/category-spending")
-    public Map<String, BigDecimal> getCategorySpending(@RequestAttribute("userId") Long userId) {
-        List<Transaction> expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+    public Map<String, BigDecimal> getCategorySpending(
+        @RequestAttribute("userId") Long userId,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        
+        List<Transaction> expenses;
+        if (startDate != null && endDate != null) {
+            expenses = transactionRepository.findByUserIdAndDateBetween(userId, startDate, endDate).stream()
+                    .filter(t -> t.getType() == TransactionType.EXPENSE)
+                    .collect(Collectors.toList());
+        } else {
+            expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+        }
+
         return expenses.stream()
                 .filter(t -> t.getCategory() != null)
                 .collect(Collectors.groupingBy(
@@ -299,8 +312,19 @@ public class FinanceController {
     }
 
     @GetMapping("/reports/frequent-merchants")
-    public List<Map<String, Object>> getFrequentMerchants(@RequestAttribute("userId") Long userId) {
-        List<Transaction> expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+    public List<Map<String, Object>> getFrequentMerchants(
+        @RequestAttribute("userId") Long userId,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        List<Transaction> expenses;
+        if (startDate != null && endDate != null) {
+            expenses = transactionRepository.findByUserIdAndDateBetween(userId, startDate, endDate).stream()
+                    .filter(t -> t.getType() == TransactionType.EXPENSE)
+                    .collect(Collectors.toList());
+        } else {
+            expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+        }
         
         Map<String, List<Transaction>> groupedByMerchant = expenses.stream()
                 .filter(t -> t.getDescription() != null)
@@ -326,8 +350,20 @@ public class FinanceController {
     }
 
     @GetMapping("/reports/largest-purchases")
-    public List<Transaction> getLargestPurchases(@RequestAttribute("userId") Long userId) {
-        List<Transaction> expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+    public List<Transaction> getLargestPurchases(
+        @RequestAttribute("userId") Long userId,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        List<Transaction> expenses;
+        if (startDate != null && endDate != null) {
+            expenses = transactionRepository.findByUserIdAndDateBetween(userId, startDate, endDate).stream()
+                    .filter(t -> t.getType() == TransactionType.EXPENSE)
+                    .collect(Collectors.toList());
+        } else {
+            expenses = transactionRepository.findByTypeAndUserId(TransactionType.EXPENSE, userId);
+        }
+
         return expenses.stream()
                 .sorted((a, b) -> b.getAmount().compareTo(a.getAmount()))
                 .limit(5)
@@ -335,9 +371,12 @@ public class FinanceController {
     }
 
     @GetMapping("/reports/spending-comparison")
-    public Map<String, Object> getSpendingComparison(@RequestAttribute("userId") Long userId) {
-        LocalDate now = LocalDate.now();
-        YearMonth currentMonth = YearMonth.from(now);
+    public Map<String, Object> getSpendingComparison(
+        @RequestAttribute("userId") Long userId,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
+
+        LocalDate targetBaseDate = (startDate != null) ? startDate : LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(targetBaseDate);
         YearMonth previousMonth = currentMonth.minusMonths(1);
 
         List<Transaction> transactions = transactionRepository.findByUserId(userId);

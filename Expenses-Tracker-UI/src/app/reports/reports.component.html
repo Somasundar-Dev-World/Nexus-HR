@@ -5,9 +5,9 @@
       <h1 class="page-title">Spending</h1>
     </div>
     <div class="tabs-row">
-      <button class="nav-tab">Last Month</button>
-      <button class="nav-tab active">This Month</button>
-      <button class="nav-tab">Custom</button>
+      <button class="nav-tab" [class.active]="selectedPeriod === 'all-time'" (click)="setPeriod('all-time')">All Time</button>
+      <button class="nav-tab" [class.active]="selectedPeriod === 'last-month'" (click)="setPeriod('last-month')">Last Month</button>
+      <button class="nav-tab" [class.active]="selectedPeriod === 'this-month'" (click)="setPeriod('this-month')">This Month</button>
     </div>
   </div>
 

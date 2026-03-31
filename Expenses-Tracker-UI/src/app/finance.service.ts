@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -59,11 +59,35 @@ export class FinanceService {
   constructor(private http: HttpClient) { }
 
   getSummary(): Observable<FinancialSummary> { return this.http.get<FinancialSummary>(`${this.apiUrl}/reports/summary`); }
-  getCategorySpending(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/category-spending`); }
+  
+  getCategorySpending(start?: string, end?: string): Observable<any> { 
+    let params = new HttpParams();
+    if (start) params = params.set('startDate', start);
+    if (end) params = params.set('endDate', end);
+    return this.http.get<any>(`${this.apiUrl}/reports/category-spending`, { params }); 
+  }
+  
   getMonthlyTrend(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/monthly-trend`); }
-  getFrequentMerchants(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/reports/frequent-merchants`); }
-  getLargestPurchases(): Observable<Transaction[]> { return this.http.get<Transaction[]>(`${this.apiUrl}/reports/largest-purchases`); }
-  getSpendingComparison(): Observable<any> { return this.http.get<any>(`${this.apiUrl}/reports/spending-comparison`); }
+  
+  getFrequentMerchants(start?: string, end?: string): Observable<any[]> { 
+    let params = new HttpParams();
+    if (start) params = params.set('startDate', start);
+    if (end) params = params.set('endDate', end);
+    return this.http.get<any[]>(`${this.apiUrl}/reports/frequent-merchants`, { params }); 
+  }
+  
+  getLargestPurchases(start?: string, end?: string): Observable<Transaction[]> { 
+    let params = new HttpParams();
+    if (start) params = params.set('startDate', start);
+    if (end) params = params.set('endDate', end);
+    return this.http.get<Transaction[]>(`${this.apiUrl}/reports/largest-purchases`, { params }); 
+  }
+  
+  getSpendingComparison(start?: string): Observable<any> { 
+    let params = new HttpParams();
+    if (start) params = params.set('startDate', start);
+    return this.http.get<any>(`${this.apiUrl}/reports/spending-comparison`, { params }); 
+  }
   
   getTransactions(): Observable<Transaction[]> { return this.http.get<Transaction[]>(`${this.apiUrl}/transactions`); }
   addTransaction(t: Transaction): Observable<Transaction> { return this.http.post<Transaction>(`${this.apiUrl}/transactions`, t); }

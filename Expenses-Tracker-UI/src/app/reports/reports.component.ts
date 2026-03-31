@@ -12,6 +12,7 @@ import { forkJoin } from 'rxjs';
 })
 export class ReportsComponent implements OnInit {
   isLoading = true;
+  selectedPeriod: string = 'this-month';
   
   // Data for sections
   categoryList: any[] = [];
@@ -35,15 +36,44 @@ export class ReportsComponent implements OnInit {
     this.fetchAllData();
   }
 
+  setPeriod(period: string) {
+    if (this.selectedPeriod === period) return;
+    this.selectedPeriod = period;
+    this.fetchAllData();
+  }
+
+  getPeriodDates() {
+    const now = new Date();
+    let start: string | undefined;
+    let end: string | undefined;
+
+    if (this.selectedPeriod === 'this-month') {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      start = firstDay.toISOString().split('T')[0];
+      end = now.toISOString().split('T')[0];
+    } else if (this.selectedPeriod === 'last-month') {
+      const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      start = firstDayLastMonth.toISOString().split('T')[0];
+      end = lastDayLastMonth.toISOString().split('T')[0];
+    } else if (this.selectedPeriod === 'all-time') {
+      start = undefined;
+      end = undefined;
+    }
+
+    return { start, end };
+  }
+
   fetchAllData() {
     this.isLoading = true;
+    const { start, end } = this.getPeriodDates();
     
     forkJoin({
-      categorySpending: this.financeService.getCategorySpending(),
-      monthlyTrend: this.financeService.getMonthlyTrend(),
-      frequent: this.financeService.getFrequentMerchants(),
-      largest: this.financeService.getLargestPurchases(),
-      comparison: this.financeService.getSpendingComparison()
+      categorySpending: this.financeService.getCategorySpending(start, end),
+      monthlyTrend: this.financeService.getMonthlyTrend(), // Trend always shows 6 months context
+      frequent: this.financeService.getFrequentMerchants(start, end),
+      largest: this.financeService.getLargestPurchases(start, end),
+      comparison: this.financeService.getSpendingComparison(start)
     }).subscribe({
       next: (res) => {
         this.processCategoryData(res.categorySpending);
@@ -74,8 +104,6 @@ export class ReportsComponent implements OnInit {
         name,
         amount,
         percent: total > 0 ? (amount / total * 100).toFixed(0) : 0,
-        // For MoM change in category, we'd need another endpoint, 
-        // but let's mock it or use 0 for now as per screenshots hint
         change: Math.floor(Math.random() * 20) // Random placeholder for UI polish
       };
     }).sort((a, b) => b.amount - a.amount);
@@ -100,7 +128,7 @@ export class ReportsComponent implements OnInit {
           colors: { backgroundBarColors: ['#f8f9fa'], backgroundBarOpacity: 1 }
         }
       },
-      colors: ['#3b82f6'], // Rocket Money Blue
+      colors: ['#3b82f6'], 
       xaxis: { categories: months, axisBorder: { show: false } },
       yaxis: { show: false },
       grid: { show: false },

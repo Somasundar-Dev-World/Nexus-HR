@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Java 17 in Enterprise | Somasundar M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+  <nav class="glass-nav">
+    <div class="container container-nav">
+      <div class="brand"><a href="index.html">SM<span>.</span></a></div>
+      <a href="index.html" class="btn btn-nav">← Back to Portfolio</a>
+    </div>
+  </nav>
+
+  <article class="article-detail">
+    <div class="container">
+      <div class="article-header">
+        <div class="badge">Technical Guide</div>
+        <h1>Mastering Java 17 Features in Enterprise Apps</h1>
+        <div class="article-meta">
+          <span>By Somasundar M</span> • <span>Oct 24, 2025</span> • <span>8 min read</span>
+        </div>
+      </div>
+      
+      <div class="article-content glass">
+        <p class="lead">Java 17 is the current long-term support (LTS) release that has brought significant improvements to the ecosystem. For enterprise developers, these features aren't just syntactic sugar—they are tools for building more resilient and maintainable microservices.</p>
+        
+        <h2>1. Records for Data Carriers</h2>
+        <p>In our work at <b>Citi</b>, we often deal with complex DTOs for wholesale lending. Records simplify this by providing an immutable, concise way to model data. No more boilerplate for getters, <code>equals()</code>, or <code>hashCode()</code>.</p>
+        <pre><code>public record TransactionRequest(String id, double amount, String currency) {}</code></pre>
+
+        <h2>2. Sealed Classes for Domain Modeling</h2>
+        <p>Sealed classes allow us to restrict which classes can extend or implement them. This is incredibly powerful for modeling domain states in financial risk engines, ensuring that only a fixed set of outcomes is possible.</p>
+
+        <h2>3. Pattern Matching for switch</h2>
+        <p>Combined with records, pattern matching dramatically reduces the complexity of handling different message types from <b>Kafka</b> streams. It makes the code more intuitive and type-safe.</p>
+        
+        <p>As we continue to evolve platforms like <b>OmniTracker</b>, staying on the latest LTS release ensures we capitalize on performance optimizations and the latest security patches.</p>
+      </div>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container text-center">
+      <p>&copy; 2026 Somasundar M. Architecting the Future.</p>
+    </div>
+  </footer>
+</body>
+</html>

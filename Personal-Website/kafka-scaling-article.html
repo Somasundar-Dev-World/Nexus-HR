@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scaling Kafka | Somasundar M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+  <nav class="glass-nav">
+    <div class="container container-nav">
+      <div class="brand"><a href="index.html">SM<span>.</span></a></div>
+      <a href="index.html" class="btn btn-nav">← Back to Portfolio</a>
+    </div>
+  </nav>
+
+  <article class="article-detail">
+    <div class="container">
+      <div class="article-header">
+        <div class="badge">Enterprise Insights</div>
+        <h1>Scaling Kafka for Global Risk Engines</h1>
+        <div class="article-meta">
+          <span>By Somasundar M</span> • <span>Sep 15, 2025</span> • <span>10 min read</span>
+        </div>
+      </div>
+      
+      <div class="article-content glass">
+        <p class="lead">Processing millions of transactions per second across global markets requires more than just a message broker—it requires a robust Kafka-driven ecosystem. Here are lessons learned from engineering scale at <b>Citi</b>.</p>
+        
+        <h2>1. Partitioning Strategy</h2>
+        <p>Correct partitioning is the backbone of Kafka scalability. In our risk analytics platforms, we used composite keys (Branch + ProductID) to ensure even data distribution across brokers while maintaining order for critical calculations.</p>
+
+        <h2>2. Monitoring with Prometheus & Grafana</h2>
+        <p>You can't manage what you can't measure. We built custom dashboards to track consumer lag, broker throughput, and disk I/O metrics in <b>OpenShift</b>. This proactive approach reduced system downtime by 40%.</p>
+
+        <h2>3. Schema Registry</h2>
+        <p>Using Avro and the Confluent Schema Registry ensured that evolving data structures didn't break our downstream consumers, a critical requirement for multi-team collaborative engineering.</p>
+        
+        <p>Scaling data systems is about resilience, monitoring, and clear architectural boundaries. These principles are what drive the high-fidelity performance of platforms like <b>OmniTracker</b>.</p>
+      </div>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container text-center">
+      <p>&copy; 2026 Somasundar M. Architecting the Future.</p>
+    </div>
+  </footer>
+</body>
+</html>

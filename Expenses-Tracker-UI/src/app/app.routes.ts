@@ -9,6 +9,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { ReportsComponent } from './reports/reports.component';
 import { LandingComponent } from './landing/landing.component';
+import { AuthorComponent } from './author/author.component';
 import { AuthGuard } from './auth.guard';
 
 export const routes: Routes = [
@@ -22,5 +23,6 @@ export const routes: Routes = [
   { path: 'assets', component: AssetsComponent, canActivate: [AuthGuard] },
   { path: 'liabilities', component: LiabilitiesComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'author', component: AuthorComponent },
   { path: '**', redirectTo: '' }
 ];

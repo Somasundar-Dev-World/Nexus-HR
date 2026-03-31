@@ -1,0 +1,103 @@
+<div class="author-page">
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="author-nav animate-fade-in">
+    <div class="container">
+      <a routerLink="/" class="back-link">
+        <span class="icon">←</span> Back to App
+      </a>
+      <div class="brand">Somasundar M</div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO SECTION ═══ -->
+  <header class="author-hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div class="author-badge animate-slide-up">Senior / Lead Software Engineer</div>
+        <h1 class="animate-slide-up">Architecting the <span class="text-gradient">Future</span> of Enterprise Systems.</h1>
+        <p class="hero-desc animate-slide-up">
+          Over 20 years of expertise delivering high-throughput microservices for global financial and technology leaders including <b>Citi</b>, <b>Apple</b>, and <b>Cisco</b>.
+        </p>
+        <div class="hero-ctas animate-slide-up">
+          <a href="https://www.linkedin.com/in/somasundarm/" target="_blank" class="btn btn-primary">Connect on LinkedIn</a>
+          <a href="mailto:mr.somasundar77@gmail.com" class="btn btn-outline">Send Message</a>
+        </div>
+      </div>
+      <div class="hero-visual animate-floating">
+        <div class="id-card">
+          <img src="/assets/author_identity.png" alt="Somasundar M" class="id-img">
+          <div class="id-overlay">
+            <span class="location">📍 Dallas–Fort Worth, TX</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ SPECIALIZATIONS ═══ -->
+  <section class="specs-section">
+    <div class="container">
+      <div class="section-title">Core <span class="text-blue">Expertise</span>.</div>
+      <div class="specs-grid">
+        <div class="spec-card" *ngFor="let spec of specializations">
+          <div class="spec-icon">{{ spec.icon }}</div>
+          <h3>{{ spec.title }}</h3>
+          <p>{{ spec.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TECH STACK MASONRY ═══ -->
+  <section class="tech-section">
+    <div class="container">
+      <div class="section-title">Technical <span class="text-indigo">Arsenal</span>.</div>
+      <div class="skills-grid">
+        <div class="skill-pill" *ngFor="let s of skills">
+          <span class="skill-cat">{{ s.category }}</span>
+          <span class="skill-name">{{ s.name }}</span>
+          <div class="skill-bar"><div class="skill-fill" [style.width.%]="s.level"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ EXPERIENCE TIMELINE ═══ -->
+  <section class="exp-section">
+    <div class="container">
+      <div class="section-title">Career <span class="text-gradient">Odyssey</span>.</div>
+      <div class="timeline">
+        <div class="timeline-item animate-in" *ngFor="let item of experience">
+          <div class="item-header">
+            <div class="item-company">{{ item.company }}</div>
+            <div class="item-period">{{ item.period }}</div>
+          </div>
+          <div class="item-role">{{ item.role }}</div>
+          <p class="item-desc">{{ item.desc }}</p>
+          <div class="item-tags">
+            <span class="tag" *ngFor="let tag of item.tags">#{{ tag }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FINAL CTA ═══ -->
+  <section class="final-cta">
+    <div class="container">
+      <div class="cta-box glass-card">
+        <h2>Passionate about <span class="text-blue">Innovation</span>.</h2>
+        <p>Currently driving cloud-native modernization and AI-enabled observability for global wholesale banking systems.</p>
+        <div class="footer-links">
+            <a href="https://www.linkedin.com/in/somasundarm/" target="_blank">LinkedIn</a> • 
+            <a href="https://github.com/Somasundar-Dev-World/" target="_blank">GitHub</a> • 
+            <a href="mailto:mr.somasundar77@gmail.com">Email</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="author-footer">
+    <p>&copy; 2026 Somasundar M. Professional Portfolio.</p>
+  </footer>
+</div>

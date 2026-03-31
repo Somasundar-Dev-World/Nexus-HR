@@ -4,13 +4,19 @@
   <aside *ngIf="authService.isAuthenticated && !isPublicPage()" class="sidebar">
     <a routerLink="/" class="brand-link">
       <div class="brand">
-        <div class="logo">ET</div>
-        <h2>Expense Tracker</h2>
+        <div class="logo">OT</div>
+        <h2>OmniTracker</h2>
       </div>
     </a>
     <nav class="nav-links">
+      <div class="nav-group-label">Core Dashboard</div>
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <span class="icon">📊</span> Dashboard
+        <span class="icon">📊</span> Overview
+      </a>
+      
+      <div class="nav-group-label">Life Tracks</div>
+      <a routerLink="/track" routerLinkActive="active">
+        <span class="icon">🎯</span> OmniTracker
       </a>
       <a routerLink="/transactions" routerLinkActive="active">
         <span class="icon">💸</span> Transactions
@@ -57,8 +63,8 @@
       <div class="mobile-brand-row">
         <a routerLink="/" class="brand-link">
           <div class="brand-left">
-            <div class="logo">ET</div>
-            <span class="brand-name">Expense Tracker</span>
+            <div class="logo">OT</div>
+            <span class="brand-name">OmniTracker</span>
           </div>
         </a>
         <!-- Avatar with dropdown -->
@@ -86,16 +92,13 @@
       <!-- Nav tabs row -->
       <nav class="mobile-nav-tabs">
         <a routerLink="/dashboard" routerLinkActive="tab-active" [routerLinkActiveOptions]="{exact:true}">
-          <span>📊</span><span class="tab-label">Dashboard</span>
+          <span>📊</span><span class="tab-label">Dash</span>
+        </a>
+        <a routerLink="/track" routerLinkActive="tab-active">
+          <span>🎯</span><span class="tab-label">Track</span>
         </a>
         <a routerLink="/transactions" routerLinkActive="tab-active">
-          <span>💸</span><span class="tab-label">Transactions</span>
-        </a>
-        <a routerLink="/assets" routerLinkActive="tab-active">
-          <span>🏦</span><span class="tab-label">Assets</span>
-        </a>
-        <a routerLink="/liabilities" routerLinkActive="tab-active">
-          <span>📉</span><span class="tab-label">Liabilities</span>
+          <span>💸</span><span class="tab-label">Trans</span>
         </a>
         <a routerLink="/reports" routerLinkActive="tab-active">
           <span>📈</span><span class="tab-label">Reports</span>

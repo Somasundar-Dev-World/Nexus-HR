@@ -18,16 +18,17 @@ export class AuthorComponent {
     { name: 'AWS/Azure', category: 'Public Cloud', level: 88 },
     { name: 'Python (AI/ML)', category: 'Analytics', level: 85 },
     { name: 'Microservices', category: 'Architecture', level: 99 },
-    { name: 'OpenShift', category: 'Orchestration', level: 85 }
+    { name: 'System Design', category: 'Scale', level: 97 },
+    { name: 'Data Modeling', category: 'Universal Systems', level: 95 }
   ];
 
   experience = [
     {
       company: 'Citi Group',
-      role: 'Technology Lead / Senior Staff Engineer',
+      role: 'Technology Lead / Architect',
       period: '2017 – Present',
-      desc: 'Architecting cloud-native platforms for global wholesale lending and counterparty credit risk. Leading distributed systems migration and Kafka-driven event architectures.',
-      tags: ['Java 17', 'Kafka', 'Kubernetes', 'AIOps']
+      desc: 'Architecting universal, high-throughput platforms for global wholesale lending and risk. Leading the move towards metadata-driven, multi-metric distributed systems.',
+      tags: ['Java 17', 'Architecture', 'Kafka', 'Scale']
     },
     {
       company: 'Apple Inc.',
@@ -53,8 +54,8 @@ export class AuthorComponent {
   ];
 
   specializations = [
-    { title: 'Microservices Architecture', icon: '⚡', desc: 'Designing high-throughput, resilient distributed systems at global banking scale.' },
-    { title: 'Cloud & Kubernetes', icon: '☁️', desc: 'Expertise in AWS, Azure, and OpenShift for mission-critical enterprise workloads.' },
-    { title: 'AI & Observability', icon: '🤖', desc: 'Integrating ML models for risk analytics and AIOps for self-healing systems.' }
+    { title: 'Universal Data Systems', icon: '🌐', desc: 'Designing metadata-driven platforms that quantify any metric at enterprise scale.' },
+    { title: 'High-Scale Microservices', icon: '⚡', desc: 'Building high-throughput, resilient distributed architectures for global leaders.' },
+    { title: 'Modern Cloud Native', icon: '☁️', desc: 'Expertise in AWS, Azure, and OpenShift for complex, multi-tenant workloads.' }
   ];
 }

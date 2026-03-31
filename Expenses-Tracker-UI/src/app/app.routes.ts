@@ -10,6 +10,7 @@ import { CategoriesComponent } from './categories/categories.component';
 import { ReportsComponent } from './reports/reports.component';
 import { LandingComponent } from './landing/landing.component';
 import { AuthorComponent } from './author/author.component';
+import { OmniDashboardComponent } from './omni-dashboard/omni-dashboard.component';
 import { AuthGuard } from './auth.guard';
 
 export const routes: Routes = [
@@ -24,5 +25,6 @@ export const routes: Routes = [
   { path: 'liabilities', component: LiabilitiesComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'author', component: AuthorComponent },
+  { path: 'track', component: OmniDashboardComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];

@@ -1,0 +1,123 @@
+<div class="omni-container">
+  <!-- ═══ HEADER ═══ -->
+  <header class="omni-header animate-fade-in">
+    <div class="header-content">
+      <div class="title-wrap">
+        <h1>OmniTracker <span class="badge">BETA</span></h1>
+        <p>Your life, quantified. Tracking metrics that matter.</p>
+      </div>
+      <button class="btn btn-primary" (click)="isAddingTracker = true">
+        <span class="icon">+</span> New Tracker
+      </button>
+    </div>
+  </header>
+
+  <div class="omni-grid">
+    <!-- ═══ TRACKER LIST ═══ -->
+    <aside class="tracker-list">
+      <div class="section-label">Active Tracks</div>
+      <div class="tracker-cards">
+        <div *ngFor="let t of trackers" 
+             class="tracker-card glass-card" 
+             [class.active]="selectedTracker?.id === t.id"
+             (click)="selectTracker(t)">
+          <div class="card-left">
+            <span class="tracker-icon">{{ getIcon(t.type) }}</span>
+            <div class="tracker-info">
+              <span class="tracker-name">{{ t.name }}</span>
+              <span class="tracker-type">{{ t.type }}</span>
+            </div>
+          </div>
+          <button class="btn-delete" (click)="deleteTracker(t.id!, $event)">×</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ TRACKER DETAIL / LOGS ═══ -->
+    <main class="tracker-detail">
+      <div *ngIf="!selectedTracker" class="empty-state glass-card">
+        <div class="empty-icon">📊</div>
+        <h3>Select a track to view details</h3>
+        <p>Manage your progress, trends, and history in one place.</p>
+      </div>
+
+      <div *ngIf="selectedTracker" class="detail-container animate-slide-up">
+        <div class="detail-header">
+          <div class="title-group">
+            <span class="icon-lg">{{ getIcon(selectedTracker.type) }}</span>
+            <h2>{{ selectedTracker.name }} <small>({{ selectedTracker.unit }})</small></h2>
+          </div>
+          <button class="btn btn-action" (click)="isAddingEntry = true">
+            Log Progress
+          </button>
+        </div>
+
+        <!-- Metric History -->
+        <div class="log-history glass-card">
+          <div class="history-header">History & Notes</div>
+          <div class="log-items" *ngIf="entries.length">
+            <div class="log-item" *ngFor="let entry of entries">
+              <div class="log-meta">
+                <span class="log-date">{{ entry.date | date:'MMM d, h:mm a' }}</span>
+                <span class="log-val">{{ entry.value }} {{ selectedTracker.unit }}</span>
+              </div>
+              <p class="log-note" *ngIf="entry.note">{{ entry.note }}</p>
+            </div>
+          </div>
+          <div class="empty-logs" *ngIf="!entries.length">
+            <p>No logs yet. Start tracking your progress today!</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══ MODALS ═══ -->
+  
+  <!-- Add Tracker Modal -->
+  <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
+    <div class="modal glass-card" (click)="$event.stopPropagation()">
+      <h3>✨ Create New Track</h3>
+      <div class="form-group">
+        <label>Metric Name (e.g. Daily Weight)</label>
+        <input [(ngModel)]="newTracker.name" placeholder="Name">
+      </div>
+      <div class="form-group">
+        <label>Unit (e.g. kg, $, count, hours)</label>
+        <input [(ngModel)]="newTracker.unit" placeholder="Unit">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select [(ngModel)]="newTracker.type">
+          <option value="FINANCE">Financials</option>
+          <option value="HEALTH">Health & Bio</option>
+          <option value="STOCK">Market Watch</option>
+          <option value="CUSTOM">Custom Metric</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="isAddingTracker = false">Cancel</button>
+        <button class="btn btn-primary" (click)="createTracker()">Create Track</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Entry Modal -->
+  <div class="modal-overlay" *ngIf="isAddingEntry" (click)="isAddingEntry = false">
+    <div class="modal glass-card" (click)="$event.stopPropagation()">
+      <h3>💪 Log Progress: {{ selectedTracker?.name }}</h3>
+      <div class="form-group">
+        <label>Current Value ({{ selectedTracker?.unit }})</label>
+        <input type="number" [(ngModel)]="newEntryValue">
+      </div>
+      <div class="form-group">
+        <label>Context / Notes (Optional)</label>
+        <textarea [(ngModel)]="newEntryNote" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="isAddingEntry = false">Cancel</button>
+        <button class="btn btn-primary" (click)="addEntry()">Submit Log</button>
+      </div>
+    </div>
+  </div>
+</div>

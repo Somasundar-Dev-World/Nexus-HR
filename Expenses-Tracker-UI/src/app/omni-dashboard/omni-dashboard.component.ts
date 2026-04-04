@@ -114,6 +114,78 @@ export class OmniDashboardComponent implements OnInit {
         { name: 'Conviction', type: 'RATING' },
         { name: 'Investment Thesis', type: 'LONG_TEXT' }
       ]
+    },
+    {
+      name: 'Global Carbon Footprint',
+      type: 'CUSTOM',
+      icon: '🌍',
+      fields: [
+        { name: 'Emission Type', type: 'SELECT', options: 'Scope 1 (Direct), Scope 2 (Energy), Scope 3 (Value Chain)' },
+        { name: 'Carbon Metric Tons (CO2e)', type: 'NUMBER', unit: 'mt' },
+        { name: 'Energy Source', type: 'SELECT', options: 'Grid Mix, Solar, Wind, Natural Gas, Diesel' },
+        { name: 'Mitigation Offset Ratio (%)', type: 'RATING' },
+        { name: 'Audit Ref ID', type: 'TEXT' }
+      ]
+    },
+    {
+      name: 'DEI & Social Impact Index',
+      type: 'HEALTH',
+      icon: '🤝',
+      fields: [
+        { name: 'Focus Area', type: 'SELECT', options: 'Representational Diversity, Pay Equity, Inclusive Culture, Community Impact' },
+        { name: 'Progress Metric (%)', type: 'NUMBER', unit: '%' },
+        { name: 'Equity Ratio (Target 1.0)', type: 'NUMBER' },
+        { name: 'Culture Sentiment Score', type: 'RATING' },
+        { name: 'Strategy Notes', type: 'LONG_TEXT' }
+      ]
+    },
+    {
+      name: 'AI Ethical Governance Hub',
+      type: 'CUSTOM',
+      icon: '🤖',
+      fields: [
+        { name: 'Model Name / LLM', type: 'TEXT' },
+        { name: 'Bias Detection Score', type: 'RATING' },
+        { name: 'Hallucination Mitigation (%)', type: 'NUMBER', unit: '%' },
+        { name: 'Compliance Level', type: 'SELECT', options: 'EU AI Act Ready, NIST Aligned, Internal Guardrails Only' },
+        { name: 'Transparency Report Link', type: 'TEXT' }
+      ]
+    },
+    {
+      name: 'Rocket Subscription Manager',
+      type: 'FINANCE',
+      icon: '💳',
+      fields: [
+        { name: 'Service Name', type: 'TEXT' },
+        { name: 'Monthly Cost', type: 'CURRENCY' },
+        { name: 'Next Bill Date', type: 'DATE' },
+        { name: 'Status', type: 'SELECT', options: 'Active, Cancelled, To Review' },
+        { name: 'Value Score', type: 'RATING' }
+      ]
+    },
+    {
+      name: 'Bills & Recurring Spends',
+      type: 'FINANCE',
+      icon: '🧾',
+      fields: [
+        { name: 'Bill Name', type: 'TEXT' },
+        { name: 'Category', type: 'SELECT', options: 'Rent/Mortgage, Utilities, Insurance, Internet/Mobile, Other' },
+        { name: 'Due Date', type: 'DATE' },
+        { name: 'Amount', type: 'CURRENCY' },
+        { name: 'Paid Status', type: 'BOOLEAN' }
+      ]
+    },
+    {
+      name: 'Net Worth Observatory',
+      type: 'FINANCE',
+      icon: '🏦',
+      fields: [
+        { name: 'Account / Asset', type: 'TEXT' },
+        { name: 'Category', type: 'SELECT', options: 'Cash, Savings, Investment, Crypto, Real Estate, Debt' },
+        { name: 'Current Balance', type: 'CURRENCY' },
+        { name: 'Growth (%)', type: 'NUMBER', unit: '%' },
+        { name: 'Last Updated', type: 'DATE' }
+      ]
     }
   ];
 

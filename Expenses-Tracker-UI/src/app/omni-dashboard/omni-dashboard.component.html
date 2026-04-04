@@ -128,6 +128,24 @@
   <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
     <div class="modal" (click)="$event.stopPropagation()">
       <h3>✨ Create New Tracker</h3>
+      
+      <!-- Template Gallery Section -->
+      <div class="template-gallery-wrap">
+        <h4 class="section-subtitle">Quick Start from Template</h4>
+        <div class="template-grid">
+          <div class="template-item" 
+               *ngFor="let tpl of TRACKER_TEMPLATES; let i = index"
+               [class.active]="selectedTemplateIndex === i"
+               (click)="applyTemplate(i)">
+            <div class="template-icon">{{ tpl.icon }}</div>
+            <div class="template-info">
+              <span class="template-name">{{ tpl.name }}</span>
+              <span class="template-count">{{ tpl.fields.length }} Fields</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <form [formGroup]="trackerForm" (ngSubmit)="createTracker()">
         <div class="form-group">
           <label>Tracker Name</label>

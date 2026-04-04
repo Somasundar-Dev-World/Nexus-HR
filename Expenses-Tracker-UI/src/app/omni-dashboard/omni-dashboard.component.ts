@@ -29,6 +29,67 @@ export class OmniDashboardComponent implements OnInit {
   editingEntryId: number | null = null;
   deleteConfirm: { type: 'TRACKER' | 'ENTRY', id: number } | null = null;
 
+  readonly TRACKER_TEMPLATES = [
+    {
+      name: 'Biohacker Recovery',
+      type: 'HEALTH',
+      icon: '🧬',
+      fields: [
+        { name: 'Sleep Quality', type: 'RATING' },
+        { name: 'Resting HR', type: 'NUMBER', unit: 'BPM' },
+        { name: 'Wake Time', type: 'TIME' },
+        { name: 'Bedtime', type: 'TIME' },
+        { name: 'Morning Feel', type: 'SELECT', options: 'Refreshed, Neutral, Tired, Sick' }
+      ]
+    },
+    {
+      name: 'Deep Work Diary',
+      type: 'CUSTOM',
+      icon: '🧠',
+      fields: [
+        { name: 'Focus Level', type: 'RATING' },
+        { name: 'Deep Work Mins', type: 'NUMBER', unit: 'min' },
+        { name: 'Start Time', type: 'TIME' },
+        { name: 'Session Goal', type: 'LONG_TEXT' }
+      ]
+    },
+    {
+      name: 'Mindset & Mood',
+      type: 'HEALTH',
+      icon: '✨',
+      fields: [
+        { name: 'Happiness', type: 'RATING' },
+        { name: 'Meditation', type: 'BOOLEAN' },
+        { name: 'Dominant Emotion', type: 'SELECT', options: 'Calm, Joyful, Anxious, Angry, Sad' },
+        { name: 'Journal', type: 'LONG_TEXT' }
+      ]
+    },
+    {
+      name: 'Financial Discipline',
+      type: 'FINANCE',
+      icon: '💰',
+      fields: [
+        { name: 'Amount Saved', type: 'CURRENCY' },
+        { name: 'Spend Type', type: 'SELECT', options: 'Need, Want' },
+        { name: 'No Spend Day', type: 'BOOLEAN' },
+        { name: 'Temptation Note', type: 'TEXT' }
+      ]
+    },
+    {
+      name: 'Pet Health Log',
+      type: 'CUSTOM',
+      icon: '🐕',
+      fields: [
+        { name: 'Walk Mins', type: 'NUMBER', unit: 'min' },
+        { name: 'Meal Given', type: 'BOOLEAN' },
+        { name: 'Energy Level', type: 'RATING' },
+        { name: 'Incident Notes', type: 'LONG_TEXT' }
+      ]
+    }
+  ];
+
+  selectedTemplateIndex: number | null = null;
+
   constructor(private omniService: OmniTrackerService, private fb: FormBuilder) {
     this.trackerForm = this.fb.group({
       name: ['', Validators.required],
@@ -65,20 +126,34 @@ export class OmniDashboardComponent implements OnInit {
   // ── Create Tracker ───────────────────────────────────────────
   get fieldDefinitions() { return this.trackerForm.get('fieldDefinitions') as FormArray; }
 
-  addField() {
+  addField(initialValues: any = {}) {
     this.fieldDefinitions.push(this.fb.group({
-      name: ['', Validators.required],
-      type: ['NUMBER', Validators.required],
-      unit: [''],
-      options: [''] // Comma-separated for SELECT type
+      name: [initialValues.name || '', Validators.required],
+      type: [initialValues.type || 'NUMBER', Validators.required],
+      unit: [initialValues.unit || ''],
+      options: [initialValues.options || ''] // Comma-separated for SELECT type
     }));
   }
 
   removeField(index: number) { this.fieldDefinitions.removeAt(index); }
 
+  applyTemplate(index: number) {
+    this.selectedTemplateIndex = index;
+    const tpl = this.TRACKER_TEMPLATES[index];
+    
+    this.trackerForm.patchValue({
+      name: tpl.name,
+      type: tpl.type
+    });
+
+    this.fieldDefinitions.clear();
+    tpl.fields.forEach(f => this.addField(f));
+  }
+
   openAddTracker() {
     this.trackerForm.reset({ type: 'FINANCE' });
     this.fieldDefinitions.clear();
+    this.selectedTemplateIndex = null;
     this.addField();
     this.isAddingTracker = true;
   }

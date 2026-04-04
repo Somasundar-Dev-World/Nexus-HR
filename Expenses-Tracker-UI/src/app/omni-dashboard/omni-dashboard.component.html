@@ -1,8 +1,8 @@
 <div class="omni-page">
 
-  <!-- ════════════════════════════════════════
+  <!-- ════════════════════════════════════════════════════════
        VIEW 1 — HOME SCREEN (App Icon Grid)
-  ════════════════════════════════════════ -->
+  ════════════════════════════════════════════════════════ -->
   <div class="home-screen" *ngIf="viewMode === 'GRID'">
     <div class="home-header animate-fade-down">
       <div class="home-title-wrap">
@@ -12,10 +12,12 @@
       <p class="home-subtitle">Your life, quantified. Tap a tracker to dive in.</p>
     </div>
 
+    <!-- Loading shimmer -->
     <div class="app-grid" *ngIf="isLoading">
       <div class="app-icon-shimmer" *ngFor="let i of [1,2,3,4,5,6]"></div>
     </div>
 
+    <!-- App Icons Grid -->
     <div class="app-grid animate-fade-up" *ngIf="!isLoading">
       <div class="app-icon-wrap" *ngFor="let t of trackers">
         <div class="app-icon" [style.background]="getGradient(t.type)" (click)="goToDetail(t)">
@@ -26,6 +28,7 @@
         <span class="app-type-badge">{{ t.type }}</span>
       </div>
 
+      <!-- Add New Tracker Tile -->
       <div class="app-icon-wrap" (click)="openAddTracker()">
         <div class="app-icon app-icon-add">
           <span class="add-cross">＋</span>
@@ -35,6 +38,7 @@
       </div>
     </div>
 
+    <!-- Empty state -->
     <div class="home-empty animate-fade-up" *ngIf="!isLoading && trackers.length === 0">
       <div class="empty-emoji">🎯</div>
       <h2>No Trackers Yet</h2>
@@ -43,13 +47,16 @@
   </div>
 
 
-  <!-- ════════════════════════════════════════
-       VIEW 2 — TRACKER DETAIL PAGE
-  ════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════
+       VIEW 2 — TRACKER DETAIL (App Home Page)
+  ════════════════════════════════════════════════════════ -->
   <div class="detail-page animate-slide-in" *ngIf="viewMode === 'DETAIL' && selectedTracker">
 
+    <!-- Detail Header -->
     <div class="detail-header" [style.background]="getGradient(selectedTracker.type)">
-      <button class="back-btn" (click)="goBack()">← All Trackers</button>
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-arrow">←</span> All Trackers
+      </button>
       <div class="detail-title-row">
         <span class="detail-emoji">{{ getIcon(selectedTracker.type) }}</span>
         <div>
@@ -57,6 +64,7 @@
           <span class="detail-badge">{{ selectedTracker.type }}</span>
         </div>
       </div>
+      <!-- Quick Stats -->
       <div class="stats-strip">
         <div class="stat-item">
           <span class="stat-val">{{ entries.length }}</span>
@@ -69,53 +77,23 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <span class="stat-val">{{ selectedTracker.type === 'FINANCE' ? '11' : (selectedTracker.fieldDefinitions ? selectedTracker.fieldDefinitions.length : 0) }}</span>
+          <span class="stat-val">{{ selectedTracker.fieldDefinitions ? selectedTracker.fieldDefinitions.length : 0 }}</span>
           <span class="stat-label">Fields</span>
         </div>
       </div>
     </div>
 
+    <!-- Log History -->
     <div class="detail-body">
       <h2 class="section-title" *ngIf="entries.length">History</h2>
 
-      <!-- FINANCE entry cards -->
-      <div class="log-cards" *ngIf="entries.length && isFinanceTracker()">
-        <div class="log-card animate-fade-up" *ngFor="let entry of entries">
-          <div class="log-card-header">
-            <div class="log-card-left">
-              <span class="tx-type-badge" [class.income]="entry.fieldValues?.type === 'INCOME'" [class.expense]="entry.fieldValues?.type !== 'INCOME'">
-                {{ entry.fieldValues?.type === 'INCOME' ? '📈 Income' : '📉 Expense' }}
-              </span>
-              <span class="tx-amount" [class.income]="entry.fieldValues?.type === 'INCOME'" [class.expense]="entry.fieldValues?.type !== 'INCOME'">
-                {{ entry.fieldValues?.type === 'INCOME' ? '+' : '-' }}${{ (+entry.fieldValues?.amount || 0).toFixed(2) }}
-              </span>
-            </div>
-            <div class="log-card-actions">
-              <button class="btn-icon" (click)="editLog(entry)">✏️</button>
-              <button class="btn-icon btn-icon-danger" (click)="deleteLog(entry.id!)">🗑️</button>
-            </div>
-          </div>
-          <div class="tx-detail-row">
-            <div class="tx-pill" *ngIf="entry.fieldValues?.description">📝 {{ entry.fieldValues.description }}</div>
-            <div class="tx-pill cat" *ngIf="entry.fieldValues?.category">🏷️ {{ entry.fieldValues.category }}</div>
-            <div class="tx-pill" *ngIf="entry.fieldValues?.date">📅 {{ entry.fieldValues.date | date:'MMM d, y' }}</div>
-            <div class="tx-pill" *ngIf="entry.fieldValues?.institutionName">🏦 {{ entry.fieldValues.institutionName }}</div>
-            <div class="tx-pill" *ngIf="entry.fieldValues?.accountName">💳 {{ entry.fieldValues.accountName }}<span *ngIf="entry.fieldValues?.accountNumber"> ({{ entry.fieldValues.accountNumber }})</span></div>
-            <div class="tx-pill tax" *ngIf="entry.fieldValues?.taxDeductible === true || entry.fieldValues?.taxDeductible === 'true'">⭐ Tax Deductible</div>
-            <div class="tx-pill tag" *ngIf="entry.fieldValues?.transactionTags">🔖 {{ entry.fieldValues.transactionTags }}</div>
-          </div>
-          <p class="log-note-text" *ngIf="entry.note">💬 {{ entry.note }}</p>
-        </div>
-      </div>
-
-      <!-- Generic (non-FINANCE) entry cards -->
-      <div class="log-cards" *ngIf="entries.length && !isFinanceTracker()">
+      <div class="log-cards" *ngIf="entries.length">
         <div class="log-card animate-fade-up" *ngFor="let entry of entries">
           <div class="log-card-header">
             <span class="log-timestamp">{{ entry.date | date:'MMM d, y · h:mm a' }}</span>
             <div class="log-card-actions">
-              <button class="btn-icon" (click)="editLog(entry)">✏️</button>
-              <button class="btn-icon btn-icon-danger" (click)="deleteLog(entry.id!)">🗑️</button>
+              <button class="btn-icon" (click)="editLog(entry)" title="Edit">✏️</button>
+              <button class="btn-icon btn-icon-danger" (click)="deleteLog(entry.id!)" title="Delete">🗑️</button>
             </div>
           </div>
           <div class="log-fields">
@@ -135,15 +113,16 @@
       </div>
     </div>
 
+    <!-- Floating Action Button (FAB) — iOS style -->
     <button class="fab" (click)="openAddEntry()">
       <span class="fab-icon">＋</span>
     </button>
   </div>
 
 
-  <!-- ════════════════════════════════════════
-       MODALS
-  ════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════
+       MODALS (shared across both views)
+  ════════════════════════════════════════════════════════ -->
 
   <!-- Create Tracker Modal -->
   <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
@@ -152,20 +131,18 @@
       <form [formGroup]="trackerForm" (ngSubmit)="createTracker()">
         <div class="form-group">
           <label>Tracker Name</label>
-          <input formControlName="name" placeholder="e.g. Monthly Expenses, Weight Log...">
+          <input formControlName="name" placeholder="e.g. Daily Check-in">
         </div>
         <div class="form-group">
           <label>Category</label>
           <select formControlName="type">
-            <option value="FINANCE">🏦 Financials — Full transaction form (Amount, Category, Account...)</option>
-            <option value="HEALTH">🍎 Health & Bio — Custom fields</option>
-            <option value="STOCK">📈 Market Watch — Custom fields</option>
-            <option value="CUSTOM">⚙️ Custom Metric — Custom fields</option>
+            <option value="FINANCE">🏦 Financials</option>
+            <option value="HEALTH">🍎 Health & Bio</option>
+            <option value="STOCK">📈 Market Watch</option>
+            <option value="CUSTOM">⚙️ Custom Metric</option>
           </select>
         </div>
-
-        <!-- Custom field builder only for non-FINANCE trackers -->
-        <div *ngIf="trackerForm.get('type')?.value !== 'FINANCE'" class="dynamic-fields" formArrayName="fieldDefinitions">
+        <div class="dynamic-fields" formArrayName="fieldDefinitions">
           <h4>Custom Fields <button type="button" class="btn btn-sm btn-outline pull-right" (click)="addField()">+ Add Field</button></h4>
           <div *ngFor="let field of fieldDefinitions.controls; let i=index" [formGroupName]="i" class="field-item">
             <input formControlName="name" placeholder="Field Name (e.g. Weight)" class="w-100">
@@ -181,114 +158,16 @@
             </div>
           </div>
         </div>
-
-        <!-- Finance tracker preview -->
-        <div *ngIf="trackerForm.get('type')?.value === 'FINANCE'" class="finance-preview-box">
-          <div class="finance-preview-icon">🏦</div>
-          <p><strong>Finance Tracker</strong> — Includes the full transaction form: Type, Amount, Date, Category, Description, Institution, Account, Tags, Tax Deductible, and Notes.</p>
-        </div>
-
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" (click)="isAddingTracker = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.get('name')?.invalid">Create Tracker</button>
+          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.invalid">Create Tracker</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Log Entry Modal — FINANCE tracker (full transaction form) -->
-  <div class="modal-overlay" *ngIf="isAddingEntry && isFinanceTracker()" (click)="isAddingEntry = false">
-    <div class="modal modal-wide" (click)="$event.stopPropagation()">
-      <h3>{{ editingEntryId ? '✏️ Edit Entry' : '➕ New Entry' }} — {{ selectedTracker?.name }}</h3>
-
-      <form (ngSubmit)="addEntry()">
-        <!-- SECTION: General Information -->
-        <div class="form-section">
-          <h4 class="section-label">General Information</h4>
-          <div class="grid-3">
-            <div class="form-group">
-              <label class="form-label">Type</label>
-              <select class="form-control" [(ngModel)]="financeEntry.type" name="txType" required>
-                <option value="EXPENSE">📉 Expense</option>
-                <option value="INCOME">📈 Income</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Amount ($)</label>
-              <input type="number" class="form-control" [(ngModel)]="financeEntry.amount" name="amount" required step="0.01" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Date</label>
-              <input type="date" class="form-control" [(ngModel)]="financeEntry.date" name="txDate" required>
-            </div>
-          </div>
-          <div class="grid-2 mt-1">
-            <div class="form-group">
-              <label class="form-label">Category</label>
-              <select class="form-control" [(ngModel)]="financeEntry.category" name="category">
-                <option value="">Select category...</option>
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Description / Payee</label>
-              <input type="text" class="form-control" [(ngModel)]="financeEntry.description" name="description" required placeholder="Who or what?">
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION: Account & Institution -->
-        <div class="form-section">
-          <h4 class="section-label">Account & Institution</h4>
-          <div class="grid-3">
-            <div class="form-group">
-              <label class="form-label">Institution</label>
-              <input type="text" class="form-control" [(ngModel)]="financeEntry.institutionName" name="inst" placeholder="e.g. Chase, Wells Fargo">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Account Name</label>
-              <input type="text" class="form-control" [(ngModel)]="financeEntry.accountName" name="accName" placeholder="e.g. Credit Card, Savings">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Account # (Last 4)</label>
-              <input type="text" class="form-control" [(ngModel)]="financeEntry.accountNumber" name="accNum" placeholder="e.g. 4321" maxlength="4">
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION: Additional Details -->
-        <div class="form-section">
-          <h4 class="section-label">Additional Details</h4>
-          <div class="grid-2">
-            <div class="form-group">
-              <label class="form-label">Transaction Tags</label>
-              <input type="text" class="form-control" [(ngModel)]="financeEntry.transactionTags" name="tags" placeholder="Family, Medical, Work...">
-            </div>
-            <div class="form-group tax-row">
-              <label class="form-label checkbox-label">
-                <input type="checkbox" [(ngModel)]="financeEntry.taxDeductible" name="taxDed">
-                Tax Deductible
-              </label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Note</label>
-            <textarea class="form-control" [(ngModel)]="financeEntry.note" name="note" rows="2" placeholder="Any extra details..."></textarea>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button type="button" class="btn btn-outline" (click)="isAddingEntry = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="!isFinanceEntryValid()">
-            {{ editingEntryId ? 'Update Entry' : 'Save Entry' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Log Entry Modal — non-FINANCE tracker (dynamic fields) -->
-  <div class="modal-overlay" *ngIf="isAddingEntry && !isFinanceTracker()" (click)="isAddingEntry = false">
+  <!-- Log Entry Modal -->
+  <div class="modal-overlay" *ngIf="isAddingEntry" (click)="isAddingEntry = false">
     <div class="modal" (click)="$event.stopPropagation()">
       <h3>{{ editingEntryId ? '✏️ Edit Log' : '💪 Log Progress' }}: {{ selectedTracker?.name }}</h3>
       <form [formGroup]="entryForm" (ngSubmit)="addEntry()">

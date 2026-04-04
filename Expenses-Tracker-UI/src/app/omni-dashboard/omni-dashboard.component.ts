@@ -85,6 +85,17 @@ export class OmniDashboardComponent implements OnInit {
         { name: 'Energy Level', type: 'RATING' },
         { name: 'Incident Notes', type: 'LONG_TEXT' }
       ]
+    },
+    {
+      name: 'Daily Expense Log',
+      type: 'FINANCE',
+      icon: '🧾',
+      fields: [
+        { name: 'Amount', type: 'CURRENCY' },
+        { name: 'Category', type: 'SELECT', options: 'Food, Transport, Bills, Shopping, Entertainment, Health, Other' },
+        { name: 'Payment Mode', type: 'SELECT', options: 'Cash, Credit Card, Debit Card, UPI' },
+        { name: 'Note', type: 'TEXT' }
+      ]
     }
   ];
 

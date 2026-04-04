@@ -26,6 +26,7 @@ public class Tracker {
     private List<Object> fieldDefinitions; // Schema representing dynamic form fields
 
     private Long userId;
+    private Long appId;            // Parent App ID
 
     public Tracker() {}
 

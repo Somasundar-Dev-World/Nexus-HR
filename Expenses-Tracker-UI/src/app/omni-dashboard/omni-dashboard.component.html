@@ -1,15 +1,13 @@
-<div class="omni-page">
-
   <!-- ════════════════════════════════════════════════════════
-       VIEW 1 — HOME SCREEN (App Icon Grid)
+       VIEW — APP GRID (Top Level)
   ════════════════════════════════════════════════════════ -->
-  <div class="home-screen" *ngIf="viewMode === 'GRID'">
+  <div class="home-screen" *ngIf="viewMode === 'APP_GRID'">
     <div class="home-header animate-fade-down">
       <div class="home-title-wrap">
         <h1>OmniTracker</h1>
         <span class="beta-chip">BETA</span>
       </div>
-      <p class="home-subtitle">Your life, quantified. Tap a tracker to dive in.</p>
+      <p class="home-subtitle">Select an app to manage your trackers.</p>
     </div>
 
     <!-- Loading shimmer -->
@@ -19,10 +17,61 @@
 
     <!-- App Icons Grid -->
     <div class="app-grid animate-fade-up" *ngIf="!isLoading">
+      <!-- Individual App Cards -->
+      <div class="app-icon-wrap" *ngFor="let app of apps" (click)="selectApp(app)">
+        <div class="app-icon app-icon-wrapper" [style.background]="app.colorStyle || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
+          <span class="app-emoji">{{ app.icon }}</span>
+          <button class="icon-delete-btn" (click)="deleteAppIcon(app.id!, $event)" title="Delete App">✕</button>
+        </div>
+        <span class="app-label">{{ app.name }}</span>
+        <span class="app-type-badge">App</span>
+      </div>
+
+      <!-- Add New App Tile -->
+      <div class="app-icon-wrap" (click)="openAddApp()">
+        <div class="app-icon app-icon-add">
+          <span class="add-cross">＋</span>
+        </div>
+        <span class="app-label">New App</span>
+        <span class="app-type-badge">&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="home-empty animate-fade-up" *ngIf="!isLoading && apps.length === 0">
+      <div class="empty-emoji">🚀</div>
+      <h2>Start Your Journey</h2>
+      <p>Create your first App container (e.g. "Work", "Life") to organize your trackers!</p>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       VIEW — TRACKER GRID (Inside an App)
+  ════════════════════════════════════════════════════════ -->
+  <div class="home-screen" *ngIf="viewMode === 'TRACKER_GRID' && selectedApp">
+    <div class="home-header animate-fade-down">
+      <button class="back-btn-pill" (click)="goBack()">
+        <span class="back-arrow">←</span> All Apps
+      </button>
+      <div class="home-title-wrap" style="margin-top: 1rem;">
+        <span class="app-emoji-large">{{ selectedApp.icon }}</span>
+        <h1>{{ selectedApp.name }}</h1>
+      </div>
+      <p class="home-subtitle">{{ selectedApp.description || 'Custom trackers inside this app.' }}</p>
+    </div>
+
+    <!-- Loading shimmer -->
+    <div class="app-grid" *ngIf="isLoading">
+      <div class="app-icon-shimmer" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <!-- Tracker Icons Grid -->
+    <div class="app-grid animate-fade-up" *ngIf="!isLoading">
       <div class="app-icon-wrap" *ngFor="let t of trackers" (click)="goToDetail(t)">
         <div class="app-icon" [style.background]="getGradient(t.type)">
           <span class="app-emoji">{{ getIcon(t.type) }}</span>
-          <button class="icon-delete-btn" (click)="deleteTrackerIcon(t.id!, $event)" title="Delete">✕</button>
+          <button class="icon-delete-btn" (click)="deleteTrackerIcon(t.id!, $event)" title="Delete Tracker">✕</button>
         </div>
         <span class="app-label">{{ t.name }}</span>
         <span class="app-type-badge">{{ t.type }}</span>
@@ -41,8 +90,8 @@
     <!-- Empty state -->
     <div class="home-empty animate-fade-up" *ngIf="!isLoading && trackers.length === 0">
       <div class="empty-emoji">🎯</div>
-      <h2>No Trackers Yet</h2>
-      <p>Tap "New Tracker" above to create your first tracker!</p>
+      <h2>No Trackers in {{ selectedApp.name }}</h2>
+      <p>Tap "New Tracker" to start monitoring metrics in this app!</p>
     </div>
   </div>
 
@@ -55,7 +104,7 @@
     <!-- Detail Header -->
     <div class="detail-header" [style.background]="getGradient(selectedTracker.type)">
       <button class="back-btn" (click)="goBack()">
-        <span class="back-arrow">←</span> All Trackers
+        <span class="back-arrow">←</span> {{ selectedApp?.name || 'Back' }}
       </button>
       <div class="detail-title-row">
         <span class="detail-emoji">{{ getIcon(selectedTracker.type) }}</span>
@@ -120,8 +169,43 @@
   </div>
 
 
+  <!-- Create App Modal -->
+  <div class="modal-overlay" *ngIf="isAddingApp" (click)="isAddingApp = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>🚀 Create New App Instance</h3>
+      <p class="modal-desc">Apps serve as individual workspaces for your trackers.</p>
+      
+      <form [formGroup]="appForm" (ngSubmit)="createApp()">
+        <div class="form-group">
+          <label>App Icon (Emoji)</label>
+          <div class="icon-selector-grid">
+            <span *ngFor="let icon of ['🚀','💼','💹','🍎','🧠','✨','🏠','⚽','🎬']" 
+                  class="icon-opt" 
+                  [class.active]="appForm.get('icon')?.value === icon"
+                  (click)="appForm.get('icon')?.setValue(icon)">
+              {{ icon }}
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>App Name</label>
+          <input formControlName="name" placeholder="e.g. Health Hub, Peak Performance">
+        </div>
+        <div class="form-group">
+          <label>Short Description (Optional)</label>
+          <input formControlName="description" placeholder="What is this app for?">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="isAddingApp = false">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="appForm.invalid">Launch App</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <!-- ════════════════════════════════════════════════════════
-       MODALS (shared across both views)
+       MODALS (shared across views)
   ════════════════════════════════════════════════════════ -->
 
   <!-- Create Tracker Modal -->
@@ -257,7 +341,7 @@
     <div class="modal confirm-modal" (click)="$event.stopPropagation()">
       <div class="confirm-icon">⚠️</div>
       <h3>Are you sure?</h3>
-      <p>This action cannot be undone. Do you really want to delete this {{ deleteConfirm.type === 'TRACKER' ? 'tracker and all its history' : 'log entry' }}?</p>
+      <p>This action cannot be undone. Do you really want to delete this {{ deleteConfirm.type === 'APP' ? 'entire App and ALL its trackers' : (deleteConfirm.type === 'TRACKER' ? 'tracker and its history' : 'log entry') }}?</p>
       <div class="modal-actions confirm-actions">
         <button class="btn btn-outline" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>

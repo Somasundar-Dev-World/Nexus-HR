@@ -1,8 +1,10 @@
 package com.example.expensestracker.controller;
 
 import com.example.expensestracker.model.Tracker;
+import com.example.expensestracker.model.TrackerApp;
 import com.example.expensestracker.model.TrackerEntry;
 import com.example.expensestracker.model.TrackerType;
+import com.example.expensestracker.repository.TrackerAppRepository;
 import com.example.expensestracker.repository.TrackerEntryRepository;
 import com.example.expensestracker.repository.TrackerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,43 @@ public class OmniTrackerController {
     @Autowired
     private TrackerEntryRepository entryRepository;
 
+    @Autowired
+    private TrackerAppRepository appRepository;
+
+    // --- Apps ---
+
+    @GetMapping("/apps")
+    public List<TrackerApp> getApps(@RequestAttribute("userId") Long userId) {
+        return appRepository.findByUserId(userId);
+    }
+
+    @PostMapping("/apps")
+    public TrackerApp createApp(@RequestAttribute("userId") Long userId, @RequestBody TrackerApp app) {
+        app.setUserId(userId);
+        return appRepository.save(app);
+    }
+
+    @DeleteMapping("/apps/{id}")
+    public ResponseEntity<?> deleteApp(@RequestAttribute("userId") Long userId, @PathVariable Long id) {
+        return appRepository.findById(id).map(app -> {
+            if (app.getUserId().equals(userId)) {
+                // Cascading delete trackers in this app
+                List<Tracker> trackers = trackerRepository.findByUserIdAndAppId(userId, id);
+                trackerRepository.deleteAll(trackers);
+                appRepository.delete(app);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(403).build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     // --- Trackers ---
 
     @GetMapping("/trackers")
-    public List<Tracker> getAllTrackers(@RequestAttribute("userId") Long userId) {
+    public List<Tracker> getAllTrackers(@RequestAttribute("userId") Long userId, @RequestParam(required = false) Long appId) {
+        if (appId != null) {
+            return trackerRepository.findByUserIdAndAppId(userId, appId);
+        }
         return trackerRepository.findByUserId(userId);
     }
 

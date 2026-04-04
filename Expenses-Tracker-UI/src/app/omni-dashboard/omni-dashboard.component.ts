@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { OmniTrackerService, Tracker, TrackerEntry } from '../omni-tracker.service';
+import { OmniApp } from '../omni-app.model';
 
 @Component({
   selector: 'app-omni-dashboard',
@@ -13,21 +14,25 @@ import { OmniTrackerService, Tracker, TrackerEntry } from '../omni-tracker.servi
 export class OmniDashboardComponent implements OnInit {
   trackers: Tracker[] = [];
   selectedTracker?: Tracker;
+  apps: OmniApp[] = [];
+  selectedApp?: OmniApp;
   entries: TrackerEntry[] = [];
 
-  // View state — 'GRID' is the home screen, 'DETAIL' is the individual tracker page
-  viewMode: 'GRID' | 'DETAIL' = 'GRID';
+  // View state — 'APP_GRID' is apps, 'TRACKER_GRID' is trackers inside app, 'DETAIL' is logs
+  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'DETAIL' = 'APP_GRID';
 
   // Reactive forms
+  appForm: FormGroup;
   trackerForm: FormGroup;
   entryForm: FormGroup;
   newEntryNote = '';
 
   isLoading = true;
+  isAddingApp = false;
   isAddingTracker = false;
   isAddingEntry = false;
   editingEntryId: number | null = null;
-  deleteConfirm: { type: 'TRACKER' | 'ENTRY', id: number } | null = null;
+  deleteConfirm: { type: 'APP' | 'TRACKER' | 'ENTRY', id: number } | null = null;
 
   readonly TRACKER_TEMPLATES = [
     {
@@ -115,6 +120,11 @@ export class OmniDashboardComponent implements OnInit {
   selectedTemplateIndex: number | null = null;
 
   constructor(private omniService: OmniTrackerService, private fb: FormBuilder) {
+    this.appForm = this.fb.group({
+      name: ['', Validators.required],
+      icon: ['🚀', Validators.required],
+      description: ['']
+    });
     this.trackerForm = this.fb.group({
       name: ['', Validators.required],
       type: ['FINANCE'],
@@ -127,13 +137,44 @@ export class OmniDashboardComponent implements OnInit {
 
   loadData() {
     this.isLoading = true;
-    this.omniService.getTrackers().subscribe({
-      next: (data) => { this.trackers = data; this.isLoading = false; },
+    this.omniService.getApps().subscribe({
+      next: (appsData) => { 
+        this.apps = appsData; 
+        
+        // --- Migration Logic ---
+        // If we have no apps, check if there are legacy "app-less" trackers
+        if (this.apps.length === 0) {
+          this.omniService.getTrackers().subscribe(legacyTrackers => {
+            if (legacyTrackers.length > 0) {
+              // Create a default app for them
+              this.omniService.createApp({ name: 'Omni Hub', icon: '🏠', description: 'Your original trackers' })
+                .subscribe(newApp => {
+                  this.apps.push(newApp);
+                  this.isLoading = false;
+                });
+            } else {
+              this.isLoading = false;
+            }
+          });
+        } else {
+          this.isLoading = false;
+        }
+      },
       error: () => this.isLoading = false
     });
   }
 
   // ── Navigation ──────────────────────────────────────────────
+  selectApp(app: OmniApp) {
+    this.selectedApp = app;
+    this.isLoading = true;
+    this.omniService.getTrackers(app.id).subscribe(data => {
+      this.trackers = data;
+      this.viewMode = 'TRACKER_GRID';
+      this.isLoading = false;
+    });
+  }
+
   goToDetail(tracker: Tracker) {
     this.selectedTracker = tracker;
     this.entries = [];
@@ -142,9 +183,29 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   goBack() {
-    this.viewMode = 'GRID';
-    this.selectedTracker = undefined;
-    this.entries = [];
+    if (this.viewMode === 'DETAIL') {
+      this.viewMode = 'TRACKER_GRID';
+      this.selectedTracker = undefined;
+      this.entries = [];
+    } else if (this.viewMode === 'TRACKER_GRID') {
+      this.viewMode = 'APP_GRID';
+      this.selectedApp = undefined;
+      this.trackers = [];
+    }
+  }
+
+  // ── Create App ───────────────────────────────────────────────
+  openAddApp() {
+    this.appForm.reset({ icon: '🚀' });
+    this.isAddingApp = true;
+  }
+
+  createApp() {
+    if (this.appForm.invalid) return;
+    this.omniService.createApp(this.appForm.value).subscribe(app => {
+      this.apps.push(app);
+      this.isAddingApp = false;
+    });
   }
 
   // ── Create Tracker ───────────────────────────────────────────
@@ -183,8 +244,9 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   createTracker() {
-    if (this.trackerForm.invalid) return;
-    this.omniService.createTracker(this.trackerForm.value).subscribe(tracker => {
+    if (this.trackerForm.invalid || !this.selectedApp) return;
+    const trackerData = { ...this.trackerForm.value, appId: this.selectedApp.id };
+    this.omniService.createTracker(trackerData).subscribe(tracker => {
       this.trackers.push(tracker);
       this.isAddingTracker = false;
     });
@@ -241,6 +303,11 @@ export class OmniDashboardComponent implements OnInit {
   // ── Delete ───────────────────────────────────────────────────
   deleteLog(id: number) { this.deleteConfirm = { type: 'ENTRY', id }; }
 
+  deleteAppIcon(id: number, event: Event) {
+    event.stopPropagation();
+    this.deleteConfirm = { type: 'APP', id };
+  }
+
   deleteTrackerIcon(id: number, event: Event) {
     event.stopPropagation();
     this.deleteConfirm = { type: 'TRACKER', id };
@@ -250,15 +317,23 @@ export class OmniDashboardComponent implements OnInit {
 
   confirmDelete() {
     if (!this.deleteConfirm) return;
-    if (this.deleteConfirm.type === 'TRACKER') {
-      this.omniService.deleteTracker(this.deleteConfirm.id).subscribe(() => {
-        this.trackers = this.trackers.filter(t => t.id !== this.deleteConfirm?.id);
+    const { type, id } = this.deleteConfirm;
+
+    if (type === 'APP') {
+      this.omniService.deleteApp(id).subscribe(() => {
+        this.apps = this.apps.filter(a => a.id !== id);
         this.deleteConfirm = null;
-        if (this.viewMode === 'DETAIL') this.goBack();
+        if (this.selectedApp?.id === id) this.goBack();
+      });
+    } else if (type === 'TRACKER') {
+      this.omniService.deleteTracker(id).subscribe(() => {
+        this.trackers = this.trackers.filter(t => t.id !== id);
+        this.deleteConfirm = null;
+        if (this.selectedTracker?.id === id) this.goBack();
       });
     } else {
-      this.omniService.deleteEntry(this.deleteConfirm.id).subscribe(() => {
-        this.entries = this.entries.filter(e => e.id !== this.deleteConfirm?.id);
+      this.omniService.deleteEntry(id).subscribe(() => {
+        this.entries = this.entries.filter(e => e.id !== id);
         this.deleteConfirm = null;
       });
     }

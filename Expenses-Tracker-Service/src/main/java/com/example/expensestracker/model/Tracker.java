@@ -30,11 +30,12 @@ public class Tracker {
 
     public Tracker() {}
 
-    public Tracker(String name, List<Object> fieldDefinitions, TrackerType type, Long userId) {
+    public Tracker(String name, List<Object> fieldDefinitions, TrackerType type, Long userId, Long appId) {
         this.name = name;
         this.fieldDefinitions = fieldDefinitions;
         this.type = type;
         this.userId = userId;
+        this.appId = appId;
     }
 
     // Getters and Setters
@@ -50,4 +51,6 @@ public class Tracker {
     public void setMetadata(String metadata) { this.metadata = metadata; }
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+    public Long getAppId() { return appId; }
+    public void setAppId(Long appId) { this.appId = appId; }
 }

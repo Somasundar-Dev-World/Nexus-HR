@@ -77,7 +77,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <span class="stat-val">{{ selectedTracker.fieldDefinitions?.length || 0 }}</span>
+          <span class="stat-val">{{ selectedTracker.fieldDefinitions ? selectedTracker.fieldDefinitions.length : 0 }}</span>
           <span class="stat-label">Fields</span>
         </div>
       </div>

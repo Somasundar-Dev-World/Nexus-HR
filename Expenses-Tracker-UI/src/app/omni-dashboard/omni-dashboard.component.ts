@@ -14,12 +14,14 @@ export class OmniDashboardComponent implements OnInit {
   trackers: Tracker[] = [];
   selectedTracker?: Tracker;
   entries: TrackerEntry[] = [];
-  
-  // Reactive forms for dynamic trackers
+
+  // View state — 'GRID' is the home screen, 'DETAIL' is the individual tracker page
+  viewMode: 'GRID' | 'DETAIL' = 'GRID';
+
+  // Reactive forms
   trackerForm: FormGroup;
   entryForm: FormGroup;
-
-  newEntryNote: string = '';
+  newEntryNote = '';
 
   isLoading = true;
   isAddingTracker = false;
@@ -33,41 +35,35 @@ export class OmniDashboardComponent implements OnInit {
       type: ['FINANCE'],
       fieldDefinitions: this.fb.array([])
     });
-
-    this.entryForm = this.fb.group({
-      fieldValues: this.fb.group({})
-    });
+    this.entryForm = this.fb.group({ fieldValues: this.fb.group({}) });
   }
 
-  ngOnInit() {
-    this.loadData();
-  }
+  ngOnInit() { this.loadData(); }
 
   loadData() {
     this.isLoading = true;
     this.omniService.getTrackers().subscribe({
-      next: (data) => {
-        this.trackers = data;
-        this.isLoading = false;
-      },
+      next: (data) => { this.trackers = data; this.isLoading = false; },
       error: () => this.isLoading = false
     });
   }
 
-  selectTracker(tracker: Tracker) {
+  // ── Navigation ──────────────────────────────────────────────
+  goToDetail(tracker: Tracker) {
     this.selectedTracker = tracker;
-    this.loadEntries(tracker.id!);
+    this.entries = [];
+    this.omniService.getEntries(tracker.id!).subscribe(data => this.entries = data);
+    this.viewMode = 'DETAIL';
   }
 
-  loadEntries(id: number) {
-    this.omniService.getEntries(id).subscribe(data => {
-      this.entries = data;
-    });
+  goBack() {
+    this.viewMode = 'GRID';
+    this.selectedTracker = undefined;
+    this.entries = [];
   }
 
-  get fieldDefinitions() {
-    return this.trackerForm.get('fieldDefinitions') as FormArray;
-  }
+  // ── Create Tracker ───────────────────────────────────────────
+  get fieldDefinitions() { return this.trackerForm.get('fieldDefinitions') as FormArray; }
 
   addField() {
     this.fieldDefinitions.push(this.fb.group({
@@ -77,33 +73,31 @@ export class OmniDashboardComponent implements OnInit {
     }));
   }
 
-  removeField(index: number) {
-    this.fieldDefinitions.removeAt(index);
-  }
+  removeField(index: number) { this.fieldDefinitions.removeAt(index); }
 
   openAddTracker() {
     this.trackerForm.reset({ type: 'FINANCE' });
     this.fieldDefinitions.clear();
-    this.addField(); // Start with one field by default
+    this.addField();
     this.isAddingTracker = true;
   }
 
   createTracker() {
     if (this.trackerForm.invalid) return;
-    const trackerData: Tracker = this.trackerForm.value;
-    this.omniService.createTracker(trackerData).subscribe(tracker => {
+    this.omniService.createTracker(this.trackerForm.value).subscribe(tracker => {
       this.trackers.push(tracker);
       this.isAddingTracker = false;
     });
   }
 
+  // ── Log Entries ──────────────────────────────────────────────
   openAddEntry() {
     if (!this.selectedTracker) return;
-    const formGroup = this.fb.group({});
-    this.selectedTracker.fieldDefinitions?.forEach(f => {
-      formGroup.addControl(f.name, this.fb.control('', Validators.required));
-    });
-    this.entryForm.setControl('fieldValues', formGroup);
+    const fg = this.fb.group({});
+    this.selectedTracker.fieldDefinitions?.forEach(f =>
+      fg.addControl(f.name, this.fb.control('', Validators.required))
+    );
+    this.entryForm.setControl('fieldValues', fg);
     this.newEntryNote = '';
     this.editingEntryId = null;
     this.isAddingEntry = true;
@@ -111,12 +105,11 @@ export class OmniDashboardComponent implements OnInit {
 
   editLog(entry: TrackerEntry) {
     if (!this.selectedTracker) return;
-    const formGroup = this.fb.group({});
+    const fg = this.fb.group({});
     this.selectedTracker.fieldDefinitions?.forEach(f => {
-      const existingVal = entry.fieldValues ? entry.fieldValues[f.name] : '';
-      formGroup.addControl(f.name, this.fb.control(existingVal || '', Validators.required));
+      fg.addControl(f.name, this.fb.control(entry.fieldValues?.[f.name] || '', Validators.required));
     });
-    this.entryForm.setControl('fieldValues', formGroup);
+    this.entryForm.setControl('fieldValues', fg);
     this.newEntryNote = entry.note || '';
     this.editingEntryId = entry.id!;
     this.isAddingEntry = true;
@@ -130,68 +123,48 @@ export class OmniDashboardComponent implements OnInit {
       note: this.newEntryNote,
       date: new Date().toISOString()
     };
-    
     if (this.editingEntryId) {
       this.omniService.updateEntry(this.editingEntryId, entryData).subscribe(saved => {
-        const index = this.entries.findIndex(e => e.id === saved.id);
-        if (index !== -1) {
-          this.entries[index] = saved;
-        }
+        const i = this.entries.findIndex(e => e.id === saved.id);
+        if (i !== -1) this.entries[i] = saved;
         this.isAddingEntry = false;
         this.editingEntryId = null;
       });
     } else {
       this.omniService.addEntry(entryData).subscribe(saved => {
-        this.entries.push(saved);
+        this.entries.unshift(saved);
         this.isAddingEntry = false;
       });
     }
   }
 
-  deleteLog(id: number) {
-    this.deleteConfirm = { type: 'ENTRY', id };
-  }
-  
-  deleteTracker(id: number, event: Event) {
+  // ── Delete ───────────────────────────────────────────────────
+  deleteLog(id: number) { this.deleteConfirm = { type: 'ENTRY', id }; }
+
+  deleteTrackerIcon(id: number, event: Event) {
     event.stopPropagation();
     this.deleteConfirm = { type: 'TRACKER', id };
   }
 
-  cancelDelete() {
-    this.deleteConfirm = null;
-  }
+  cancelDelete() { this.deleteConfirm = null; }
 
   confirmDelete() {
     if (!this.deleteConfirm) return;
-    
     if (this.deleteConfirm.type === 'TRACKER') {
       this.omniService.deleteTracker(this.deleteConfirm.id).subscribe(() => {
         this.trackers = this.trackers.filter(t => t.id !== this.deleteConfirm?.id);
-        if (this.selectedTracker?.id === this.deleteConfirm?.id) this.selectedTracker = undefined;
         this.deleteConfirm = null;
+        if (this.viewMode === 'DETAIL') this.goBack();
       });
-    } else if (this.deleteConfirm.type === 'ENTRY') {
+    } else {
       this.omniService.deleteEntry(this.deleteConfirm.id).subscribe(() => {
         this.entries = this.entries.filter(e => e.id !== this.deleteConfirm?.id);
         this.deleteConfirm = null;
       });
     }
   }
-  
-  getMainMetricKey(tracker: Tracker): string {
-      if (tracker.fieldDefinitions && tracker.fieldDefinitions.length > 0) {
-          return tracker.fieldDefinitions[0].name;
-      }
-      return '';
-  }
-  
-  getMainMetricUnit(tracker: Tracker): string {
-      if (tracker.fieldDefinitions && tracker.fieldDefinitions.length > 0) {
-          return tracker.fieldDefinitions[0].unit || '';
-      }
-      return '';
-  }
 
+  // ── Helpers ──────────────────────────────────────────────────
   getIcon(type: string): string {
     switch(type) {
       case 'FINANCE': return '🏦';
@@ -199,5 +172,26 @@ export class OmniDashboardComponent implements OnInit {
       case 'STOCK': return '📈';
       default: return '⚙️';
     }
+  }
+
+  getGradient(type: string): string {
+    switch(type) {
+      case 'FINANCE': return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      case 'HEALTH': return 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+      case 'STOCK': return 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)';
+      default: return 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)';
+    }
+  }
+
+  getFieldKeys(entry: TrackerEntry): string[] {
+    return entry.fieldValues ? Object.keys(entry.fieldValues) : [];
+  }
+
+  getLatestValue(): string {
+    if (!this.entries.length || !this.selectedTracker?.fieldDefinitions?.length) return '—';
+    const key = this.selectedTracker.fieldDefinitions[0].name;
+    const val = this.entries[0]?.fieldValues?.[key];
+    const unit = this.selectedTracker.fieldDefinitions[0].unit || '';
+    return val ? `${val} ${unit}`.trim() : '—';
   }
 }

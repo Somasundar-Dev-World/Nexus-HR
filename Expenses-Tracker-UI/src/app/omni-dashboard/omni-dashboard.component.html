@@ -1,104 +1,147 @@
-<div class="omni-container">
-  <!-- ═══ HEADER ═══ -->
-  <header class="omni-header animate-fade-in">
-    <div class="header-content">
-      <div class="title-wrap">
-        <h1>OmniTracker <span class="badge">BETA</span></h1>
-        <p>Your life, quantified. Tracking metrics that matter.</p>
+<div class="omni-page">
+
+  <!-- ════════════════════════════════════════════════════════
+       VIEW 1 — HOME SCREEN (App Icon Grid)
+  ════════════════════════════════════════════════════════ -->
+  <div class="home-screen" *ngIf="viewMode === 'GRID'">
+    <div class="home-header animate-fade-down">
+      <div class="home-title-wrap">
+        <h1>OmniTracker</h1>
+        <span class="beta-chip">BETA</span>
       </div>
-      <button class="btn btn-primary" (click)="openAddTracker()">
-        <span class="icon">+</span> New Tracker
-      </button>
+      <p class="home-subtitle">Your life, quantified. Tap a tracker to dive in.</p>
     </div>
-  </header>
 
-  <div class="omni-grid">
-    <!-- ═══ TRACKER LIST ═══ -->
-    <aside class="tracker-list">
-      <div class="section-label">Active Tracks</div>
-      <div class="tracker-cards">
-        <div *ngFor="let t of trackers" 
-             class="tracker-card glass-card" 
-             [class.active]="selectedTracker?.id === t.id"
-             (click)="selectTracker(t)">
-          <div class="card-left">
-            <span class="tracker-icon">{{ getIcon(t.type) }}</span>
-            <div class="tracker-info">
-              <span class="tracker-name">{{ t.name }}</span>
-              <span class="tracker-type">{{ t.type }}</span>
-            </div>
-          </div>
-          <button class="btn-delete" (click)="deleteTracker(t.id!, $event)">×</button>
+    <!-- Loading shimmer -->
+    <div class="app-grid" *ngIf="isLoading">
+      <div class="app-icon-shimmer" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <!-- App Icons Grid -->
+    <div class="app-grid animate-fade-up" *ngIf="!isLoading">
+      <div class="app-icon-wrap" *ngFor="let t of trackers">
+        <div class="app-icon" [style.background]="getGradient(t.type)" (click)="goToDetail(t)">
+          <span class="app-emoji">{{ getIcon(t.type) }}</span>
+          <button class="icon-delete-btn" (click)="deleteTrackerIcon(t.id!, $event)" title="Delete">✕</button>
         </div>
-      </div>
-    </aside>
-
-    <!-- ═══ TRACKER DETAIL / LOGS ═══ -->
-    <main class="tracker-detail">
-      <div *ngIf="!selectedTracker" class="empty-state glass-card">
-        <div class="empty-icon">📊</div>
-        <h3>Select a track to view details</h3>
-        <p>Manage your progress, trends, and history in one place.</p>
+        <span class="app-label">{{ t.name }}</span>
+        <span class="app-type-badge">{{ t.type }}</span>
       </div>
 
-      <div *ngIf="selectedTracker" class="detail-container animate-slide-up">
-        <div class="detail-header">
-          <div class="title-group">
-            <span class="icon-lg">{{ getIcon(selectedTracker.type) }}</span>
-            <h2>{{ selectedTracker.name }}</h2>
-          </div>
-          <button class="btn btn-action" (click)="openAddEntry()">
-            Log Progress
-          </button>
+      <!-- Add New Tracker Tile -->
+      <div class="app-icon-wrap" (click)="openAddTracker()">
+        <div class="app-icon app-icon-add">
+          <span class="add-cross">＋</span>
         </div>
-
-        <!-- Metric History -->
-        <div class="log-history glass-card">
-          <div class="history-header">History & Notes</div>
-          <div class="log-items" *ngIf="entries.length">
-            <div class="log-item" *ngFor="let entry of entries">
-              <div class="log-meta">
-                <div class="log-meta-left">
-                  <span class="log-date">{{ entry.date | date:'MMM d, h:mm a' }}</span>
-                  <span class="log-val">{{ entry.fieldValues?.[getMainMetricKey(selectedTracker)] }} {{ getMainMetricUnit(selectedTracker) }}</span>
-                </div>
-                <div class="log-actions">
-                  <button type="button" class="btn-icon" (click)="editLog(entry)" title="Edit">✏️</button>
-                  <button type="button" class="btn-icon" (click)="deleteLog(entry.id!)" title="Delete">🗑️</button>
-                </div>
-              </div>
-              <p class="log-note" *ngIf="entry.note">{{ entry.note }}</p>
-            </div>
-          </div>
-          <div class="empty-logs" *ngIf="!entries.length">
-            <p>No logs yet. Start tracking your progress today!</p>
-          </div>
-        </div>
+        <span class="app-label">New Tracker</span>
+        <span class="app-type-badge">&nbsp;</span>
       </div>
-    </main>
+    </div>
+
+    <!-- Empty state -->
+    <div class="home-empty animate-fade-up" *ngIf="!isLoading && trackers.length === 0">
+      <div class="empty-emoji">🎯</div>
+      <h2>No Trackers Yet</h2>
+      <p>Tap "New Tracker" above to create your first tracker!</p>
+    </div>
   </div>
 
-  <!-- ═══ MODALS ═══ -->
-  
-  <!-- Add Tracker Modal -->
+
+  <!-- ════════════════════════════════════════════════════════
+       VIEW 2 — TRACKER DETAIL (App Home Page)
+  ════════════════════════════════════════════════════════ -->
+  <div class="detail-page animate-slide-in" *ngIf="viewMode === 'DETAIL' && selectedTracker">
+
+    <!-- Detail Header -->
+    <div class="detail-header" [style.background]="getGradient(selectedTracker.type)">
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-arrow">←</span> All Trackers
+      </button>
+      <div class="detail-title-row">
+        <span class="detail-emoji">{{ getIcon(selectedTracker.type) }}</span>
+        <div>
+          <h1 class="detail-name">{{ selectedTracker.name }}</h1>
+          <span class="detail-badge">{{ selectedTracker.type }}</span>
+        </div>
+      </div>
+      <!-- Quick Stats -->
+      <div class="stats-strip">
+        <div class="stat-item">
+          <span class="stat-val">{{ entries.length }}</span>
+          <span class="stat-label">Total Logs</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-val">{{ getLatestValue() }}</span>
+          <span class="stat-label">Latest</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-val">{{ selectedTracker.fieldDefinitions?.length || 0 }}</span>
+          <span class="stat-label">Fields</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log History -->
+    <div class="detail-body">
+      <h2 class="section-title" *ngIf="entries.length">History</h2>
+
+      <div class="log-cards" *ngIf="entries.length">
+        <div class="log-card animate-fade-up" *ngFor="let entry of entries">
+          <div class="log-card-header">
+            <span class="log-timestamp">{{ entry.date | date:'MMM d, y · h:mm a' }}</span>
+            <div class="log-card-actions">
+              <button class="btn-icon" (click)="editLog(entry)" title="Edit">✏️</button>
+              <button class="btn-icon btn-icon-danger" (click)="deleteLog(entry.id!)" title="Delete">🗑️</button>
+            </div>
+          </div>
+          <div class="log-fields">
+            <div class="log-field" *ngFor="let key of getFieldKeys(entry)">
+              <span class="field-key">{{ key }}</span>
+              <span class="field-val">{{ entry.fieldValues[key] }}</span>
+            </div>
+          </div>
+          <p class="log-note-text" *ngIf="entry.note">💬 {{ entry.note }}</p>
+        </div>
+      </div>
+
+      <div class="detail-empty" *ngIf="!entries.length">
+        <div class="empty-emoji">📋</div>
+        <h3>No logs yet</h3>
+        <p>Tap the <strong>＋</strong> button below to log your first entry!</p>
+      </div>
+    </div>
+
+    <!-- Floating Action Button (FAB) — iOS style -->
+    <button class="fab" (click)="openAddEntry()">
+      <span class="fab-icon">＋</span>
+    </button>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       MODALS (shared across both views)
+  ════════════════════════════════════════════════════════ -->
+
+  <!-- Create Tracker Modal -->
   <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
-    <div class="modal glass-card" (click)="$event.stopPropagation()">
-      <h3>✨ Create New Track</h3>
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>✨ Create New Tracker</h3>
       <form [formGroup]="trackerForm" (ngSubmit)="createTracker()">
         <div class="form-group">
-          <label>Tracker Name (e.g. Daily Check-in)</label>
-          <input formControlName="name" placeholder="Name">
+          <label>Tracker Name</label>
+          <input formControlName="name" placeholder="e.g. Daily Check-in">
         </div>
         <div class="form-group">
           <label>Category</label>
           <select formControlName="type">
-            <option value="FINANCE">Financials</option>
-            <option value="HEALTH">Health & Bio</option>
-            <option value="STOCK">Market Watch</option>
-            <option value="CUSTOM">Custom Metric</option>
+            <option value="FINANCE">🏦 Financials</option>
+            <option value="HEALTH">🍎 Health & Bio</option>
+            <option value="STOCK">📈 Market Watch</option>
+            <option value="CUSTOM">⚙️ Custom Metric</option>
           </select>
         </div>
-
         <div class="dynamic-fields" formArrayName="fieldDefinitions">
           <h4>Custom Fields <button type="button" class="btn btn-sm btn-outline pull-right" (click)="addField()">+ Add Field</button></h4>
           <div *ngFor="let field of fieldDefinitions.controls; let i=index" [formGroupName]="i" class="field-item">
@@ -111,24 +154,22 @@
                 <option value="BOOLEAN">Yes / No</option>
               </select>
               <input formControlName="unit" placeholder="Unit (e.g. kg, $, %)">
-              <button type="button" class="btn-delete" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
+              <button type="button" class="btn-icon" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
             </div>
           </div>
         </div>
-
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" (click)="isAddingTracker = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.invalid">Create Track</button>
+          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.invalid">Create Tracker</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Add Entry Modal -->
+  <!-- Log Entry Modal -->
   <div class="modal-overlay" *ngIf="isAddingEntry" (click)="isAddingEntry = false">
-    <div class="modal glass-card" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()">
       <h3>{{ editingEntryId ? '✏️ Edit Log' : '💪 Log Progress' }}: {{ selectedTracker?.name }}</h3>
-      
       <form [formGroup]="entryForm" (ngSubmit)="addEntry()">
         <div formGroupName="fieldValues" class="dynamic-inputs">
           <div class="form-group" *ngFor="let field of selectedTracker?.fieldDefinitions">
@@ -142,14 +183,13 @@
             </select>
           </div>
         </div>
-
-        <div class="form-group mt-3">
-          <label>Context / Notes (Optional)</label>
-          <textarea [(ngModel)]="newEntryNote" [ngModelOptions]="{standalone: true}" rows="3"></textarea>
+        <div class="form-group">
+          <label>Notes (Optional)</label>
+          <textarea [(ngModel)]="newEntryNote" [ngModelOptions]="{standalone: true}" rows="2"></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" (click)="isAddingEntry = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="entryForm.invalid">{{ editingEntryId ? 'Update Log' : 'Submit Log' }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="entryForm.invalid">{{ editingEntryId ? 'Update Log' : 'Save Log' }}</button>
         </div>
       </form>
     </div>
@@ -157,14 +197,15 @@
 
   <!-- Delete Confirm Modal -->
   <div class="modal-overlay" *ngIf="deleteConfirm" (click)="cancelDelete()">
-    <div class="modal glass-card confirm-modal" (click)="$event.stopPropagation()">
+    <div class="modal confirm-modal" (click)="$event.stopPropagation()">
       <div class="confirm-icon">⚠️</div>
       <h3>Are you sure?</h3>
       <p>This action cannot be undone. Do you really want to delete this {{ deleteConfirm.type === 'TRACKER' ? 'tracker and all its history' : 'log entry' }}?</p>
-      <div class="modal-actions mt-4">
+      <div class="modal-actions confirm-actions">
         <button class="btn btn-outline" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
       </div>
     </div>
   </div>
+
 </div>

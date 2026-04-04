@@ -96,6 +96,19 @@ export class OmniDashboardComponent implements OnInit {
         { name: 'Payment Mode', type: 'SELECT', options: 'Cash, Credit Card, Debit Card, UPI' },
         { name: 'Note', type: 'TEXT' }
       ]
+    },
+    {
+      name: 'Wealth Portfolio',
+      type: 'FINANCE',
+      icon: '💹',
+      fields: [
+        { name: 'Ticker Symbol', type: 'TEXT' },
+        { name: 'Asset Class', type: 'SELECT', options: 'Stocks, Crypto, Mutual Funds, Real Estate, Gold, Cash' },
+        { name: 'Buy Price', type: 'CURRENCY' },
+        { name: 'Quantity', type: 'NUMBER' },
+        { name: 'Conviction', type: 'RATING' },
+        { name: 'Investment Thesis', type: 'LONG_TEXT' }
+      ]
     }
   ];
 

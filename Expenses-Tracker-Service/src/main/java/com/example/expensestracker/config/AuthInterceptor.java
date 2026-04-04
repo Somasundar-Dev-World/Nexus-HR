@@ -14,8 +14,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         
         // Handle preflight requests explicitly
         if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            return false;
+            return true;
         }
 
         String authHeader = request.getHeader("Authorization");

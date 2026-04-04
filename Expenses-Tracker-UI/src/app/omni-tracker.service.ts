@@ -6,7 +6,7 @@ import { environment } from '../environments/environment';
 export interface Tracker {
   id?: number;
   name: string;
-  unit: string;
+  fieldDefinitions: any[];
   type: 'FINANCE' | 'HEALTH' | 'STOCK' | 'CUSTOM';
   metadata?: string;
   userId?: number;
@@ -14,7 +14,7 @@ export interface Tracker {
 
 export interface TrackerEntry {
   id?: number;
-  value: number;
+  fieldValues: any;
   date: string;
   note?: string;
   trackerId: number;

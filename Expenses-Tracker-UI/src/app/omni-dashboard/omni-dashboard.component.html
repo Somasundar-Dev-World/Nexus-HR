@@ -6,7 +6,7 @@
         <h1>OmniTracker <span class="badge">BETA</span></h1>
         <p>Your life, quantified. Tracking metrics that matter.</p>
       </div>
-      <button class="btn btn-primary" (click)="isAddingTracker = true">
+      <button class="btn btn-primary" (click)="openAddTracker()">
         <span class="icon">+</span> New Tracker
       </button>
     </div>
@@ -45,9 +45,9 @@
         <div class="detail-header">
           <div class="title-group">
             <span class="icon-lg">{{ getIcon(selectedTracker.type) }}</span>
-            <h2>{{ selectedTracker.name }} <small>({{ selectedTracker.unit }})</small></h2>
+            <h2>{{ selectedTracker.name }}</h2>
           </div>
-          <button class="btn btn-action" (click)="isAddingEntry = true">
+          <button class="btn btn-action" (click)="openAddEntry()">
             Log Progress
           </button>
         </div>
@@ -59,7 +59,7 @@
             <div class="log-item" *ngFor="let entry of entries">
               <div class="log-meta">
                 <span class="log-date">{{ entry.date | date:'MMM d, h:mm a' }}</span>
-                <span class="log-val">{{ entry.value }} {{ selectedTracker.unit }}</span>
+                <span class="log-val">{{ entry.fieldValues?.[getMainMetricKey(selectedTracker)] }} {{ getMainMetricUnit(selectedTracker) }}</span>
               </div>
               <p class="log-note" *ngIf="entry.note">{{ entry.note }}</p>
             </div>
@@ -78,27 +78,43 @@
   <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
     <div class="modal glass-card" (click)="$event.stopPropagation()">
       <h3>✨ Create New Track</h3>
-      <div class="form-group">
-        <label>Metric Name (e.g. Daily Weight)</label>
-        <input [(ngModel)]="newTracker.name" placeholder="Name">
-      </div>
-      <div class="form-group">
-        <label>Unit (e.g. kg, $, count, hours)</label>
-        <input [(ngModel)]="newTracker.unit" placeholder="Unit">
-      </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select [(ngModel)]="newTracker.type">
-          <option value="FINANCE">Financials</option>
-          <option value="HEALTH">Health & Bio</option>
-          <option value="STOCK">Market Watch</option>
-          <option value="CUSTOM">Custom Metric</option>
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" (click)="isAddingTracker = false">Cancel</button>
-        <button class="btn btn-primary" (click)="createTracker()">Create Track</button>
-      </div>
+      <form [formGroup]="trackerForm" (ngSubmit)="createTracker()">
+        <div class="form-group">
+          <label>Tracker Name (e.g. Daily Check-in)</label>
+          <input formControlName="name" placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select formControlName="type">
+            <option value="FINANCE">Financials</option>
+            <option value="HEALTH">Health & Bio</option>
+            <option value="STOCK">Market Watch</option>
+            <option value="CUSTOM">Custom Metric</option>
+          </select>
+        </div>
+
+        <div class="dynamic-fields" formArrayName="fieldDefinitions">
+          <h4>Custom Fields <button type="button" class="btn btn-sm btn-outline pull-right" (click)="addField()">+ Add Field</button></h4>
+          <div *ngFor="let field of fieldDefinitions.controls; let i=index" [formGroupName]="i" class="field-item">
+            <input formControlName="name" placeholder="Field Name (e.g. Weight)" class="w-100">
+            <div class="field-row">
+              <select formControlName="type">
+                <option value="NUMBER">Number</option>
+                <option value="TEXT">Text</option>
+                <option value="DATE">Date</option>
+                <option value="BOOLEAN">Yes / No</option>
+              </select>
+              <input formControlName="unit" placeholder="Unit (e.g. kg, $, %)">
+              <button type="button" class="btn-delete" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="isAddingTracker = false">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.invalid">Create Track</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -106,18 +122,30 @@
   <div class="modal-overlay" *ngIf="isAddingEntry" (click)="isAddingEntry = false">
     <div class="modal glass-card" (click)="$event.stopPropagation()">
       <h3>💪 Log Progress: {{ selectedTracker?.name }}</h3>
-      <div class="form-group">
-        <label>Current Value ({{ selectedTracker?.unit }})</label>
-        <input type="number" [(ngModel)]="newEntryValue">
-      </div>
-      <div class="form-group">
-        <label>Context / Notes (Optional)</label>
-        <textarea [(ngModel)]="newEntryNote" rows="3"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" (click)="isAddingEntry = false">Cancel</button>
-        <button class="btn btn-primary" (click)="addEntry()">Submit Log</button>
-      </div>
+      
+      <form [formGroup]="entryForm" (ngSubmit)="addEntry()">
+        <div formGroupName="fieldValues" class="dynamic-inputs">
+          <div class="form-group" *ngFor="let field of selectedTracker?.fieldDefinitions">
+            <label>{{ field.name }} <span *ngIf="field.unit">({{ field.unit }})</span></label>
+            <input *ngIf="field.type === 'NUMBER'" type="number" [formControlName]="field.name">
+            <input *ngIf="field.type === 'TEXT'" type="text" [formControlName]="field.name">
+            <input *ngIf="field.type === 'DATE'" type="date" [formControlName]="field.name">
+            <select *ngIf="field.type === 'BOOLEAN'" [formControlName]="field.name">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label>Context / Notes (Optional)</label>
+          <textarea [(ngModel)]="newEntryNote" [ngModelOptions]="{standalone: true}" rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="isAddingEntry = false">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="entryForm.invalid">Submit Log</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

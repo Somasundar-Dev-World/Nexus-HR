@@ -1,8 +1,9 @@
 package com.example.expensestracker.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import com.example.expensestracker.util.JpaMapConverter;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * Universal Tracker Entry (The specific data point logged)
@@ -14,7 +15,10 @@ public class TrackerEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private BigDecimal value;      // Numerical value (e.g., 75, 100.5, 20)
+    @Convert(converter = JpaMapConverter.class)
+    @Column(length = 2000)
+    private Map<String, Object> fieldValues; // Dynamic values correlating to the Tracker's field definitions
+    
     private LocalDateTime date;    // When the tracking occurred
     private String note;           // Optional context or observation
 
@@ -25,8 +29,8 @@ public class TrackerEntry {
         this.date = LocalDateTime.now();
     }
 
-    public TrackerEntry(BigDecimal value, Long trackerId, Long userId) {
-        this.value = value;
+    public TrackerEntry(Map<String, Object> fieldValues, Long trackerId, Long userId) {
+        this.fieldValues = fieldValues;
         this.trackerId = trackerId;
         this.userId = userId;
         this.date = LocalDateTime.now();
@@ -35,8 +39,8 @@ public class TrackerEntry {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public BigDecimal getValue() { return value; }
-    public void setValue(BigDecimal value) { this.value = value; }
+    public Map<String, Object> getFieldValues() { return fieldValues; }
+    public void setFieldValues(Map<String, Object> fieldValues) { this.fieldValues = fieldValues; }
     public LocalDateTime getDate() { return date; }
     public void setDate(LocalDateTime date) { this.date = date; }
     public String getNote() { return note; }

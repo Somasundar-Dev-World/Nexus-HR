@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { OmniTrackerService, Tracker, TrackerEntry } from '../omni-tracker.service';
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-omni-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './omni-dashboard.component.html',
   styleUrl: './omni-dashboard.component.css'
 })
@@ -16,15 +15,27 @@ export class OmniDashboardComponent implements OnInit {
   selectedTracker?: Tracker;
   entries: TrackerEntry[] = [];
   
-  newTracker: Tracker = { name: '', unit: '', type: 'FINANCE' };
-  newEntryValue: number = 0;
+  // Reactive forms for dynamic trackers
+  trackerForm: FormGroup;
+  entryForm: FormGroup;
+
   newEntryNote: string = '';
 
   isLoading = true;
   isAddingTracker = false;
   isAddingEntry = false;
 
-  constructor(private omniService: OmniTrackerService) {}
+  constructor(private omniService: OmniTrackerService, private fb: FormBuilder) {
+    this.trackerForm = this.fb.group({
+      name: ['', Validators.required],
+      type: ['FINANCE'],
+      fieldDefinitions: this.fb.array([])
+    });
+
+    this.entryForm = this.fb.group({
+      fieldValues: this.fb.group({})
+    });
+  }
 
   ngOnInit() {
     this.loadData();
@@ -52,29 +63,75 @@ export class OmniDashboardComponent implements OnInit {
     });
   }
 
+  get fieldDefinitions() {
+    return this.trackerForm.get('fieldDefinitions') as FormArray;
+  }
+
+  addField() {
+    this.fieldDefinitions.push(this.fb.group({
+      name: ['', Validators.required],
+      type: ['NUMBER', Validators.required],
+      unit: ['']
+    }));
+  }
+
+  removeField(index: number) {
+    this.fieldDefinitions.removeAt(index);
+  }
+
+  openAddTracker() {
+    this.trackerForm.reset({ type: 'FINANCE' });
+    this.fieldDefinitions.clear();
+    this.addField(); // Start with one field by default
+    this.isAddingTracker = true;
+  }
+
   createTracker() {
-    if (!this.newTracker.name) return;
-    this.omniService.createTracker(this.newTracker).subscribe(tracker => {
+    if (this.trackerForm.invalid) return;
+    const trackerData: Tracker = this.trackerForm.value;
+    this.omniService.createTracker(trackerData).subscribe(tracker => {
       this.trackers.push(tracker);
       this.isAddingTracker = false;
-      this.newTracker = { name: '', unit: '', type: 'FINANCE' };
     });
   }
 
+  openAddEntry() {
+    if (!this.selectedTracker) return;
+    const formGroup = this.fb.group({});
+    this.selectedTracker.fieldDefinitions?.forEach(f => {
+      formGroup.addControl(f.name, this.fb.control('', Validators.required));
+    });
+    this.entryForm.setControl('fieldValues', formGroup);
+    this.newEntryNote = '';
+    this.isAddingEntry = true;
+  }
+
   addEntry() {
-    if (!this.selectedTracker || this.newEntryValue === null) return;
+    if (!this.selectedTracker || this.entryForm.invalid) return;
     const entry: TrackerEntry = {
       trackerId: this.selectedTracker.id!,
-      value: this.newEntryValue,
+      fieldValues: this.entryForm.get('fieldValues')?.value,
       note: this.newEntryNote,
       date: new Date().toISOString()
     };
     this.omniService.addEntry(entry).subscribe(saved => {
       this.entries.push(saved);
       this.isAddingEntry = false;
-      this.newEntryValue = 0;
-      this.newEntryNote = '';
     });
+  }
+  
+  getMainMetricKey(tracker: Tracker): string {
+      if (tracker.fieldDefinitions && tracker.fieldDefinitions.length > 0) {
+          return tracker.fieldDefinitions[0].name;
+      }
+      return '';
+  }
+  
+  getMainMetricUnit(tracker: Tracker): string {
+      if (tracker.fieldDefinitions && tracker.fieldDefinitions.length > 0) {
+          return tracker.fieldDefinitions[0].unit || '';
+      }
+      return '';
   }
 
   deleteTracker(id: number, event: Event) {

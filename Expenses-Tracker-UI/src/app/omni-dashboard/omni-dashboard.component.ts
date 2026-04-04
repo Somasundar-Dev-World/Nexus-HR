@@ -25,6 +25,7 @@ export class OmniDashboardComponent implements OnInit {
   isAddingTracker = false;
   isAddingEntry = false;
   editingEntryId: number | null = null;
+  deleteConfirm: { type: 'TRACKER' | 'ENTRY', id: number } | null = null;
 
   constructor(private omniService: OmniTrackerService, private fb: FormBuilder) {
     this.trackerForm = this.fb.group({
@@ -148,9 +149,31 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   deleteLog(id: number) {
-    if(confirm('Are you sure you want to delete this log?')) {
-      this.omniService.deleteEntry(id).subscribe(() => {
-        this.entries = this.entries.filter(e => e.id !== id);
+    this.deleteConfirm = { type: 'ENTRY', id };
+  }
+  
+  deleteTracker(id: number, event: Event) {
+    event.stopPropagation();
+    this.deleteConfirm = { type: 'TRACKER', id };
+  }
+
+  cancelDelete() {
+    this.deleteConfirm = null;
+  }
+
+  confirmDelete() {
+    if (!this.deleteConfirm) return;
+    
+    if (this.deleteConfirm.type === 'TRACKER') {
+      this.omniService.deleteTracker(this.deleteConfirm.id).subscribe(() => {
+        this.trackers = this.trackers.filter(t => t.id !== this.deleteConfirm?.id);
+        if (this.selectedTracker?.id === this.deleteConfirm?.id) this.selectedTracker = undefined;
+        this.deleteConfirm = null;
+      });
+    } else if (this.deleteConfirm.type === 'ENTRY') {
+      this.omniService.deleteEntry(this.deleteConfirm.id).subscribe(() => {
+        this.entries = this.entries.filter(e => e.id !== this.deleteConfirm?.id);
+        this.deleteConfirm = null;
       });
     }
   }
@@ -167,16 +190,6 @@ export class OmniDashboardComponent implements OnInit {
           return tracker.fieldDefinitions[0].unit || '';
       }
       return '';
-  }
-
-  deleteTracker(id: number, event: Event) {
-    event.stopPropagation();
-    if (confirm('Delete this tracker and all its logs?')) {
-      this.omniService.deleteTracker(id).subscribe(() => {
-        this.trackers = this.trackers.filter(t => t.id !== id);
-        if (this.selectedTracker?.id === id) this.selectedTracker = undefined;
-      });
-    }
   }
 
   getIcon(type: string): string {

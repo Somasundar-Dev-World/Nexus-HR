@@ -2,6 +2,7 @@ package com.example.expensestracker.model;
 
 import jakarta.persistence.*;
 import com.example.expensestracker.util.JpaListConverter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
@@ -25,7 +26,12 @@ public class Tracker {
     @Column(length = 2000)
     private List<Object> fieldDefinitions; // Schema representing dynamic form fields
 
+    @Column(name = "user_id")
+    @JsonProperty("userId")
     private Long userId;
+
+    @Column(name = "app_id")
+    @JsonProperty("appId")
     private Long appId;            // Parent App ID
 
     public Tracker() {}

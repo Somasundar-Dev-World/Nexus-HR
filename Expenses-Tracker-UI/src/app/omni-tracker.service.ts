@@ -53,6 +53,10 @@ export class OmniTrackerService {
     return this.http.post<TrackerEntry>(`${this.apiUrl}/entries`, entry); 
   }
 
+  updateEntry(id: number, entry: TrackerEntry): Observable<TrackerEntry> {
+    return this.http.put<TrackerEntry>(`${this.apiUrl}/entries/${id}`, entry);
+  }
+
   deleteEntry(id: number): Observable<any> { 
     return this.http.delete(`${this.apiUrl}/entries/${id}`); 
   }

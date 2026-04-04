@@ -24,6 +24,7 @@ export class OmniDashboardComponent implements OnInit {
   isLoading = true;
   isAddingTracker = false;
   isAddingEntry = false;
+  editingEntryId: number | null = null;
 
   constructor(private omniService: OmniTrackerService, private fb: FormBuilder) {
     this.trackerForm = this.fb.group({
@@ -103,21 +104,55 @@ export class OmniDashboardComponent implements OnInit {
     });
     this.entryForm.setControl('fieldValues', formGroup);
     this.newEntryNote = '';
+    this.editingEntryId = null;
+    this.isAddingEntry = true;
+  }
+
+  editLog(entry: TrackerEntry) {
+    if (!this.selectedTracker) return;
+    const formGroup = this.fb.group({});
+    this.selectedTracker.fieldDefinitions?.forEach(f => {
+      const existingVal = entry.fieldValues ? entry.fieldValues[f.name] : '';
+      formGroup.addControl(f.name, this.fb.control(existingVal || '', Validators.required));
+    });
+    this.entryForm.setControl('fieldValues', formGroup);
+    this.newEntryNote = entry.note || '';
+    this.editingEntryId = entry.id!;
     this.isAddingEntry = true;
   }
 
   addEntry() {
     if (!this.selectedTracker || this.entryForm.invalid) return;
-    const entry: TrackerEntry = {
+    const entryData: TrackerEntry = {
       trackerId: this.selectedTracker.id!,
       fieldValues: this.entryForm.get('fieldValues')?.value,
       note: this.newEntryNote,
       date: new Date().toISOString()
     };
-    this.omniService.addEntry(entry).subscribe(saved => {
-      this.entries.push(saved);
-      this.isAddingEntry = false;
-    });
+    
+    if (this.editingEntryId) {
+      this.omniService.updateEntry(this.editingEntryId, entryData).subscribe(saved => {
+        const index = this.entries.findIndex(e => e.id === saved.id);
+        if (index !== -1) {
+          this.entries[index] = saved;
+        }
+        this.isAddingEntry = false;
+        this.editingEntryId = null;
+      });
+    } else {
+      this.omniService.addEntry(entryData).subscribe(saved => {
+        this.entries.push(saved);
+        this.isAddingEntry = false;
+      });
+    }
+  }
+
+  deleteLog(id: number) {
+    if(confirm('Are you sure you want to delete this log?')) {
+      this.omniService.deleteEntry(id).subscribe(() => {
+        this.entries = this.entries.filter(e => e.id !== id);
+      });
+    }
   }
   
   getMainMetricKey(tracker: Tracker): string {

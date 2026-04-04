@@ -58,8 +58,14 @@
           <div class="log-items" *ngIf="entries.length">
             <div class="log-item" *ngFor="let entry of entries">
               <div class="log-meta">
-                <span class="log-date">{{ entry.date | date:'MMM d, h:mm a' }}</span>
-                <span class="log-val">{{ entry.fieldValues?.[getMainMetricKey(selectedTracker)] }} {{ getMainMetricUnit(selectedTracker) }}</span>
+                <div class="log-meta-left">
+                  <span class="log-date">{{ entry.date | date:'MMM d, h:mm a' }}</span>
+                  <span class="log-val">{{ entry.fieldValues?.[getMainMetricKey(selectedTracker)] }} {{ getMainMetricUnit(selectedTracker) }}</span>
+                </div>
+                <div class="log-actions">
+                  <button type="button" class="btn-icon" (click)="editLog(entry)" title="Edit">✏️</button>
+                  <button type="button" class="btn-icon" (click)="deleteLog(entry.id!)" title="Delete">🗑️</button>
+                </div>
               </div>
               <p class="log-note" *ngIf="entry.note">{{ entry.note }}</p>
             </div>
@@ -121,7 +127,7 @@
   <!-- Add Entry Modal -->
   <div class="modal-overlay" *ngIf="isAddingEntry" (click)="isAddingEntry = false">
     <div class="modal glass-card" (click)="$event.stopPropagation()">
-      <h3>💪 Log Progress: {{ selectedTracker?.name }}</h3>
+      <h3>{{ editingEntryId ? '✏️ Edit Log' : '💪 Log Progress' }}: {{ selectedTracker?.name }}</h3>
       
       <form [formGroup]="entryForm" (ngSubmit)="addEntry()">
         <div formGroupName="fieldValues" class="dynamic-inputs">
@@ -143,7 +149,7 @@
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" (click)="isAddingEntry = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="entryForm.invalid">Submit Log</button>
+          <button type="submit" class="btn btn-primary" [disabled]="entryForm.invalid">{{ editingEntryId ? 'Update Log' : 'Submit Log' }}</button>
         </div>
       </form>
     </div>

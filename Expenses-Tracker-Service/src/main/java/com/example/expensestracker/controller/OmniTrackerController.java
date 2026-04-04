@@ -64,6 +64,19 @@ public class OmniTrackerController {
         return entryRepository.save(entry);
     }
 
+    @PutMapping("/entries/{id}")
+    public ResponseEntity<?> updateEntry(@RequestAttribute("userId") Long userId, @PathVariable Long id, @RequestBody TrackerEntry updatedEntry) {
+        return entryRepository.findById(id).map(entry -> {
+            if (entry.getUserId().equals(userId)) {
+                entry.setFieldValues(updatedEntry.getFieldValues());
+                entry.setNote(updatedEntry.getNote());
+                entryRepository.save(entry);
+                return ResponseEntity.ok(entry);
+            }
+            return ResponseEntity.status(403).build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/entries/{id}")
     public ResponseEntity<?> deleteEntry(@RequestAttribute("userId") Long userId, @PathVariable Long id) {
         return entryRepository.findById(id).map(entry -> {

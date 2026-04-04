@@ -89,6 +89,16 @@
 .app-icon:hover .icon-delete-btn {
   opacity: 1;
   transform: scale(1);
+  pointer-events: auto; /* Re-enable pointer events on hover */
+}
+
+/* On Touch/Mobile Devices (No hover) */
+@media (hover: none) {
+  .icon-delete-btn {
+    opacity: 0.4; /* Slightly visible but non-intrusive */
+    pointer-events: auto; /* Always interactive on touch */
+    transform: scale(0.85); /* Slightly smaller on touch */
+  }
 }
 
 .app-icon:active {
@@ -119,6 +129,8 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  pointer-events: none; /* Disable pointer events when hidden/default */
+  z-index: 5;
 }
 
 /* Add new tile */

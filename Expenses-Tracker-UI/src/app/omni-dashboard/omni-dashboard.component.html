@@ -19,8 +19,8 @@
 
     <!-- App Icons Grid -->
     <div class="app-grid animate-fade-up" *ngIf="!isLoading">
-      <div class="app-icon-wrap" *ngFor="let t of trackers">
-        <div class="app-icon" [style.background]="getGradient(t.type)" (click)="goToDetail(t)">
+      <div class="app-icon-wrap" *ngFor="let t of trackers" (click)="goToDetail(t)">
+        <div class="app-icon" [style.background]="getGradient(t.type)">
           <span class="app-emoji">{{ getIcon(t.type) }}</span>
           <button class="icon-delete-btn" (click)="deleteTrackerIcon(t.id!, $event)" title="Delete">✕</button>
         </div>

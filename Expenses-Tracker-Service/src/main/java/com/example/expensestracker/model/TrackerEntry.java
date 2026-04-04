@@ -2,6 +2,7 @@ package com.example.expensestracker.model;
 
 import jakarta.persistence.*;
 import com.example.expensestracker.util.JpaMapConverter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -22,7 +23,12 @@ public class TrackerEntry {
     private LocalDateTime date;    // When the tracking occurred
     private String note;           // Optional context or observation
 
+    @Column(name = "tracker_id")
+    @JsonProperty("trackerId")
     private Long trackerId;        // Foreign key back to the Tracker definition
+
+    @Column(name = "user_id")
+    @JsonProperty("userId")
     private Long userId;
 
     public TrackerEntry() {

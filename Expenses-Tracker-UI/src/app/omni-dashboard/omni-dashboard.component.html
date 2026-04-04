@@ -99,7 +99,7 @@
           <div class="log-fields">
             <div class="log-field" *ngFor="let key of getFieldKeys(entry)">
               <span class="field-key">{{ key }}</span>
-              <span class="field-val">{{ entry.fieldValues[key] }}</span>
+              <span class="field-val">{{ formatFieldValue(entry.fieldValues[key], getFieldDef(key)) }}</span>
             </div>
           </div>
           <p class="log-note-text" *ngIf="entry.note">💬 {{ entry.note }}</p>
@@ -149,11 +149,17 @@
             <div class="field-row">
               <select formControlName="type">
                 <option value="NUMBER">Number</option>
-                <option value="TEXT">Text</option>
+                <option value="CURRENCY">Currency ($)</option>
+                <option value="TEXT">Short Text</option>
+                <option value="LONG_TEXT">Long Text / Note</option>
                 <option value="DATE">Date</option>
+                <option value="TIME">Time</option>
                 <option value="BOOLEAN">Yes / No</option>
+                <option value="SELECT">Dropdown (Select)</option>
+                <option value="RATING">Rating (1-5 Stars)</option>
               </select>
-              <input formControlName="unit" placeholder="Unit (e.g. kg, $, %)">
+              <input formControlName="unit" placeholder="Unit (e.g. kg, %)" *ngIf="field.get('type')?.value === 'NUMBER'">
+              <input formControlName="options" placeholder="Options (comma-separated)" *ngIf="field.get('type')?.value === 'SELECT'">
               <button type="button" class="btn-icon" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
             </div>
           </div>
@@ -174,13 +180,46 @@
         <div formGroupName="fieldValues" class="dynamic-inputs">
           <div class="form-group" *ngFor="let field of selectedTracker?.fieldDefinitions">
             <label>{{ field.name }} <span *ngIf="field.unit">({{ field.unit }})</span></label>
-            <input *ngIf="field.type === 'NUMBER'" type="number" [formControlName]="field.name">
-            <input *ngIf="field.type === 'TEXT'" type="text" [formControlName]="field.name">
-            <input *ngIf="field.type === 'DATE'" type="date" [formControlName]="field.name">
-            <select *ngIf="field.type === 'BOOLEAN'" [formControlName]="field.name">
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
+            
+            <!-- Type-specific Inputs -->
+            <ng-container [ngSwitch]="field.type">
+              <input *ngSwitchCase="'NUMBER'" type="number" [formControlName]="field.name" step="any">
+              
+              <div *ngSwitchCase="'CURRENCY'" class="currency-input-wrap">
+                <span class="currency-symbol">$</span>
+                <input type="number" [formControlName]="field.name" step="0.01">
+              </div>
+
+              <input *ngSwitchCase="'TEXT'" type="text" [formControlName]="field.name">
+              
+              <textarea *ngSwitchCase="'LONG_TEXT'" [formControlName]="field.name" rows="3"></textarea>
+              
+              <input *ngSwitchCase="'DATE'" type="date" [formControlName]="field.name">
+              
+              <input *ngSwitchCase="'TIME'" type="time" [formControlName]="field.name">
+              
+              <select *ngSwitchCase="'BOOLEAN'" [formControlName]="field.name">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+
+              <select *ngSwitchCase="'SELECT'" [formControlName]="field.name">
+                <option value="" disabled>Select an option...</option>
+                <option *ngFor="let opt of getOptions(field.options)" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <div *ngSwitchCase="'RATING'" class="rating-input-wrap">
+                <select [formControlName]="field.name">
+                  <option value="1">⭐ (1)</option>
+                  <option value="2">⭐⭐ (2)</option>
+                  <option value="3">⭐⭐⭐ (3)</option>
+                  <option value="4">⭐⭐⭐⭐ (4)</option>
+                  <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                </select>
+              </div>
+
+              <input *ngSwitchDefault [formControlName]="field.name">
+            </ng-container>
           </div>
         </div>
         <div class="form-group">

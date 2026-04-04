@@ -69,7 +69,8 @@ export class OmniDashboardComponent implements OnInit {
     this.fieldDefinitions.push(this.fb.group({
       name: ['', Validators.required],
       type: ['NUMBER', Validators.required],
-      unit: ['']
+      unit: [''],
+      options: [''] // Comma-separated for SELECT type
     }));
   }
 
@@ -187,11 +188,34 @@ export class OmniDashboardComponent implements OnInit {
     return entry.fieldValues ? Object.keys(entry.fieldValues) : [];
   }
 
+  getOptions(optionsStr: string): string[] {
+    if (!optionsStr) return [];
+    return optionsStr.split(',').map(s => s.trim()).filter(s => s !== '');
+  }
+
+  formatFieldValue(val: any, fieldDef: any): string {
+    if (val === undefined || val === null || val === '') return '—';
+    
+    switch(fieldDef.type) {
+      case 'CURRENCY':
+        return `$${parseFloat(val).toFixed(2)}`;
+      case 'RATING':
+        return '⭐'.repeat(parseInt(val)) || '—';
+      case 'BOOLEAN':
+        return val === 'true' || val === true ? '✅ Yes' : '❌ No';
+      default:
+        return fieldDef.unit ? `${val} ${fieldDef.unit}` : `${val}`;
+    }
+  }
+
+  getFieldDef(key: string): any {
+    return this.selectedTracker?.fieldDefinitions.find(f => f.name === key);
+  }
+
   getLatestValue(): string {
     if (!this.entries.length || !this.selectedTracker?.fieldDefinitions?.length) return '—';
-    const key = this.selectedTracker.fieldDefinitions[0].name;
-    const val = this.entries[0]?.fieldValues?.[key];
-    const unit = this.selectedTracker.fieldDefinitions[0].unit || '';
-    return val ? `${val} ${unit}`.trim() : '—';
+    const fieldDef = this.selectedTracker.fieldDefinitions[0];
+    const val = this.entries[0]?.fieldValues?.[fieldDef.name];
+    return this.formatFieldValue(val, fieldDef);
   }
 }

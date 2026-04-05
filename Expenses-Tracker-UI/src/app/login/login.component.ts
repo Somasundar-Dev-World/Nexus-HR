@@ -23,7 +23,7 @@ export class LoginComponent {
     this.error = '';
     this.authService.login(this.credentials).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/track']);
       },
       error: (err) => {
         this.isLoading = false;

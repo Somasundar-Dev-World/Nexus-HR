@@ -842,3 +842,192 @@
 .app-icon-wrapper {
   border: 3px solid rgba(255,255,255,0.4);
 }
+/* ══ APP DASHBOARD STYLES ════════════════════════════════════ */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid rgba(255,255,255,0.8);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+
+.stat-card-icon {
+  width: 54px;
+  height: 54px;
+  background: #f8fafc;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.stat-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-val {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.stat-card-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dashboard-content-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.dashboard-col {
+  background: white;
+  border-radius: 24px;
+  padding: 1.75rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  border: 1px solid #f1f5f9;
+  min-height: 400px;
+}
+
+.col-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.col-header h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.col-subtitle {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* Pulse Activity Feed */
+.pulse-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pulse-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pulse-item:last-child { border-bottom: none; }
+
+.pulse-icon {
+  width: 42px;
+  height: 42px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.pulse-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pulse-tracker {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.pulse-note {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.pulse-date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+.pulse-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Mini App Grid for Dashboard */
+.mini-app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 1.5rem 1rem;
+}
+
+.app-icon-wrap.mini { gap: 0.35rem; }
+
+.app-icon.mini {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.app-emoji.mini { font-size: 1.75rem; }
+
+.app-label.mini {
+  font-size: 0.75rem;
+  max-width: 80px;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 992px) {
+  .dashboard-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-col {
+    padding: 1.25rem;
+  }
+}

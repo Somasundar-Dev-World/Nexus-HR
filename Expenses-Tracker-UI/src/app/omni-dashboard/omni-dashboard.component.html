@@ -49,7 +49,95 @@
 
 
   <!-- ════════════════════════════════════════════════════════
-       VIEW — TRACKER GRID (Inside an App)
+       VIEW — APP DASHBOARD (Insights & Trackers)
+  ════════════════════════════════════════════════════════ -->
+  <div class="home-screen" *ngIf="viewMode === 'APP_DASHBOARD' && selectedApp">
+    <div class="home-header animate-fade-down">
+      <button class="back-btn-pill" (click)="goBack()">
+        <span class="back-arrow">←</span> All Apps
+      </button>
+      <div class="home-title-wrap" style="margin-top: 1rem;">
+        <span class="app-emoji-large">{{ selectedApp.icon }}</span>
+        <h1>{{ selectedApp.name }} Dashboard</h1>
+      </div>
+      <p class="home-subtitle">{{ selectedApp.description || 'Intelligent insights across all your trackers.' }}</p>
+    </div>
+
+    <!-- Dashboard Stat Cards -->
+    <div class="dashboard-stats animate-fade-up">
+      <div class="stat-card">
+        <div class="stat-card-icon">💰</div>
+        <div class="stat-card-info">
+          <span class="stat-card-val">{{ appStats.totalValue | currency:'USD' }}</span>
+          <span class="stat-card-label">Total Monthly Insight</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📈</div>
+        <div class="stat-card-info">
+          <span class="stat-card-val">{{ trackers.length }}</span>
+          <span class="stat-card-label">Active Trackers</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">⚡</div>
+        <div class="stat-card-info">
+          <span class="stat-card-val">On Track</span>
+          <span class="stat-card-label">Health Status</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-content-grid">
+      <!-- Activity Feed -->
+      <div class="dashboard-col animate-fade-up">
+        <div class="col-header">
+          <h3>The Pulse</h3>
+          <span class="col-subtitle">Recent activity across trackers</span>
+        </div>
+        <div class="pulse-list" *ngIf="appStats.recentLogs.length">
+          <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
+            <div class="pulse-icon">{{ log.trackerIcon }}</div>
+            <div class="pulse-details">
+              <span class="pulse-tracker">{{ log.trackerName }}</span>
+              <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
+              <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
+          No recent activity to report.
+        </div>
+      </div>
+
+      <!-- Quick Tracker Grid -->
+      <div class="dashboard-col animate-fade-up">
+        <div class="col-header">
+          <h3>Quick Access</h3>
+          <span class="col-subtitle">Manage individual trackers</span>
+        </div>
+        <div class="mini-app-grid">
+          <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
+            <div class="app-icon mini" [style.background]="getGradient(t.type)">
+              <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
+            </div>
+            <span class="app-label mini">{{ t.name }}</span>
+          </div>
+          <!-- Add New Tracker Tile -->
+          <div class="app-icon-wrap mini" (click)="openAddTracker()">
+            <div class="app-icon mini app-icon-add">
+              <span class="add-cross">＋</span>
+            </div>
+            <span class="app-label mini">Add New</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       VIEW — TRACKER GRID (Inside an App) -- KEEP AS FALLBACK OR LEGACY
   ════════════════════════════════════════════════════════ -->
   <div class="home-screen" *ngIf="viewMode === 'TRACKER_GRID' && selectedApp">
     <div class="home-header animate-fade-down">

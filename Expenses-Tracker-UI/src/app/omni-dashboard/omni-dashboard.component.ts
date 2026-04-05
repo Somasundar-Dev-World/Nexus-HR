@@ -18,8 +18,15 @@ export class OmniDashboardComponent implements OnInit {
   selectedApp?: OmniApp;
   entries: TrackerEntry[] = [];
 
-  // View state — 'APP_GRID' is apps, 'TRACKER_GRID' is trackers inside app, 'DETAIL' is logs
-  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'DETAIL' = 'APP_GRID';
+  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs
+  viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' = 'APP_GRID';
+
+  appStats = {
+    totalValue: 0,
+    activeCount: 0,
+    recentLogs: [] as any[],
+    breakdown: [] as { name: string, value: number, percent: number }[]
+  };
 
   // Reactive forms
   appForm: FormGroup;
@@ -200,6 +207,7 @@ export class OmniDashboardComponent implements OnInit {
     this.trackerForm = this.fb.group({
       name: ['', Validators.required],
       type: ['FINANCE'],
+      icon: ['⚙️'],
       fieldDefinitions: this.fb.array([])
     });
     this.entryForm = this.fb.group({ fieldValues: this.fb.group({}) });
@@ -214,11 +222,9 @@ export class OmniDashboardComponent implements OnInit {
         this.apps = appsData; 
         
         // --- Migration Logic ---
-        // If we have no apps, check if there are legacy "app-less" trackers
         if (this.apps.length === 0) {
           this.omniService.getTrackers().subscribe(legacyTrackers => {
             if (legacyTrackers.length > 0) {
-              // Create a default app for them
               this.omniService.createApp({ name: 'Omni Hub', icon: '🏠', description: 'Your original trackers' })
                 .subscribe(newApp => {
                   this.apps.push(newApp);
@@ -236,13 +242,57 @@ export class OmniDashboardComponent implements OnInit {
     });
   }
 
+  calculateAppStats(appId: number) {
+    this.appStats = { totalValue: 0, activeCount: 0, recentLogs: [], breakdown: [] };
+    const allLogs: any[] = [];
+    let processedTrackers = 0;
+
+    if (this.trackers.length === 0) return;
+
+    this.trackers.forEach(tracker => {
+      this.omniService.getEntries(tracker.id!).subscribe(entries => {
+        processedTrackers++;
+        
+        // 1. Total value (Currency/Balance)
+        entries.forEach(e => {
+          Object.keys(e.fieldValues || {}).forEach(k => {
+            const field = tracker.fieldDefinitions.find(f => f.name === k);
+            if (field?.type === 'CURRENCY' || k.toLowerCase().includes('balance') || k.toLowerCase().includes('cost')) {
+              // Only take latest entry for individual accounts/subs unless it's a "Journal" style
+              if (entries.indexOf(e) === 0) {
+                this.appStats.totalValue += parseFloat(e.fieldValues[k]) || 0;
+              }
+            }
+          });
+          
+          // Add to recent logs
+          allLogs.push({ ...e, trackerName: tracker.name, trackerIcon: tracker.icon || this.getIcon(tracker.type) });
+        });
+
+        if (processedTrackers === this.trackers.length) {
+          // Sort overall logs by date
+          this.appStats.recentLogs = allLogs.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+          
+          // Create breakdown by tracker
+          const total = this.trackers.length;
+          this.appStats.breakdown = this.trackers.map(t => ({
+            name: t.name,
+            value: 0, 
+            percent: 100 / total
+          }));
+        }
+      });
+    });
+  }
+
   // ── Navigation ──────────────────────────────────────────────
   selectApp(app: OmniApp) {
     this.selectedApp = app;
     this.isLoading = true;
     this.omniService.getTrackers(app.id).subscribe(data => {
       this.trackers = data;
-      this.viewMode = 'TRACKER_GRID';
+      this.calculateAppStats(app.id!);
+      this.viewMode = 'APP_DASHBOARD';
       this.isLoading = false;
     });
   }
@@ -256,10 +306,10 @@ export class OmniDashboardComponent implements OnInit {
 
   goBack() {
     if (this.viewMode === 'DETAIL') {
-      this.viewMode = 'TRACKER_GRID';
+      this.viewMode = 'APP_DASHBOARD';
       this.selectedTracker = undefined;
       this.entries = [];
-    } else if (this.viewMode === 'TRACKER_GRID') {
+    } else if (this.viewMode === 'TRACKER_GRID' || this.viewMode === 'APP_DASHBOARD') {
       this.viewMode = 'APP_GRID';
       this.selectedApp = undefined;
       this.trackers = [];
@@ -300,7 +350,8 @@ export class OmniDashboardComponent implements OnInit {
     
     this.trackerForm.patchValue({
       name: tpl.name,
-      type: tpl.type
+      type: tpl.type,
+      icon: tpl.icon
     });
 
     this.fieldDefinitions.clear();
@@ -321,6 +372,7 @@ export class OmniDashboardComponent implements OnInit {
     this.omniService.createTracker(trackerData).subscribe(tracker => {
       this.trackers.push(tracker);
       this.isAddingTracker = false;
+      this.calculateAppStats(this.selectedApp!.id!); // Refresh stats
     });
   }
 

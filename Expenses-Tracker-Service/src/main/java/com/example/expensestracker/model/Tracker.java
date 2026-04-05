@@ -34,6 +34,8 @@ public class Tracker {
     @JsonProperty("appId")
     private Long appId;            // Parent App ID
 
+    private String icon;           // Visual icon for the tracker (e.g. 💳, 🧬)
+
     public Tracker() {}
 
     public Tracker(String name, List<Object> fieldDefinitions, TrackerType type, Long userId, Long appId) {
@@ -59,4 +61,6 @@ public class Tracker {
     public void setUserId(Long userId) { this.userId = userId; }
     public Long getAppId() { return appId; }
     public void setAppId(Long appId) { this.appId = appId; }
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 }

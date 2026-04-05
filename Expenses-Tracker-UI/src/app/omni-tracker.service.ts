@@ -10,6 +10,7 @@ export interface Tracker {
   fieldDefinitions: any[];
   type: 'FINANCE' | 'HEALTH' | 'STOCK' | 'CUSTOM';
   metadata?: string;
+  icon?: string;
   userId?: number;
   appId?: number;
 }

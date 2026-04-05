@@ -63,28 +63,15 @@
       <p class="home-subtitle">{{ selectedApp.description || 'Intelligent insights across all your trackers.' }}</p>
     </div>
 
-    <!-- Dashboard Stat Cards -->
-    <div class="dashboard-stats animate-fade-up">
-      <div class="stat-card">
-        <div class="stat-card-icon">💰</div>
+    <!-- Dashboard Stat Cards (Dynamic Archetypes) -->
+    <div class="dashboard-stats animate-fade-up" [ngClass]="'archetype-' + appStats.archetype.toLowerCase()">
+      <div class="stat-card" *ngFor="let metric of appStats.primaryMetrics">
+        <div class="stat-card-icon">{{ metric.icon }}</div>
         <div class="stat-card-info">
-          <span class="stat-card-val">{{ appStats.totalValue | currency:'USD' }}</span>
-          <span class="stat-card-label">Total Monthly Insight</span>
+          <span class="stat-card-val">{{ metric.value }}</span>
+          <span class="stat-card-label">{{ metric.label }}</span>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon">📈</div>
-        <div class="stat-card-info">
-          <span class="stat-card-val">{{ trackers.length }}</span>
-          <span class="stat-card-label">Active Trackers</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon">⚡</div>
-        <div class="stat-card-info">
-          <span class="stat-card-val">On Track</span>
-          <span class="stat-card-label">Health Status</span>
-        </div>
+        <div class="stat-card-trend" *ngIf="metric.trend">{{ metric.trend }}</div>
       </div>
     </div>
 

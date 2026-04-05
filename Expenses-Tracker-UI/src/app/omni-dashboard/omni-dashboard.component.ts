@@ -22,8 +22,8 @@ export class OmniDashboardComponent implements OnInit {
   viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' = 'APP_GRID';
 
   appStats = {
-    totalValue: 0,
-    activeCount: 0,
+    archetype: 'GENERIC' as 'FINANCE' | 'HEALTH' | 'GENERIC',
+    primaryMetrics: [] as { label: string, value: string, icon: string, trend?: string }[],
     recentLogs: [] as any[],
     breakdown: [] as { name: string, value: number, percent: number }[]
   };
@@ -243,43 +243,68 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   calculateAppStats(appId: number) {
-    this.appStats = { totalValue: 0, activeCount: 0, recentLogs: [], breakdown: [] };
+    if (this.trackers.length === 0) {
+      this.appStats = { archetype: 'GENERIC', primaryMetrics: [], recentLogs: [], breakdown: [] };
+      return;
+    }
+
+    const typeCounts = { FINANCE: 0, HEALTH: 0, STOCK: 0, CUSTOM: 0 };
+    this.trackers.forEach(t => typeCounts[t.type as keyof typeof typeCounts]++);
+    
+    let archetype: 'FINANCE' | 'HEALTH' | 'GENERIC' = 'GENERIC';
+    if (typeCounts.FINANCE >= typeCounts.HEALTH && typeCounts.FINANCE > 0) archetype = 'FINANCE';
+    else if (typeCounts.HEALTH > typeCounts.FINANCE) archetype = 'HEALTH';
+
+    this.appStats.archetype = archetype;
     const allLogs: any[] = [];
     let processedTrackers = 0;
-
-    if (this.trackers.length === 0) return;
+    let totalFinance = 0;
+    let totalHealthScore = 0;
+    let healthMetricCount = 0;
 
     this.trackers.forEach(tracker => {
       this.omniService.getEntries(tracker.id!).subscribe(entries => {
         processedTrackers++;
+        const identityField = tracker.fieldDefinitions?.[0]?.name;
+        const latestByIdentity: { [id: string]: TrackerEntry } = {};
         
-        // 1. Total value (Currency/Balance)
         entries.forEach(e => {
-          Object.keys(e.fieldValues || {}).forEach(k => {
-            const field = tracker.fieldDefinitions.find(f => f.name === k);
-            if (field?.type === 'CURRENCY' || k.toLowerCase().includes('balance') || k.toLowerCase().includes('cost')) {
-              // Only take latest entry for individual accounts/subs unless it's a "Journal" style
-              if (entries.indexOf(e) === 0) {
-                this.appStats.totalValue += parseFloat(e.fieldValues[k]) || 0;
-              }
-            }
-          });
-          
-          // Add to recent logs
+          const idValue = identityField ? e.fieldValues[identityField] : 'default';
+          if (!latestByIdentity[idValue]) latestByIdentity[idValue] = e;
           allLogs.push({ ...e, trackerName: tracker.name, trackerIcon: tracker.icon || this.getIcon(tracker.type) });
         });
 
+        Object.values(latestByIdentity).forEach(e => {
+          Object.keys(e.fieldValues || {}).forEach(k => {
+            const field = tracker.fieldDefinitions.find(f => f.name === k);
+            const valNum = parseFloat(e.fieldValues[k]);
+            if (field?.type === 'CURRENCY' || k.toLowerCase().includes('balance') || k.toLowerCase().includes('cost')) totalFinance += valNum || 0;
+            if (field?.type === 'RATING') { totalHealthScore += valNum || 0; healthMetricCount++; }
+          });
+        });
+
         if (processedTrackers === this.trackers.length) {
-          // Sort overall logs by date
+          if (archetype === 'FINANCE') {
+            this.appStats.primaryMetrics = [
+              { label: 'Total Value Hub', value: `$${totalFinance.toLocaleString()}`, icon: '💰', trend: 'Monthly' },
+              { label: 'Asset Classes', value: `${this.trackers.length}`, icon: '📊' },
+              { label: 'Financial Health', value: 'Prime', icon: '✨' }
+            ];
+          } else if (archetype === 'HEALTH') {
+            const avg = healthMetricCount > 0 ? (totalHealthScore / healthMetricCount).toFixed(1) : '—';
+            this.appStats.primaryMetrics = [
+              { label: 'Avg Health Score', value: `⭐ ${avg}`, icon: '🧬' },
+              { label: 'Recovery Status', value: 'Optimal', icon: '🛌' },
+              { label: 'Logs Analyzed', value: `${allLogs.length}`, icon: '📋' }
+            ];
+          } else {
+            this.appStats.primaryMetrics = [
+              { label: 'Operational Hub', value: `${this.trackers.length}`, icon: '⚙️' },
+              { label: 'Total Activity', value: `${allLogs.length}`, icon: '🔄' },
+              { label: 'System status', value: 'Online', icon: '🌐' }
+            ];
+          }
           this.appStats.recentLogs = allLogs.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
-          
-          // Create breakdown by tracker
-          const total = this.trackers.length;
-          this.appStats.breakdown = this.trackers.map(t => ({
-            name: t.name,
-            value: 0, 
-            percent: 100 / total
-          }));
         }
       });
     });

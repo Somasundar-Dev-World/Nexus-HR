@@ -1,25 +1,19 @@
 <div class="layout-container" (click)="closeAll($event)">
 
-  <!-- ═══ DESKTOP SIDEBAR (hidden on mobile) ═══ -->
-  <aside *ngIf="authService.isAuthenticated && !isPublicPage()" class="sidebar">
-    <a routerLink="/" class="brand-link">
-      <div class="brand">
-        <div class="logo">OT</div>
-        <h2>OmniTracker</h2>
-      </div>
-    </a>
-    <nav class="nav-links">
-      <a routerLink="/track" routerLinkActive="active">
-        <span class="icon">🎯</span> OmniTracker
-      </a>
-    </nav>
-  </aside>
-
   <!-- ═══ MAIN CONTENT ═══ -->
-  <main class="main-content" [class.full-width]="!authService.isAuthenticated || isPublicPage()">
+  <main class="main-content" [class.full-width]="true">
 
-    <!-- Desktop topbar (user avatar / logout) -->
+    <!-- Desktop topbar (brand | user profile) -->
     <div *ngIf="authService.isAuthenticated && !isPublicPage()" class="topbar">
+      <!-- Brand on the left -->
+      <a routerLink="/track" class="brand-link">
+        <div class="brand-horizontal">
+          <div class="logo">OT</div>
+          <span class="brand-name">OmniTracker</span>
+        </div>
+      </a>
+
+      <!-- User Profile on the right -->
       <div class="user-profile" (click)="toggleDropdown(); $event.stopPropagation()"
            style="position:relative; cursor:pointer;"
            *ngIf="authService.currentUserValue as user">

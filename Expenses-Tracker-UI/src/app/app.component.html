@@ -18,18 +18,6 @@
       <a routerLink="/track" routerLinkActive="active">
         <span class="icon">🎯</span> OmniTracker
       </a>
-      <a routerLink="/transactions" routerLinkActive="active">
-        <span class="icon">💸</span> Transactions
-      </a>
-      <a routerLink="/assets" routerLinkActive="active">
-        <span class="icon">🏦</span> Assets
-      </a>
-      <a routerLink="/liabilities" routerLinkActive="active">
-        <span class="icon">📉</span> Liabilities
-      </a>
-      <a routerLink="/reports" routerLinkActive="active">
-        <span class="icon">📈</span> Reports
-      </a>
     </nav>
   </aside>
 
@@ -50,6 +38,23 @@
           <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
             <span style="margin-right:8px">⚙️</span> Update Profile
           </a>
+          
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-header">Legacy</div>
+          <a class="dropdown-item" routerLink="/transactions" (click)="isDropdownOpen = false">
+            <span style="margin-right:8px">💸</span> Transactions
+          </a>
+          <a class="dropdown-item" routerLink="/assets" (click)="isDropdownOpen = false">
+            <span style="margin-right:8px">🏦</span> Assets
+          </a>
+          <a class="dropdown-item" routerLink="/liabilities" (click)="isDropdownOpen = false">
+            <span style="margin-right:8px">📉</span> Liabilities
+          </a>
+          <a class="dropdown-item" routerLink="/reports" (click)="isDropdownOpen = false">
+            <span style="margin-right:8px">📈</span> Reports
+          </a>
+
+          <div class="dropdown-divider"></div>
           <a class="dropdown-item text-danger" (click)="logout()">
             <span style="margin-right:8px">🚪</span> Logout
           </a>
@@ -83,6 +88,23 @@
             <a class="dropdown-item" routerLink="/profile" (click)="isDropdownOpen = false">
               <span style="margin-right:8px">⚙️</span> Update Profile
             </a>
+            
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-header">Legacy</div>
+            <a class="dropdown-item" routerLink="/transactions" (click)="isDropdownOpen = false">
+              <span style="margin-right:8px">💸</span> Transactions
+            </a>
+            <a class="dropdown-item" routerLink="/assets" (click)="isDropdownOpen = false">
+              <span style="margin-right:8px">🏦</span> Assets
+            </a>
+            <a class="dropdown-item" routerLink="/liabilities" (click)="isDropdownOpen = false">
+              <span style="margin-right:8px">📉</span> Liabilities
+            </a>
+            <a class="dropdown-item" routerLink="/reports" (click)="isDropdownOpen = false">
+              <span style="margin-right:8px">📈</span> Reports
+            </a>
+
+            <div class="dropdown-divider"></div>
             <a class="dropdown-item text-danger" (click)="logout()">
               <span style="margin-right:8px">🚪</span> Logout
             </a>
@@ -96,12 +118,6 @@
         </a>
         <a routerLink="/track" routerLinkActive="tab-active">
           <span>🎯</span><span class="tab-label">Track</span>
-        </a>
-        <a routerLink="/transactions" routerLinkActive="tab-active">
-          <span>💸</span><span class="tab-label">Trans</span>
-        </a>
-        <a routerLink="/reports" routerLinkActive="tab-active">
-          <span>📈</span><span class="tab-label">Reports</span>
         </a>
       </nav>
     </div>

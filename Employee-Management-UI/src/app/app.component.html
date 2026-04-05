@@ -1,51 +1,58 @@
-<div class="app-container">
+<div class="app-container" [class.no-nav]="hideNav()">
   <!-- Sidebar -->
-  <aside class="sidebar" [class.open]="isSidebarOpen">
-    <div class="brand">
-      <img src="assets/logo.png" alt="Nexus HR Logo" class="brand-logo" />
-      <h2>Nexus HR</h2>
-      <button class="mobile-close" (click)="closeSidebar()">✕</button>
-    </div>
-    <nav class="nav-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" (click)="closeSidebar()">
-        <span class="icon">📊</span> Dashboard
-      </a>
-      <a routerLink="/employees" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
-        <span class="icon">👥</span> Employees
-      </a>
-      <a routerLink="/departments" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
-        <span class="icon">🏢</span> Departments
-      </a>
-      <a routerLink="/add" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
-        <span class="icon">➕</span> Add Employee
-      </a>
-    </nav>
-  </aside>
+  @if (!hideNav()) {
+    <aside class="sidebar" [class.open]="isSidebarOpen">
+      <div class="brand">
+        <div class="logo-icon">N</div>
+        <h2>Nexus HR</h2>
+        <button class="mobile-close" (click)="isSidebarOpen = false">✕</button>
+      </div>
+      <nav class="nav-links">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen = false">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a routerLink="/employees" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen = false">
+          <span class="icon">👥</span> Employees
+        </a>
+        <a routerLink="/departments" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen = false">
+          <span class="icon">🏢</span> Departments
+        </a>
+        <a routerLink="/add" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen = false">
+          <span class="icon">➕</span> Add Employee
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="logout-btn" (click)="logout()">
+          <span class="icon">🚪</span> Logout
+        </button>
+      </div>
+    </aside>
 
-  <!-- Mobile Overlay -->
-  <div class="sidebar-overlay" [class.show]="isSidebarOpen" (click)="closeSidebar()"></div>
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" [class.show]="isSidebarOpen" (click)="isSidebarOpen = false"></div>
+  }
 
   <!-- Main Content -->
   <main class="main-content">
-    <header class="topbar">
-      <button class="mobile-toggle" (click)="toggleSidebar()">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </button>
-      <div class="topbar-right">
-        <div class="search-bar">
-          <input type="text" placeholder="Search..." class="search-input">
-        </div>
-        <div class="user-profile">
-          <div class="avatar">R</div>
-          <div class="user-info">
-            <span class="name">Admin Rekha</span>
-            <span class="role">System Administrator</span>
+    @if (!hideNav()) {
+      <header class="topbar">
+        <button class="mobile-toggle" (click)="toggleSidebar()">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+        <div class="topbar-right">
+          <div class="user-profile">
+            <div class="avatar">{{ currentUser()?.name?.charAt(0) || 'U' }}</div>
+            <div class="user-info">
+              <span class="name">{{ currentUser()?.name }}</span>
+              <span class="role">Administrator</span>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    }
 
     <div class="content-area">
       <router-outlet></router-outlet>

@@ -24,7 +24,12 @@ export class RegisterComponent {
     this.authService.register(this.userData).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
-        this.error = 'Registration failed. Username might already exist.';
+        console.error('Registration error:', err);
+        if (err.status === 0) {
+          this.error = 'Could not connect to the authentication server. Please ensure the backend is running on port 8080.';
+        } else {
+          this.error = err.error?.message || err.error || 'Registration failed. Username might already exist.';
+        }
         this.loading = false;
       }
     });

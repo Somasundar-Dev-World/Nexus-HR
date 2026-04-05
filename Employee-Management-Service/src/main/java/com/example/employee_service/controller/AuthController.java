@@ -25,16 +25,23 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
+        try {
+            System.out.println("Processing registration for user: " + request.getUsername());
+            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
+            }
+            User user = new User(request.getUsername(), request.getPassword(), request.getName());
+            userRepository.save(user);
+            
+            String token = UUID.randomUUID().toString();
+            TOKEN_STORE.put(token, user.getId());
+            
+            System.out.println("Registration successful for user: " + request.getUsername());
+            return ResponseEntity.ok(new AuthResponse(token, user.getName(), user.getUsername()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registration failed: " + e.getMessage());
         }
-        User user = new User(request.getUsername(), request.getPassword(), request.getName());
-        userRepository.save(user);
-        
-        String token = UUID.randomUUID().toString();
-        TOKEN_STORE.put(token, user.getId());
-        
-        return ResponseEntity.ok(new AuthResponse(token, user.getName(), user.getUsername()));
     }
 
     @PostMapping("/login")

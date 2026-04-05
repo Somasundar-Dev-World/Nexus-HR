@@ -9,11 +9,6 @@
       </div>
     </a>
     <nav class="nav-links">
-      <div class="nav-group-label">Core Dashboard</div>
-      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <span class="icon">📊</span> Overview
-      </a>
-      
       <div class="nav-group-label">Life Tracks</div>
       <a routerLink="/track" routerLinkActive="active">
         <span class="icon">🎯</span> OmniTracker
@@ -41,6 +36,9 @@
           
           <div class="dropdown-divider"></div>
           <div class="dropdown-header">Legacy</div>
+          <a class="dropdown-item" routerLink="/dashboard" (click)="isDropdownOpen = false">
+            <span style="margin-right:8px">📊</span> Overview
+          </a>
           <a class="dropdown-item" routerLink="/transactions" (click)="isDropdownOpen = false">
             <span style="margin-right:8px">💸</span> Transactions
           </a>
@@ -91,6 +89,9 @@
             
             <div class="dropdown-divider"></div>
             <div class="dropdown-header">Legacy</div>
+            <a class="dropdown-item" routerLink="/dashboard" (click)="isDropdownOpen = false">
+              <span style="margin-right:8px">📊</span> Overview
+            </a>
             <a class="dropdown-item" routerLink="/transactions" (click)="isDropdownOpen = false">
               <span style="margin-right:8px">💸</span> Transactions
             </a>
@@ -113,9 +114,6 @@
       </div>
       <!-- Nav tabs row -->
       <nav class="mobile-nav-tabs">
-        <a routerLink="/dashboard" routerLinkActive="tab-active" [routerLinkActiveOptions]="{exact:true}">
-          <span>📊</span><span class="tab-label">Dash</span>
-        </a>
         <a routerLink="/track" routerLinkActive="tab-active">
           <span>🎯</span><span class="tab-label">Track</span>
         </a>

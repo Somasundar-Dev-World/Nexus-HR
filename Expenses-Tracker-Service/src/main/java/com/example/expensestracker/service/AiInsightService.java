@@ -68,18 +68,6 @@ public class AiInsightService {
         } catch (Exception e) {
             String errorMsg = e.getMessage();
             System.err.println("AI Insight Generation Failed: " + errorMsg);
-            
-            if (errorMsg != null && errorMsg.contains("404")) {
-                System.out.println("AI Insight Debug: 404 detected. Listing available models...");
-                try {
-                    String listModelsUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + activeApiKey;
-                    String models = restTemplate.getForObject(listModelsUrl, String.class);
-                    System.out.println("AI Insight Debug: Available Models: " + models);
-                } catch (Exception listEx) {
-                    System.err.println("AI Insight Debug: Failed to list models: " + listEx.getMessage());
-                }
-            }
-            
             return getErrorFallbackInsights(app, errorMsg);
         }
     }
@@ -105,7 +93,7 @@ public class AiInsightService {
     }
 
     private List<SmartInsight> callGemini(String context, String activeApiKey) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + activeApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=" + activeApiKey;
 
         String prompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
                 "Your goal is to analyze user tracking data and provide 3-4 highly relevant, actionable insights or metrics. " +

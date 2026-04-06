@@ -41,6 +41,7 @@ public class AiInsightService {
     public List<SmartInsight> getInsightsForApp(Long appId, Long userId) {
         TrackerApp app = trackerAppRepository.findById(appId).orElse(null);
         if (app == null || !app.getUserId().equals(userId)) {
+            System.out.println("AI Insight: App not found or access denied for appId " + appId + ", userId " + userId);
             return Collections.emptyList();
         }
 
@@ -49,7 +50,9 @@ public class AiInsightService {
                 .map(User::getGeminiApiKey)
                 .orElse(null);
 
-        String activeApiKey = (userApiKey != null && !userApiKey.isEmpty()) ? userApiKey : defaultApiKey;
+        String activeApiKey = (userApiKey != null && !userApiKey.isEmpty()) ? userApiKey.trim() : defaultApiKey;
+
+        System.out.println("AI Insight: Using API Key (start): " + (activeApiKey != null && activeApiKey.length() > 4 ? activeApiKey.substring(0, 4) + "..." : "EMPTY"));
 
         if (activeApiKey == null || activeApiKey.isEmpty()) {
             return getFallbackInsights(app);
@@ -57,12 +60,15 @@ public class AiInsightService {
 
         List<Tracker> trackers = trackerRepository.findByUserIdAndAppId(userId, appId);
         String dataContext = buildDataContext(app, trackers);
+        
+        System.out.println("AI Insight: Data context length: " + dataContext.length());
 
         try {
             return callGemini(dataContext, activeApiKey);
         } catch (Exception e) {
-            System.err.println("AI Insight Generation Failed: " + e.getMessage());
-            return getFallbackInsights(app);
+            String errorMsg = e.getMessage();
+            System.err.println("AI Insight Generation Failed: " + errorMsg);
+            return getErrorFallbackInsights(app, errorMsg);
         }
     }
 
@@ -130,8 +136,15 @@ public class AiInsightService {
 
     private List<SmartInsight> getFallbackInsights(TrackerApp app) {
         return List.of(
-            new SmartInsight("ADVICE", "Get Started", "Zero Data Analyzed", "Connect more trackers to see AI insights", "💡", "primary", 1, "No API key or data found."),
-            new SmartInsight("METRIC", app.getName() + " Status", "Active", "Operational", "🚀", "success", 2, "Default active status.")
+            new SmartInsight("ADVICE", "Action Required", "AI Insights Pending", "Please ensure your Gemini API Key is set in Profile Settings.", "💡", "primary", 1, "No active API key found."),
+            new SmartInsight("METRIC", app.getName() + " Status", "Active", "Operational", "🚀", "success", 2, "System is ready for data analysis.")
+        );
+    }
+
+    private List<SmartInsight> getErrorFallbackInsights(TrackerApp app, String error) {
+        return List.of(
+            new SmartInsight("ALERT", "AI Error", "Generation Failed", "There was an issue communicating with Gemini.", "⚠️", "danger", 1, error),
+            new SmartInsight("ADVICE", "Check API Key", "Verify Settings", "Ensure your API key is valid and has Gemini 1.5 Flash enabled.", "🔑", "warning", 2, "API Call Result: " + error)
         );
     }
 }

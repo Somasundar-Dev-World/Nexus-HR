@@ -3,8 +3,10 @@
   @if (!hideNav()) {
     <aside class="sidebar" [class.open]="isSidebarOpen">
       <div class="brand">
-        <div class="logo-icon">N</div>
-        <h2>Nexus HR</h2>
+        <a routerLink="/dashboard" class="brand-wrapper">
+          <img src="assets/logo.png" alt="Nexus HR Logo" class="brand-logo">
+          <h2 class="brand-title">Nexus HR</h2>
+        </a>
         <button class="mobile-close" (click)="isSidebarOpen = false">✕</button>
       </div>
       <nav class="nav-links">
@@ -38,6 +40,14 @@
           <span class="bar"></span>
           <span class="bar"></span>
         </button>
+
+        <div class="search-container">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search employees, departments..." class="search-input">
+          </div>
+        </div>
+
         <div class="topbar-right">
           <div class="user-profile" (click)="toggleProfileMenu($event)">
             <div class="avatar">{{ authService.currentUser()?.name?.charAt(0) || 'U' }}</div>

@@ -16,6 +16,13 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Glassmorphism & Premium Effects */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --header-blur: blur(12px);
+  --brand-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --surface-glass: rgba(255, 255, 255, 0.03);
 }
 
 * {

@@ -62,6 +62,34 @@
         <button class="btn-icon btn-edit-header" (click)="openEditApp(selectedApp)" title="Edit App">✏️</button>
       </div>
       <p class="home-subtitle">{{ selectedApp.description || 'Intelligent insights across all your trackers.' }}</p>
+
+    <!-- AI Smart Insights Section -->
+    <div class="ai-insights-section animate-fade-up" *ngIf="aiInsights.length || loadingInsights">
+      <div class="section-badge"><span class="magic-sparkle">✨</span> AI SMART INSIGHTS</div>
+      
+      <div class="insights-grid" *ngIf="!loadingInsights">
+        <div class="insight-card" *ngFor="let insight of aiInsights" [ngClass]="'insight-' + insight.color">
+          <div class="insight-header">
+            <span class="insight-icon">{{ insight.icon }}</span>
+            <span class="insight-type">{{ insight.type }}</span>
+          </div>
+          <div class="insight-body">
+            <h4 class="insight-title">{{ insight.title }}</h4>
+            <div class="insight-value">{{ insight.value }}</div>
+            <p class="insight-subtitle">{{ insight.subtitle }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Loading State -->
+      <div class="insights-grid" *ngIf="loadingInsights">
+        <div class="insight-card skeleton" *ngFor="let i of [1,2,3]">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line val"></div>
+          <div class="skeleton-line sub"></div>
+        </div>
+      </div>
+    </div>
     </div>
 
     <!-- Dashboard Stat Cards (Dynamic Archetypes) -->

@@ -24,6 +24,17 @@ export interface TrackerEntry {
   userId?: number;
 }
 
+export interface SmartInsight {
+  type: 'METRIC' | 'ADVICE' | 'ALERT' | 'CHART';
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: string;
+  color: 'success' | 'warning' | 'danger' | 'primary' | 'magic';
+  priority: number;
+  reasoning?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OmniTrackerService {
   private apiUrl = `${environment.apiUrl}/omni`;
@@ -85,5 +96,9 @@ export class OmniTrackerService {
 
   deleteEntry(id: number): Observable<any> { 
     return this.http.delete(`${this.apiUrl}/entries/${id}`); 
+  }
+
+  getAiInsights(appId: number): Observable<SmartInsight[]> {
+    return this.http.get<SmartInsight[]>(`${this.apiUrl}/apps/${appId}/insights`);
   }
 }

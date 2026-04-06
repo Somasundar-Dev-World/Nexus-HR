@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { OmniTrackerService, Tracker, TrackerEntry } from '../omni-tracker.service';
+import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight } from '../omni-tracker.service';
 import { OmniApp } from '../omni-app.model';
 
 @Component({
@@ -17,6 +17,8 @@ export class OmniDashboardComponent implements OnInit {
   apps: OmniApp[] = [];
   selectedApp?: OmniApp;
   entries: TrackerEntry[] = [];
+  aiInsights: SmartInsight[] = [];
+  loadingInsights = false;
 
   // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs
   viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' = 'APP_GRID';
@@ -316,11 +318,27 @@ export class OmniDashboardComponent implements OnInit {
   selectApp(app: OmniApp) {
     this.selectedApp = app;
     this.isLoading = true;
+    this.aiInsights = [];
     this.omniService.getTrackers(app.id).subscribe(data => {
       this.trackers = data;
       this.calculateAppStats(app.id!);
+      this.fetchAiInsights(app.id!);
       this.viewMode = 'APP_DASHBOARD';
       this.isLoading = false;
+    });
+  }
+
+  fetchAiInsights(appId: number) {
+    this.loadingInsights = true;
+    this.omniService.getAiInsights(appId).subscribe({
+      next: (insights) => {
+        this.aiInsights = insights.sort((a, b) => a.priority - b.priority);
+        this.loadingInsights = false;
+      },
+      error: (err) => {
+        console.error('Failed to fetch AI insights', err);
+        this.loadingInsights = false;
+      }
     });
   }
 

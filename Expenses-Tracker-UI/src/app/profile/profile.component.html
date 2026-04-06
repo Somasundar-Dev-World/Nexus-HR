@@ -29,6 +29,12 @@
         <label class="form-label">Full Name</label>
         <input type="text" class="form-control" name="name" [(ngModel)]="profile.name" required>
       </div>
+
+      <div class="form-group mb-1">
+        <label class="form-label">Gemini API Key</label>
+        <input type="password" class="form-control" name="geminiApiKey" [(ngModel)]="profile.geminiApiKey" placeholder="Enter your Google Gemini API Key">
+        <p class="text-xs text-muted mt-1">This key is used to generate smart insights for your dashboards.</p>
+      </div>
       
       <div class="form-group mb-2">
         <label class="form-label">New Password</label>

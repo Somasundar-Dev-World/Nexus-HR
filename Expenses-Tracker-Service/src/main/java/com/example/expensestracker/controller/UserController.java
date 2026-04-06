@@ -18,7 +18,7 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestAttribute("userId") Long userId) {
         return userRepository.findById(userId)
-                .map(user -> ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName())))
+                .map(user -> ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName(), user.getGeminiApiKey())))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -26,11 +26,12 @@ public class UserController {
     public ResponseEntity<?> updateProfile(@RequestAttribute("userId") Long userId, @RequestBody ProfileDTO dto) {
         return userRepository.findById(userId).map(user -> {
             user.setName(dto.getName());
+            user.setGeminiApiKey(dto.getGeminiApiKey());
             if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
                 user.setPassword(dto.getPassword());
             }
             userRepository.save(user);
-            return ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName()));
+            return ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName(), user.getGeminiApiKey()));
         }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -38,11 +39,13 @@ public class UserController {
         private String username;
         private String name;
         private String password;
+        private String geminiApiKey;
 
         public ProfileDTO() {}
-        public ProfileDTO(String username, String name) {
+        public ProfileDTO(String username, String name, String geminiApiKey) {
             this.username = username;
             this.name = name;
+            this.geminiApiKey = geminiApiKey;
         }
 
         public String getUsername() { return username; }
@@ -51,5 +54,7 @@ public class UserController {
         public void setName(String name) { this.name = name; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
+        public String getGeminiApiKey() { return geminiApiKey; }
+        public void setGeminiApiKey(String geminiApiKey) { this.geminiApiKey = geminiApiKey; }
     }
 }

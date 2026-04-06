@@ -1086,3 +1086,129 @@
   align-items: center;
   gap: 0.5rem;
 }
+
+/* --- AI Smart Insights Styles --- */
+.ai-insights-section {
+  margin: 1.5rem 0 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.2), rgba(219, 39, 119, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #c4b5fd;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+}
+
+.magic-sparkle {
+  filter: drop-shadow(0 0 5px #7c3aed);
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.insight-card {
+  padding: 1.5rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.insight-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.insight-icon {
+  font-size: 1.5rem;
+}
+
+.insight-type {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.insight-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 0.5rem 0;
+}
+
+.insight-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.insight-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Insight Colors */
+.insight-success { border-left: 4px solid #10b981; }
+.insight-warning { border-left: 4px solid #f59e0b; }
+.insight-danger { border-left: 4px solid #ef4444; }
+.insight-primary { border-left: 4px solid #3b82f6; }
+.insight-magic { border-left: 4px solid #8b5cf6; }
+
+/* Skeleton Loading */
+.insight-card.skeleton {
+  min-height: 160px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-line.title { height: 1.2rem; width: 60%; margin-bottom: 1rem; }
+.skeleton-line.val { height: 2rem; width: 40%; margin-bottom: 0.5rem; }
+.skeleton-line.sub { height: 1rem; width: 80%; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

@@ -18,6 +18,8 @@ public class User {
 
     private String name;
 
+    private String geminiApiKey;
+
     public User() {}
 
     public User(String username, String password, String name) {
@@ -34,4 +36,6 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getGeminiApiKey() { return geminiApiKey; }
+    public void setGeminiApiKey(String geminiApiKey) { this.geminiApiKey = geminiApiKey; }
 }

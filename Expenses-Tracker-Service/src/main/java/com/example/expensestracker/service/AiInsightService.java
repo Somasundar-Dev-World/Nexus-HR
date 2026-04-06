@@ -93,7 +93,7 @@ public class AiInsightService {
     }
 
     private List<SmartInsight> callGemini(String context, String activeApiKey) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + activeApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + activeApiKey;
 
         String prompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
                 "Your goal is to analyze user tracking data and provide 3-4 highly relevant, actionable insights or metrics. " +

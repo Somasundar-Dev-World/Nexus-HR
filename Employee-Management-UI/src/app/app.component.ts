@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './auth.service';
@@ -13,11 +13,20 @@ import { AuthService } from './auth.service';
 export class AppComponent {
   title = 'Employee-Management-UI';
   isSidebarOpen = false;
+  isProfileMenuOpen = false;
 
   currentUser = this.authService.currentUser;
   isLoggedIn = computed(() => !!this.currentUser());
 
   constructor(public authService: AuthService, private router: Router) {}
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.user-profile')) {
+      this.isProfileMenuOpen = false;
+    }
+  }
 
   hideNav() {
     const url = this.router.url;
@@ -26,10 +35,16 @@ export class AppComponent {
 
   logout() {
     this.authService.logout();
+    this.isProfileMenuOpen = false;
   }
 
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  toggleProfileMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
   }
 
   closeSidebar() {

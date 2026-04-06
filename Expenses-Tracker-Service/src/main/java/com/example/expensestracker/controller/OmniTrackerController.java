@@ -40,6 +40,20 @@ public class OmniTrackerController {
         return appRepository.save(app);
     }
 
+    @PutMapping("/apps/{id}")
+    public ResponseEntity<TrackerApp> updateApp(@RequestAttribute("userId") Long userId, @PathVariable Long id, @RequestBody TrackerApp updatedApp) {
+        return appRepository.findById(id).map(app -> {
+            if (app.getUserId().equals(userId)) {
+                app.setName(updatedApp.getName());
+                app.setIcon(updatedApp.getIcon());
+                app.setDescription(updatedApp.getDescription());
+                app.setColorStyle(updatedApp.getColorStyle());
+                return ResponseEntity.ok(appRepository.save(app));
+            }
+            return ResponseEntity.status(403).<TrackerApp>build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/apps/{id}")
     public ResponseEntity<?> deleteApp(@RequestAttribute("userId") Long userId, @PathVariable Long id) {
         return appRepository.findById(id).map(app -> {
@@ -73,6 +87,21 @@ public class OmniTrackerController {
     public Tracker createTracker(@RequestAttribute("userId") Long userId, @RequestBody Tracker tracker) {
         tracker.setUserId(userId);
         return trackerRepository.save(tracker);
+    }
+
+    @PutMapping("/trackers/{id}")
+    public ResponseEntity<Tracker> updateTracker(@RequestAttribute("userId") Long userId, @PathVariable Long id, @RequestBody Tracker updatedTracker) {
+        return trackerRepository.findById(id).map(tracker -> {
+            if (tracker.getUserId().equals(userId)) {
+                tracker.setName(updatedTracker.getName());
+                tracker.setType(updatedTracker.getType());
+                tracker.setIcon(updatedTracker.getIcon());
+                tracker.setMetadata(updatedTracker.getMetadata());
+                tracker.setFieldDefinitions(updatedTracker.getFieldDefinitions());
+                return ResponseEntity.ok(trackerRepository.save(tracker));
+            }
+            return ResponseEntity.status(403).<Tracker>build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/trackers/{id}")

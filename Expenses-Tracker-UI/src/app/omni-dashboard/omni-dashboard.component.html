@@ -59,6 +59,7 @@
       <div class="home-title-wrap" style="margin-top: 1rem;">
         <span class="app-emoji-large">{{ selectedApp.icon }}</span>
         <h1>{{ selectedApp.name }} Dashboard</h1>
+        <button class="btn-icon btn-edit-header" (click)="openEditApp(selectedApp)" title="Edit App">✏️</button>
       </div>
       <p class="home-subtitle">{{ selectedApp.description || 'Intelligent insights across all your trackers.' }}</p>
     </div>
@@ -187,7 +188,10 @@
         <span class="detail-emoji">{{ getIcon(selectedTracker.type) }}</span>
         <div>
           <h1 class="detail-name">{{ selectedTracker.name }}</h1>
-          <span class="detail-badge">{{ selectedTracker.type }}</span>
+          <div class="detail-badge-row">
+            <span class="detail-badge">{{ selectedTracker.type }}</span>
+            <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
+          </div>
         </div>
       </div>
       <!-- Quick Stats -->
@@ -249,8 +253,8 @@
   <!-- Create App Modal -->
   <div class="modal-overlay" *ngIf="isAddingApp" (click)="isAddingApp = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>🚀 Create New App Instance</h3>
-      <p class="modal-desc">Apps serve as individual workspaces for your trackers.</p>
+      <h3>{{ editingAppId ? '✏️ Edit App Instance' : '🚀 Create New App Instance' }}</h3>
+      <p class="modal-desc">{{ editingAppId ? 'Update your workspace settings.' : 'Apps serve as individual workspaces for your trackers.' }}</p>
       
       <form [formGroup]="appForm" (ngSubmit)="createApp()">
         <div class="form-group">
@@ -274,7 +278,7 @@
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" (click)="isAddingApp = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="appForm.invalid">Launch App</button>
+          <button type="submit" class="btn btn-primary" [disabled]="appForm.invalid">{{ editingAppId ? 'Update App' : 'Launch App' }}</button>
         </div>
       </form>
     </div>
@@ -288,7 +292,7 @@
   <!-- Create Tracker Modal -->
   <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>✨ Create New Tracker</h3>
+      <h3>{{ editingTrackerId ? '✏️ Edit Tracker' : '✨ Create New Tracker' }}</h3>
       
       <!-- Template Gallery Section -->
       <div class="template-gallery-wrap">
@@ -345,7 +349,7 @@
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" (click)="isAddingTracker = false">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.invalid">Create Tracker</button>
+          <button type="submit" class="btn btn-primary" [disabled]="trackerForm.invalid">{{ editingTrackerId ? 'Update Tracker' : 'Create Tracker' }}</button>
         </div>
       </form>
     </div>

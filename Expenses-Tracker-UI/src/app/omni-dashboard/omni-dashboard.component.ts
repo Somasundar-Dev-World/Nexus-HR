@@ -39,6 +39,8 @@ export class OmniDashboardComponent implements OnInit {
   isAddingTracker = false;
   isAddingEntry = false;
   editingEntryId: number | null = null;
+  editingAppId: number | null = null;
+  editingTrackerId: number | null = null;
   deleteConfirm: { type: 'APP' | 'TRACKER' | 'ENTRY', id: number } | null = null;
 
   readonly TRACKER_TEMPLATES = [
@@ -344,15 +346,37 @@ export class OmniDashboardComponent implements OnInit {
   // ── Create App ───────────────────────────────────────────────
   openAddApp() {
     this.appForm.reset({ icon: '🚀' });
+    this.editingAppId = null;
+    this.isAddingApp = true;
+  }
+
+  openEditApp(app: OmniApp) {
+    this.appForm.patchValue({
+      name: app.name,
+      icon: app.icon,
+      description: app.description
+    });
+    this.editingAppId = app.id!;
     this.isAddingApp = true;
   }
 
   createApp() {
     if (this.appForm.invalid) return;
-    this.omniService.createApp(this.appForm.value).subscribe(app => {
-      this.apps.push(app);
-      this.isAddingApp = false;
-    });
+    
+    if (this.editingAppId) {
+      this.omniService.updateApp(this.editingAppId, this.appForm.value).subscribe(updated => {
+        const idx = this.apps.findIndex(a => a.id === updated.id);
+        if (idx !== -1) this.apps[idx] = updated;
+        if (this.selectedApp?.id === updated.id) this.selectedApp = updated;
+        this.isAddingApp = false;
+        this.editingAppId = null;
+      });
+    } else {
+      this.omniService.createApp(this.appForm.value).subscribe(app => {
+        this.apps.push(app);
+        this.isAddingApp = false;
+      });
+    }
   }
 
   // ── Create Tracker ───────────────────────────────────────────
@@ -384,21 +408,50 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   openAddTracker() {
-    this.trackerForm.reset({ type: 'FINANCE' });
+    this.trackerForm.reset({ type: 'FINANCE', icon: '⚙️' });
     this.fieldDefinitions.clear();
     this.selectedTemplateIndex = null;
+    this.editingTrackerId = null;
     this.addField();
+    this.isAddingTracker = true;
+  }
+
+  openEditTracker(tracker: Tracker) {
+    this.trackerForm.patchValue({
+      name: tracker.name,
+      type: tracker.type,
+      icon: tracker.icon || '⚙️'
+    });
+    this.fieldDefinitions.clear();
+    tracker.fieldDefinitions.forEach(f => this.addField(f));
+    this.editingTrackerId = tracker.id!;
     this.isAddingTracker = true;
   }
 
   createTracker() {
     if (this.trackerForm.invalid || !this.selectedApp) return;
     const trackerData = { ...this.trackerForm.value, appId: this.selectedApp.id };
-    this.omniService.createTracker(trackerData).subscribe(tracker => {
-      this.trackers.push(tracker);
-      this.isAddingTracker = false;
-      this.calculateAppStats(this.selectedApp!.id!); // Refresh stats
-    });
+    
+    if (this.editingTrackerId) {
+      this.omniService.updateTracker(this.editingTrackerId, trackerData).subscribe(updated => {
+        const idx = this.trackers.findIndex(t => t.id === updated.id);
+        if (idx !== -1) this.trackers[idx] = updated;
+        if (this.selectedTracker?.id === updated.id) {
+          this.selectedTracker = updated;
+          this.entries = []; // Re-fetch or clear to be safe
+          this.omniService.getEntries(updated.id!).subscribe(data => this.entries = data);
+        }
+        this.isAddingTracker = false;
+        this.editingTrackerId = null;
+        this.calculateAppStats(this.selectedApp!.id!);
+      });
+    } else {
+      this.omniService.createTracker(trackerData).subscribe(tracker => {
+        this.trackers.push(tracker);
+        this.isAddingTracker = false;
+        this.calculateAppStats(this.selectedApp!.id!); // Refresh stats
+      });
+    }
   }
 
   // ── Log Entries ──────────────────────────────────────────────

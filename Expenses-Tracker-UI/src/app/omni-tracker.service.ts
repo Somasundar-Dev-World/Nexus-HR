@@ -39,6 +39,10 @@ export class OmniTrackerService {
     return this.http.post<OmniApp>(`${this.apiUrl}/apps`, app);
   }
 
+  updateApp(id: number, app: OmniApp): Observable<OmniApp> {
+    return this.http.put<OmniApp>(`${this.apiUrl}/apps/${id}`, app);
+  }
+
   deleteApp(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/apps/${id}`);
   }
@@ -56,6 +60,10 @@ export class OmniTrackerService {
 
   createTracker(tracker: Tracker): Observable<Tracker> { 
     return this.http.post<Tracker>(`${this.apiUrl}/trackers`, tracker); 
+  }
+
+  updateTracker(id: number, tracker: Tracker): Observable<Tracker> { 
+    return this.http.put<Tracker>(`${this.apiUrl}/trackers/${id}`, tracker); 
   }
 
   deleteTracker(id: number): Observable<any> { 

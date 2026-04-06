@@ -68,6 +68,18 @@ public class AiInsightService {
         } catch (Exception e) {
             String errorMsg = e.getMessage();
             System.err.println("AI Insight Generation Failed: " + errorMsg);
+            
+            if (errorMsg != null && errorMsg.contains("404")) {
+                System.out.println("AI Insight Debug: 404 detected. Listing available models...");
+                try {
+                    String listModelsUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + activeApiKey;
+                    String models = restTemplate.getForObject(listModelsUrl, String.class);
+                    System.out.println("AI Insight Debug: Available Models: " + models);
+                } catch (Exception listEx) {
+                    System.err.println("AI Insight Debug: Failed to list models: " + listEx.getMessage());
+                }
+            }
+            
             return getErrorFallbackInsights(app, errorMsg);
         }
     }

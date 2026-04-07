@@ -13,7 +13,7 @@ import { environment } from '../../environments/environment';
   styleUrl: '../login/login.component.css'
 })
 export class ProfileComponent implements OnInit {
-  profile = { username: '', name: '', password: '', geminiApiKey: '' };
+  profile = { username: '', name: '', password: '', geminiApiKey: '', anthropicApiKey: '' };
   isLoading = false;
   successMsg = '';
   errorMsg = '';
@@ -26,6 +26,7 @@ export class ProfileComponent implements OnInit {
         this.profile.username = data.username;
         this.profile.name = data.name;
         this.profile.geminiApiKey = data.geminiApiKey;
+        this.profile.anthropicApiKey = data.anthropicApiKey;
       },
       error: (err) => console.error(err)
     });

@@ -19,6 +19,7 @@ public class User {
     private String name;
 
     private String geminiApiKey;
+    private String anthropicApiKey;
 
     public User() {}
 
@@ -38,4 +39,6 @@ public class User {
     public void setName(String name) { this.name = name; }
     public String getGeminiApiKey() { return geminiApiKey; }
     public void setGeminiApiKey(String geminiApiKey) { this.geminiApiKey = geminiApiKey; }
+    public String getAnthropicApiKey() { return anthropicApiKey; }
+    public void setAnthropicApiKey(String anthropicApiKey) { this.anthropicApiKey = anthropicApiKey; }
 }

@@ -18,7 +18,7 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestAttribute("userId") Long userId) {
         return userRepository.findById(userId)
-                .map(user -> ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName(), user.getGeminiApiKey())))
+                .map(user -> ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName(), user.getGeminiApiKey(), user.getAnthropicApiKey())))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -27,11 +27,12 @@ public class UserController {
         return userRepository.findById(userId).map(user -> {
             user.setName(dto.getName());
             user.setGeminiApiKey(dto.getGeminiApiKey());
+            user.setAnthropicApiKey(dto.getAnthropicApiKey());
             if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
                 user.setPassword(dto.getPassword());
             }
             userRepository.save(user);
-            return ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName(), user.getGeminiApiKey()));
+            return ResponseEntity.ok(new ProfileDTO(user.getUsername(), user.getName(), user.getGeminiApiKey(), user.getAnthropicApiKey()));
         }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -40,12 +41,14 @@ public class UserController {
         private String name;
         private String password;
         private String geminiApiKey;
+        private String anthropicApiKey;
 
         public ProfileDTO() {}
-        public ProfileDTO(String username, String name, String geminiApiKey) {
+        public ProfileDTO(String username, String name, String geminiApiKey, String anthropicApiKey) {
             this.username = username;
             this.name = name;
             this.geminiApiKey = geminiApiKey;
+            this.anthropicApiKey = anthropicApiKey;
         }
 
         public String getUsername() { return username; }
@@ -56,5 +59,7 @@ public class UserController {
         public void setPassword(String password) { this.password = password; }
         public String getGeminiApiKey() { return geminiApiKey; }
         public void setGeminiApiKey(String geminiApiKey) { this.geminiApiKey = geminiApiKey; }
+        public String getAnthropicApiKey() { return anthropicApiKey; }
+        public void setAnthropicApiKey(String anthropicApiKey) { this.anthropicApiKey = anthropicApiKey; }
     }
 }

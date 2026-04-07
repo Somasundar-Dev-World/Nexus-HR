@@ -68,7 +68,7 @@ public class AiInsightService {
 
         // Fetch user-specific API key
         String userApiKey = userRepository.findById(userId)
-                .map(User::getGeminiApiKey)
+                .map(User::getAnthropicApiKey)
                 .orElse(null);
 
         String activeApiKey = (userApiKey != null && !userApiKey.isEmpty()) ? userApiKey.trim() : defaultApiKey;

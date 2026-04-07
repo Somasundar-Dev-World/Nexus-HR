@@ -65,7 +65,12 @@
 
     <!-- AI Smart Insights Section -->
     <div class="ai-insights-section animate-fade-up" *ngIf="aiInsights.length || loadingInsights">
-      <div class="section-badge"><span class="magic-sparkle">✨</span> AI SMART INSIGHTS</div>
+      <div class="section-badge-row">
+        <div class="section-badge"><span class="magic-sparkle">✨</span> AI SMART INSIGHTS</div>
+        <button class="btn-refresh-ai" (click)="refreshAI()" [disabled]="loadingInsights" title="Refresh AI Insights">
+          <span class="refresh-icon" [class.spinning]="loadingInsights">🔄</span>
+        </button>
+      </div>
       
       <div class="insights-grid" *ngIf="!loadingInsights">
         <div class="insight-card" *ngFor="let insight of aiInsights" [ngClass]="'insight-' + insight.color">

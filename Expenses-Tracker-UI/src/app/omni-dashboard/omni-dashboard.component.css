@@ -1208,7 +1208,55 @@
 .skeleton-line.val { height: 2rem; width: 40%; margin-bottom: 0.5rem; }
 .skeleton-line.sub { height: 1rem; width: 80%; }
 
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* --- Added Refresh AI Styles --- */
+.section-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.btn-refresh-ai {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #c4b5fd;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-refresh-ai:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.3);
+  transform: scale(1.1);
+}
+
+.btn-refresh-ai:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.refresh-icon {
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+.refresh-icon.spinning {
+  animation: rotate 1s linear infinite;
 }

@@ -328,9 +328,9 @@ export class OmniDashboardComponent implements OnInit {
     });
   }
 
-  fetchAiInsights(appId: number) {
+  fetchAiInsights(appId: number, refresh: boolean = false) {
     this.loadingInsights = true;
-    this.omniService.getAiInsights(appId).subscribe({
+    this.omniService.getAiInsights(appId, refresh).subscribe({
       next: (insights) => {
         this.aiInsights = insights.sort((a, b) => a.priority - b.priority);
         this.loadingInsights = false;
@@ -340,6 +340,12 @@ export class OmniDashboardComponent implements OnInit {
         this.loadingInsights = false;
       }
     });
+  }
+
+  refreshAI() {
+    if (this.selectedApp?.id) {
+      this.fetchAiInsights(this.selectedApp.id, true);
+    }
   }
 
   goToDetail(tracker: Tracker) {

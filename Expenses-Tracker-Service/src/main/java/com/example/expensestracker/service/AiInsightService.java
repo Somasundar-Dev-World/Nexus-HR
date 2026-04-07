@@ -129,7 +129,11 @@ public class AiInsightService {
     }
 
     private String callGeminiRaw(String context, String activeApiKey) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + activeApiKey;
+        // Switching to 1.5-pro-latest for higher reliability across account tiers
+        String modelName = "gemini-1.5-pro-latest";
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + activeApiKey;
+        
+        System.out.println("AI Insight: Calling Gemini API (" + modelName + ") via v1beta...");
 
         String prompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
                 "Your goal is to analyze user tracking data and provide 3-4 highly relevant, actionable insights or metrics. " +

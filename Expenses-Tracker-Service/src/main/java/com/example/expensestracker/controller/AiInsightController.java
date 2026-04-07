@@ -16,7 +16,9 @@ public class AiInsightController {
     private AiInsightService aiInsightService;
 
     @GetMapping("/apps/{appId}/insights")
-    public List<SmartInsight> getInsights(@RequestAttribute("userId") Long userId, @PathVariable Long appId) {
-        return aiInsightService.getInsightsForApp(appId, userId);
+    public List<SmartInsight> getInsights(@RequestAttribute("userId") Long userId, 
+                                          @PathVariable Long appId,
+                                          @RequestParam(required = false) boolean refresh) {
+        return aiInsightService.getInsightsForApp(appId, userId, refresh);
     }
 }

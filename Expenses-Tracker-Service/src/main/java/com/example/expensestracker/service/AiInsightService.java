@@ -24,7 +24,7 @@ public class AiInsightService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${gemini.api.key:}")
+    @Value("${anthropic.api.key:}")
     private String defaultApiKey;
 
     public AiInsightService(TrackerAppRepository trackerAppRepository,
@@ -85,7 +85,7 @@ public class AiInsightService {
         System.out.println("AI Insight: Data context length: " + dataContext.length());
 
         try {
-            String rawJson = callGeminiRaw(dataContext, activeApiKey);
+            String rawJson = callClaudeRaw(dataContext, activeApiKey);
             List<SmartInsight> insights = objectMapper.readValue(rawJson, 
                 objectMapper.getTypeFactory().constructCollectionType(List.class, SmartInsight.class));
             
@@ -128,54 +128,57 @@ public class AiInsightService {
         return sb.toString();
     }
 
-    private String callGeminiRaw(String context, String activeApiKey) throws Exception {
-        // Switching to 1.5-pro-latest for higher reliability across account tiers
-        String modelName = "gemini-1.5-pro-latest";
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + activeApiKey;
+    private String callClaudeRaw(String context, String activeApiKey) throws Exception {
+        String modelName = "claude-3-5-sonnet-20241022";
+        String url = "https://api.anthropic.com/v1/messages";
         
-        System.out.println("AI Insight: Calling Gemini API (" + modelName + ") via v1beta...");
+        System.out.println("AI Insight: Calling Claude API (" + modelName + ")...");
 
-        String prompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
+        String systemPrompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
                 "Your goal is to analyze user tracking data and provide 3-4 highly relevant, actionable insights or metrics. " +
-                "Format your response strictly as a JSON array of SmartInsight objects. " +
+                "Format your response STRICTLY as a raw JSON array of SmartInsight objects. " +
                 "Each object must have: type (METRIC, ADVICE, ALERT), title, value, subtitle, icon (emoji), color (success, warning, danger, primary, magic), priority (1-5), and reasoning. " +
-                "\n\nUSER DATA CONTEXT:\n" + context +
-                "\n\nRESPONSE FORMAT:\n" +
-                "[{\"type\":\"...\", \"title\":\"...\", \"value\":\"...\", \"subtitle\":\"...\", \"icon\":\"...\", \"color\":\"...\", \"priority\":1, \"reasoning\":\"...\"}]";
+                "Do not include any preamble, markdown formatting (like ```json), or follow-up text. Just the raw JSON array.";
 
-        Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(
-                                Map.of("text", prompt)
-                        ))
-                )
-        );
+        String userPrompt = "USER DATA CONTEXT:\n" + context +
+                "\n\nBased on this data, provide 3-4 smart insights in the requested JSON array format.";
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", modelName);
+        requestBody.put("max_tokens", 4096);
+        requestBody.put("system", systemPrompt);
+        requestBody.put("messages", List.of(
+                Map.of("role", "user", "content", userPrompt)
+        ));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", activeApiKey);
+        headers.set("anthropic-version", "2023-06-01");
+        
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         
         if (response.getStatusCode() == HttpStatus.OK) {
             JsonNode root = objectMapper.readTree(response.getBody());
-            String aiText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+            String aiText = root.path("content").get(0).path("text").asText().trim();
             
-            // Handle Gemini markdown wrapping if present
+            // Defensive cleaning in case Claude included markdown anyway
             if (aiText.contains("```json")) {
-                aiText = aiText.substring(aiText.indexOf("```json") + 7, aiText.lastIndexOf("```"));
+                aiText = aiText.substring(aiText.indexOf("```json") + 7, aiText.lastIndexOf("```")).trim();
             } else if (aiText.contains("```")) {
-                aiText = aiText.substring(aiText.indexOf("```") + 3, aiText.lastIndexOf("```"));
+                aiText = aiText.substring(aiText.indexOf("```") + 3, aiText.lastIndexOf("```")).trim();
             }
             return aiText;
         }
 
-        throw new RuntimeException("Gemini API call failed with status: " + response.getStatusCode());
+        throw new RuntimeException("Claude API call failed with status: " + response.getStatusCode());
     }
 
     private List<SmartInsight> getFallbackInsights(TrackerApp app) {
         return List.of(
-            new SmartInsight("ADVICE", "Action Required", "AI Insights Pending", "Please ensure your Gemini API Key is set in Profile Settings.", "💡", "primary", 1, "No active API key found."),
+            new SmartInsight("ADVICE", "Action Required", "AI Insights Pending", "Please ensure your Claude API Key is set in Profile Settings.", "💡", "primary", 1, "No active API key found."),
             new SmartInsight("METRIC", app.getName() + " Status", "Active", "Operational", "🚀", "success", 2, "System is ready for data analysis.")
         );
     }
@@ -183,14 +186,14 @@ public class AiInsightService {
     private List<SmartInsight> getErrorFallbackInsights(TrackerApp app, String error) {
         return List.of(
             new SmartInsight("ALERT", "AI Connectivity", "Communication Error", "The AI service is currently unavailable.", "🔌", "danger", 1, error),
-            new SmartInsight("ADVICE", "Action Required", "Verify API Key", "Ensure your Gemini API key is correct in your profile settings.", "🔑", "warning", 2, "Error details: " + error)
+            new SmartInsight("ADVICE", "Action Required", "Verify API Key", "Ensure your Claude API key is correct in your profile settings.", "🔑", "warning", 2, "Error details: " + error)
         );
     }
 
     private List<SmartInsight> getRateLimitFallbackInsights(TrackerApp app) {
         return List.of(
             new SmartInsight("ALERT", "AI Cooling Down", "Rate Limit Reached", "Too many requests. Please wait a moment before refreshing.", "🧊", "warning", 1, "429 Too Many Requests"),
-            new SmartInsight("ADVICE", "Pro Tip", "Free Tier Limit", "The Gemini Free Tier has a 15 requests per minute limit.", "💡", "primary", 2, "Wait ~60 seconds.")
+            new SmartInsight("ADVICE", "Pro Tip", "Usage Limits", "Your Claude API tier may have reached its hourly or daily limit.", "💡", "primary", 2, "Check Anthropic Dashboard.")
         );
     }
 }

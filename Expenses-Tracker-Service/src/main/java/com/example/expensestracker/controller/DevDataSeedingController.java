@@ -5,7 +5,6 @@ import com.example.expensestracker.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -23,8 +22,8 @@ public class DevDataSeedingController {
     private UserRepository userRepository;
 
     @PostMapping("/seed")
-    public String seedData(@RequestParam String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    public String seedData(@RequestParam String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         Long userId = user.getId();
 
         // 1. Create App
@@ -45,11 +44,12 @@ public class DevDataSeedingController {
         healthTracker.setIcon("❤️");
         healthTracker.setUserId(userId);
         healthTracker.setAppId(app.getId());
-        healthTracker.setFieldDefinitions(List.of(
-            new FieldDefinition("Sleep Score", FieldType.RATING, null, null),
-            new FieldDefinition("HRV", FieldType.NUMBER, "ms", null),
-            new FieldDefinition("Resting HR", FieldType.NUMBER, "bpm", null)
-        ));
+        
+        List<Object> hFields = new ArrayList<>();
+        hFields.add(Map.of("name", "Sleep Score", "type", "RATING"));
+        hFields.add(Map.of("name", "HRV", "type", "NUMBER", "unit", "ms"));
+        hFields.add(Map.of("name", "Resting HR", "type", "NUMBER", "unit", "bpm"));
+        healthTracker.setFieldDefinitions(hFields);
         healthTracker = trackerRepository.save(healthTracker);
 
         // B. Finance: Wealth Observatory
@@ -59,11 +59,12 @@ public class DevDataSeedingController {
         wealthTracker.setIcon("💹");
         wealthTracker.setUserId(userId);
         wealthTracker.setAppId(app.getId());
-        wealthTracker.setFieldDefinitions(List.of(
-            new FieldDefinition("Net Worth", FieldType.CURRENCY, null, null),
-            new FieldDefinition("Daily P&L", FieldType.CURRENCY, null, null),
-            new FieldDefinition("Risk Level", FieldType.RATING, null, null)
-        ));
+        
+        List<Object> wFields = new ArrayList<>();
+        wFields.add(Map.of("name", "Net Worth", "type", "CURRENCY"));
+        wFields.add(Map.of("name", "Daily P&L", "type", "CURRENCY"));
+        wFields.add(Map.of("name", "Risk Level", "type", "RATING"));
+        wealthTracker.setFieldDefinitions(wFields);
         wealthTracker = trackerRepository.save(wealthTracker);
 
         // 3. Inject Entries (14 days of data)
@@ -71,44 +72,43 @@ public class DevDataSeedingController {
         for (int i = 14; i >= 0; i--) {
             LocalDateTime date = now.minusDays(i);
             
-            // Health Data (The Story: Getting sick/stressed at day 4)
+            // Health Data
             TrackerEntry hEntry = new TrackerEntry();
             hEntry.setTrackerId(healthTracker.getId());
             hEntry.setUserId(userId);
-            hEntry.setDate(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            hEntry.setDate(date);
             
-            Map<String, String> hValues = new HashMap<>();
-            if (i <= 4) { // Getting worse
-                hValues.put("Sleep Score", String.valueOf(3 + (i % 2)));
-                hValues.put("HRV", String.valueOf(35 + (i * 2)));
-                hValues.put("Resting HR", String.valueOf(72 + i));
-                hEntry.setNote("Feeling fatigued. Overtraining suspected.");
-            } else { // Optimal state
-                hValues.put("Sleep Score", String.valueOf(5));
-                hValues.put("HRV", String.valueOf(82 - (i % 5)));
-                hValues.put("Resting HR", String.valueOf(52 + (i % 3)));
-                hEntry.setNote("Feeling refreshed.");
+            Map<String, Object> hValues = new HashMap<>();
+            if (i <= 4) { // Stress signal
+                hValues.put("Sleep Score", 3);
+                hValues.put("HRV", 40 + (i * 2));
+                hValues.put("Resting HR", 72 + i);
+                hEntry.setNote("Fatigued. AI should flag this.");
+            } else { // Normal
+                hValues.put("Sleep Score", 5);
+                hValues.put("HRV", 80 - (i % 5));
+                hValues.put("Resting HR", 52 + (i % 3));
+                hEntry.setNote("Stable state.");
             }
             hEntry.setFieldValues(hValues);
             entryRepository.save(hEntry);
 
-            // Wealth Data (High Volatility)
+            // Wealth Data
             TrackerEntry wEntry = new TrackerEntry();
             wEntry.setTrackerId(wealthTracker.getId());
             wEntry.setUserId(userId);
-            wEntry.setDate(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            wEntry.setDate(date);
             
-            Map<String, String> wValues = new HashMap<>();
+            Map<String, Object> wValues = new HashMap<>();
             double baseWealth = 1250000;
-            double dailyFluc = (Math.random() - 0.5) * 50000;
-            wValues.put("Net Worth", String.valueOf(baseWealth + (15-i) * 5000 + dailyFluc));
-            wValues.put("Daily P&L", String.valueOf(dailyFluc));
-            wValues.put("Risk Level", String.valueOf(3 + (i % 3)));
+            wValues.put("Net Worth", baseWealth + (15 - i) * 1000);
+            wValues.put("Daily P&L", 1000.0);
+            wValues.put("Risk Level", 3);
             
             wEntry.setFieldValues(wValues);
             entryRepository.save(wEntry);
         }
 
-        return "Successfully seeded 1 App, 2 Trackers, and 30 Entries for " + email;
+        return "Successfully seeded data for " + username;
     }
 }

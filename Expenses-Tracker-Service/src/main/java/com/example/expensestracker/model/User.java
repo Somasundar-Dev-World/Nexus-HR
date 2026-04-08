@@ -22,8 +22,8 @@ public class User {
     private String anthropicApiKey;
     private String openaiApiKey;
     
-    private String aiProvider; // e.g., GOOGLE, ANTHROPIC, OPENAI
-    private String aiModel;    // e.g., gemini-1.5-flash, claude-3-5-sonnet, gpt-4o
+    private String aiProvider = "GOOGLE"; // Default to Gemini
+    private String aiModel = "gemini-1.5-flash"; // Default to Flash
 
     public User() {}
 

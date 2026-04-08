@@ -155,9 +155,10 @@ public class AiInsightService {
     }
 
     private String callGeminiRaw(String context, String activeApiKey, String modelName) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + activeApiKey;
+        // Switching to header-based auth to resolve 404 errors on Render
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent";
         
-        System.out.println("AI Insight: Calling Gemini API (" + modelName + ")...");
+        System.out.println("AI Insight: Calling Gemini API (" + modelName + ") via Header Auth...");
 
         String prompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
                 "Your goal is to analyze user tracking data and provide 3-4 highly relevant, actionable insights or metrics. " +
@@ -176,6 +177,8 @@ public class AiInsightService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", activeApiKey.trim());
+        
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);

@@ -348,6 +348,12 @@ export class OmniDashboardComponent implements OnInit {
     }
   }
 
+  showReasoning(insight: SmartInsight) {
+    if (insight.reasoning) {
+      alert(`AI Reasoning: ${insight.reasoning}`);
+    }
+  }
+
   goToDetail(tracker: Tracker) {
     this.selectedTracker = tracker;
     this.entries = [];

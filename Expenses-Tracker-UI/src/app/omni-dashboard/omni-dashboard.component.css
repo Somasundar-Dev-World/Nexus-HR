@@ -1331,6 +1331,7 @@
 .insight-magic .insight-value { 
   background: linear-gradient(135deg, #7c3aed, #db2777);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .insight-magic .insight-badge-pill { background: rgba(139, 92, 246, 0.1); }

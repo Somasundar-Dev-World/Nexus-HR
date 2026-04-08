@@ -73,15 +73,28 @@
       </div>
       
       <div class="insights-grid" *ngIf="!loadingInsights">
-        <div class="insight-card" *ngFor="let insight of aiInsights" [ngClass]="'insight-' + insight.color">
+        <div class="insight-card glass-premium" *ngFor="let insight of aiInsights; let i = index" 
+             [ngClass]="['insight-' + insight.color, 'delay-' + (i % 4)]">
+          <div class="insight-glow"></div>
           <div class="insight-header">
-            <span class="insight-icon">{{ insight.icon }}</span>
-            <span class="insight-type">{{ insight.type }}</span>
+            <div class="insight-badge-pill">
+              <span class="insight-icon-sm">{{ insight.icon }}</span>
+              <span class="insight-type-label">{{ insight.type }}</span>
+            </div>
+            <div class="insight-priority-dots">
+              <span class="dot" *ngFor="let d of [1,2,3,4,5]" [class.active]="d <= insight.priority"></span>
+            </div>
           </div>
           <div class="insight-body">
             <h4 class="insight-title">{{ insight.title }}</h4>
-            <div class="insight-value">{{ insight.value }}</div>
+            <div class="insight-value-wrap">
+              <span class="insight-value">{{ insight.value }}</span>
+              <span class="insight-sparkle" *ngIf="insight.color === 'magic'">✨</span>
+            </div>
             <p class="insight-subtitle">{{ insight.subtitle }}</p>
+          </div>
+          <div class="insight-footer" (click)="showReasoning(insight)">
+            <span class="reasoning-toggle">Why this?</span>
           </div>
         </div>
       </div>

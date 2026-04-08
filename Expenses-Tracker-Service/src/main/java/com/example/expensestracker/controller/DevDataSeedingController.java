@@ -109,6 +109,64 @@ public class DevDataSeedingController {
             entryRepository.save(wEntry);
         }
 
-        return "Successfully seeded data for " + username;
+        // 4. Create Wealth Management App
+        TrackerApp wealthApp = new TrackerApp();
+        wealthApp.setName("Strategic Wealth Hub");
+        wealthApp.setIcon("🏦");
+        wealthApp.setDescription("Total net worth tracking and investment strategy.");
+        wealthApp.setUserId(userId);
+        wealthApp.setColorStyle("linear-gradient(135deg, #064e3b 0%, #065f46 100%)");
+        wealthApp = appRepository.save(wealthApp);
+
+        // A. Stock Portfolio
+        Tracker stockTracker = new Tracker();
+        stockTracker.setName("Stock Portfolio");
+        stockTracker.setType(TrackerType.STOCK);
+        stockTracker.setIcon("📈");
+        stockTracker.setUserId(userId);
+        stockTracker.setAppId(wealthApp.getId());
+        stockTracker.setFieldDefinitions(List.of(
+            Map.of("name", "Symbol", "type", "TEXT"),
+            Map.of("name", "Price", "type", "CURRENCY"),
+            Map.of("name", "Day Change (%)", "type", "NUMBER")
+        ));
+        stockTracker = trackerRepository.save(stockTracker);
+
+        // B. Savings Goals
+        Tracker goalTracker = new Tracker();
+        goalTracker.setName("Retirement Goals");
+        goalTracker.setType(TrackerType.FINANCE);
+        goalTracker.setIcon("🎯");
+        goalTracker.setUserId(userId);
+        goalTracker.setAppId(wealthApp.getId());
+        goalTracker.setFieldDefinitions(List.of(
+            Map.of("name", "Target Amount", "type", "CURRENCY"),
+            Map.of("name", "Current Balance", "type", "CURRENCY"),
+            Map.of("name", "Completion (%)", "type", "RATING")
+        ));
+        goalTracker = trackerRepository.save(goalTracker);
+
+        // 5. Inject Wealth Data
+        for (int i = 7; i >= 0; i--) {
+            LocalDateTime date = now.minusDays(i);
+            
+            // Stock Data
+            TrackerEntry sEntry = new TrackerEntry();
+            sEntry.setTrackerId(stockTracker.getId());
+            sEntry.setUserId(userId);
+            sEntry.setDate(date);
+            sEntry.setFieldValues(Map.of("Symbol", "AAPL", "Price", 185.0 + i, "Day Change (%)", 1.2));
+            entryRepository.save(sEntry);
+
+            // Goal Data
+            TrackerEntry gEntry = new TrackerEntry();
+            gEntry.setTrackerId(goalTracker.getId());
+            gEntry.setUserId(userId);
+            gEntry.setDate(date);
+            gEntry.setFieldValues(Map.of("Target Amount", 1000000.0, "Current Balance", 850000.0 + (7-i)*5000, "Completion (%)", 4));
+            entryRepository.save(gEntry);
+        }
+
+        return "Successfully seeded Vitality & Wealth data for " + username;
     }
 }

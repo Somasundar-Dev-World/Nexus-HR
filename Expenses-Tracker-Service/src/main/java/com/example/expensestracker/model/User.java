@@ -23,7 +23,7 @@ public class User {
     private String openaiApiKey;
     
     private String aiProvider = "GOOGLE"; // Default to Gemini
-    private String aiModel = "gemini-1.5-flash"; // Default to Flash
+    private String aiModel = "gemini-2.0-flash"; // Confirmed available ID
 
     public User() {}
 

@@ -13,7 +13,25 @@ import { environment } from '../../environments/environment';
   styleUrl: '../login/login.component.css'
 })
 export class ProfileComponent implements OnInit {
-  profile = { username: '', name: '', password: '', geminiApiKey: '', anthropicApiKey: '' };
+  profile = { 
+    username: '', 
+    name: '', 
+    password: '', 
+    geminiApiKey: '', 
+    anthropicApiKey: '', 
+    openaiApiKey: '',
+    aiProvider: 'GOOGLE',
+    aiModel: 'gemini-1.5-flash'
+  };
+
+  providers = [
+    { id: 'GOOGLE', name: 'Google Gemini', models: ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'] },
+    { id: 'ANTHROPIC', name: 'Anthropic Claude', models: ['claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307', 'claude-3-opus-20240229'] },
+    { id: 'OPENAI', name: 'OpenAI (GPT)', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'] }
+  ];
+
+  selectedProviderModels: string[] = [];
+
   isLoading = false;
   successMsg = '';
   errorMsg = '';
@@ -27,9 +45,26 @@ export class ProfileComponent implements OnInit {
         this.profile.name = data.name;
         this.profile.geminiApiKey = data.geminiApiKey;
         this.profile.anthropicApiKey = data.anthropicApiKey;
+        this.profile.openaiApiKey = data.openaiApiKey;
+        this.profile.aiProvider = data.aiProvider || 'GOOGLE';
+        this.profile.aiModel = data.aiModel || 'gemini-1.5-flash';
+        this.updateModelList();
       },
       error: (err) => console.error(err)
     });
+  }
+
+  onProviderChange() {
+    this.updateModelList();
+    // Default to the first model in the list when provider changes
+    if (this.selectedProviderModels.length > 0) {
+      this.profile.aiModel = this.selectedProviderModels[0];
+    }
+  }
+
+  updateModelList() {
+    const provider = this.providers.find(p => p.id === this.profile.aiProvider);
+    this.selectedProviderModels = provider ? provider.models : [];
   }
 
   onSubmit() {

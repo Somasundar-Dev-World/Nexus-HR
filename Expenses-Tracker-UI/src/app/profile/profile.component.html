@@ -30,16 +30,55 @@
         <input type="text" class="form-control" name="name" [(ngModel)]="profile.name" required>
       </div>
 
-      <div class="form-group mb-1">
-        <label class="form-label">Claude API Key</label>
-        <input type="password" class="form-control" name="anthropicApiKey" [(ngModel)]="profile.anthropicApiKey" placeholder="Enter your Anthropic Claude API Key">
-        <p class="text-xs text-muted mt-1">Used for high-tier smart insights and dashboard analysis.</p>
+      <div style="background: rgba(var(--primary-rgb), 0.05); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid rgba(var(--primary-rgb), 0.1); display: flex; flex-direction: column; gap: 1rem; margin: 0.5rem 0 1rem 0;">
+        <h3 class="text-sm font-semibold text-primary mb-1">AI Smart Dashboard Configuration</h3>
+        
+        <div class="form-group">
+          <label class="form-label">LLM Provider</label>
+          <select class="form-control" name="aiProvider" [(ngModel)]="profile.aiProvider" (change)="onProviderChange()">
+            @for (p of providers; track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <select class="form-control" name="aiModel" [(ngModel)]="profile.aiModel">
+            @for (m of selectedProviderModels; track m) {
+              <option [value]="m">{{ m }}</option>
+            }
+          </select>
+        </div>
+
+        @if (profile.aiProvider === 'GOOGLE') {
+          <div class="form-group">
+            <label class="form-label">Gemini API Key</label>
+            <input type="password" class="form-control" name="geminiApiKey" [(ngModel)]="profile.geminiApiKey" placeholder="Enter Google Gemini Key">
+            <p class="text-xs text-muted mt-1">Get your key from Google AI Studio.</p>
+          </div>
+        }
+
+        @if (profile.aiProvider === 'ANTHROPIC') {
+          <div class="form-group">
+            <label class="form-label">Claude API Key</label>
+            <input type="password" class="form-control" name="anthropicApiKey" [(ngModel)]="profile.anthropicApiKey" placeholder="Enter Anthropic Claude Key">
+            <p class="text-xs text-muted mt-1">Get your key from Anthropic Console.</p>
+          </div>
+        }
+
+        @if (profile.aiProvider === 'OPENAI') {
+          <div class="form-group">
+            <label class="form-label">OpenAI API Key</label>
+            <input type="password" class="form-control" name="openaiApiKey" [(ngModel)]="profile.openaiApiKey" placeholder="Enter OpenAI API Key">
+            <p class="text-xs text-muted mt-1">Get your key from OpenAI Platform.</p>
+          </div>
+        }
       </div>
-      
+
       <div class="form-group mb-2">
-        <label class="form-label">New Password</label>
-        <input type="password" class="form-control" name="password" [(ngModel)]="profile.password" placeholder="Leave blank to keep unchanged" minlength="6">
-        <p class="text-xs text-muted mt-1">Must be at least 6 characters if changing.</p>
+        <label class="form-label">Account Security</label>
+        <input type="password" class="form-control" name="password" [(ngModel)]="profile.password" placeholder="New Password (or leave blank)" minlength="6">
       </div>
       
       <div style="display: flex; justify-content: flex-end;">

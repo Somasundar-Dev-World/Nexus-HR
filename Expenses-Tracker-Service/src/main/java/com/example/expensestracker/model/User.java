@@ -20,6 +20,10 @@ public class User {
 
     private String geminiApiKey;
     private String anthropicApiKey;
+    private String openaiApiKey;
+    
+    private String aiProvider; // e.g., GOOGLE, ANTHROPIC, OPENAI
+    private String aiModel;    // e.g., gemini-1.5-flash, claude-3-5-sonnet, gpt-4o
 
     public User() {}
 
@@ -41,4 +45,10 @@ public class User {
     public void setGeminiApiKey(String geminiApiKey) { this.geminiApiKey = geminiApiKey; }
     public String getAnthropicApiKey() { return anthropicApiKey; }
     public void setAnthropicApiKey(String anthropicApiKey) { this.anthropicApiKey = anthropicApiKey; }
+    public String getOpenaiApiKey() { return openaiApiKey; }
+    public void setOpenaiApiKey(String openaiApiKey) { this.openaiApiKey = openaiApiKey; }
+    public String getAiProvider() { return aiProvider; }
+    public void setAiProvider(String aiProvider) { this.aiProvider = aiProvider; }
+    public String getAiModel() { return aiModel; }
+    public void setAiModel(String aiModel) { this.aiModel = aiModel; }
 }

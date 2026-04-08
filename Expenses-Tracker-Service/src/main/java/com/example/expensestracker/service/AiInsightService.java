@@ -124,6 +124,11 @@ public class AiInsightService {
             String responseBody = e.getResponseBodyAsString();
             System.err.println("AI Insight Generation Failed (HTTP " + e.getStatusCode() + "): " + responseBody);
             
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND && "GOOGLE".equalsIgnoreCase(provider)) {
+                System.err.println("AI Insight: 404 detected for Gemini. Attempting Model Discovery...");
+                listAvailableModels(activeApiKey);
+            }
+            
             if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
                 return getRateLimitFallbackInsights(app, provider);
             }
@@ -159,6 +164,7 @@ public class AiInsightService {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent";
         
         System.out.println("AI Insight: Calling Gemini API (" + modelName + ") via Header Auth...");
+        System.out.println("AI Insight: Target URL (masked): " + url.replace(activeApiKey, "REDACTED"));
 
         String prompt = "You are an AI Smart Dashboard engine for a Personal OS platform called Omni Tracker. " +
                 "Your goal is to analyze user tracking data and provide 3-4 highly relevant, actionable insights or metrics. " +
@@ -254,6 +260,33 @@ public class AiInsightService {
             return cleanJson(aiText);
         }
         throw new RuntimeException("OpenAI API failed: " + response.getStatusCode());
+    }
+
+    private void listAvailableModels(String activeApiKey) {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models";
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("x-goog-api-key", activeApiKey.trim());
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            
+            if (response.getStatusCode() == HttpStatus.OK) {
+                System.out.println("AI Insight: --- AVAILABLE GEMINI MODELS ---");
+                JsonNode root = objectMapper.readTree(response.getBody());
+                JsonNode models = root.path("models");
+                if (models.isArray()) {
+                    for (JsonNode m : models) {
+                        System.out.println("AI Insight: Found Model: " + m.path("name").asText() + " (supports: " + m.path("supportedGenerationMethods").toString() + ")");
+                    }
+                } else {
+                    System.out.println("AI Insight: No models array found in response: " + response.getBody());
+                }
+                System.out.println("AI Insight: --------------------------------");
+            }
+        } catch (Exception e) {
+            System.err.println("AI Insight: Failed to list models: " + e.getMessage());
+        }
     }
 
     private String cleanJson(String aiText) {

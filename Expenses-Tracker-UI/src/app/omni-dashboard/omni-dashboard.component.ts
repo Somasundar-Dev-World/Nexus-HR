@@ -49,6 +49,7 @@ export class OmniDashboardComponent implements OnInit {
   selectedFile: File | null = null;
   importTrackerName = '';
   isImporting = false;
+  importResult: { entryCount: number, skippedCount: number } | null = null;
 
   readonly TRACKER_TEMPLATES = [
     {
@@ -532,11 +533,7 @@ export class OmniDashboardComponent implements OnInit {
             this.omniService.getEntries(this.selectedTracker!.id!).subscribe(data => {
               this.entries = data;
               this.calculateAppStats(this.selectedApp!.id!);
-              let msg = `Successfully imported ${res.entryCount} entries into ${this.selectedTracker!.name}!`;
-              if (res.skippedCount > 0) {
-                msg += `\nSkipped ${res.skippedCount} duplicate entries.`;
-              }
-              alert(msg);
+              this.importResult = { entryCount: res.entryCount, skippedCount: res.skippedCount || 0 };
             });
           },
           error: (err) => {
@@ -549,6 +546,11 @@ export class OmniDashboardComponent implements OnInit {
       event.target.value = null;
     }
   }
+
+  closeImportResult() {
+    this.importResult = null;
+  }
+
 
   // ── Log Entries ──────────────────────────────────────────────
   openAddEntry() {

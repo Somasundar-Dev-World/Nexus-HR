@@ -1578,3 +1578,50 @@
   background: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
 }
+
+/* --- Import Success Card --- */
+.import-success-card {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+}
+.import-success-card .success-icon {
+  font-size: 2.5rem;
+}
+.import-success-card h3 {
+  color: #10b981;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+.import-success-card p {
+  margin: 0 0 0.2rem 0;
+  color: #d1d5db;
+  font-size: 0.95rem;
+}
+.import-success-card p strong {
+  color: white;
+}
+.import-success-card .text-muted {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+.btn-close-sm {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.btn-close-sm:hover {
+  color: white;
+}

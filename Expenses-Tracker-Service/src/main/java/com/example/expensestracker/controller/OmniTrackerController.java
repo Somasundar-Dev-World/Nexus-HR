@@ -279,8 +279,7 @@ public class OmniTrackerController {
                         entry.setTrackerId(tracker.getId());
                         entry.setUserId(userId);
                         entry.setFieldValues(fieldValues);
-                        TrackerEntry saved = entryRepository.save(entry);
-                        existingEntries.add(saved);
+                        entryRepository.save(entry);
                         entryCount++;
                     }
                 }
@@ -386,8 +385,7 @@ public class OmniTrackerController {
                                 entry.setTrackerId(tracker.getId());
                                 entry.setUserId(userId);
                                 entry.setFieldValues(fieldValues);
-                                TrackerEntry saved = entryRepository.save(entry);
-                                existingEntries.add(saved);
+                                entryRepository.save(entry);
                                 entryCount++;
                             }
                         }
@@ -433,8 +431,7 @@ public class OmniTrackerController {
                             entry.setTrackerId(tracker.getId());
                             entry.setUserId(userId);
                             entry.setFieldValues(fieldValues);
-                            TrackerEntry saved = entryRepository.save(entry);
-                            existingEntries.add(saved); 
+                            entryRepository.save(entry);
                             entryCount++;
                         }
                     }

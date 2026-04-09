@@ -130,8 +130,12 @@ export class OmniTrackerService {
     return this.http.post<any>(`${this.apiUrl}/integrations/plaid/link-token`, {});
   }
 
-  exchangePlaidToken(trackerId: number, publicToken: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/integrations/plaid/exchange/${trackerId}`, { public_token: publicToken });
+  exchangePlaidToken(trackerId: number, publicToken: string, institutionName: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/integrations/plaid/exchange/${trackerId}`, { public_token: publicToken, institution_name: institutionName });
+  }
+
+  getSuggestedPlaidMapping(trackerId: number): Observable<{ [key: string]: string }> {
+    return this.http.get<{ [key: string]: string }>(`${this.apiUrl}/integrations/plaid/suggest-mapping/${trackerId}`);
   }
 
   setPlaidMapping(trackerId: number, mapping: any): Observable<any> {

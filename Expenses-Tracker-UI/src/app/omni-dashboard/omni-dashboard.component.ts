@@ -55,6 +55,9 @@ export class OmniDashboardComponent implements OnInit {
 
   // Plaid Mapping State
   isPlaidMappingModalOpen = false;
+  isAutoMapping = false;
+  isAutoMapped = false;
+  connectedInstitution = '';
   plaidMapping: { [plaidField: string]: string } = { amount: '', name: '', date: '' };
   plaidStandardFields = [
     { id: 'amount', label: 'Transaction Amount' },
@@ -686,10 +689,27 @@ export class OmniDashboardComponent implements OnInit {
         const handler = Plaid.create({
           token: res.link_token,
           onSuccess: (public_token: string, metadata: any) => {
-            console.log("Plaid connected, exchanging token...");
-            this.omniService.exchangePlaidToken(this.selectedTracker!.id!, public_token).subscribe({
-              next: (integration) => {
+            const institutionName = metadata?.institution?.name || 'Your Bank';
+            this.connectedInstitution = institutionName;
+            console.log("Plaid connected to: " + institutionName + ", exchanging token...");
+            this.omniService.exchangePlaidToken(this.selectedTracker!.id!, public_token, institutionName).subscribe({
+              next: () => {
+                // Now call AI to auto-suggest field mappings
+                this.isAutoMapping = true;
                 this.isPlaidMappingModalOpen = true;
+                this.omniService.getSuggestedPlaidMapping(this.selectedTracker!.id!).subscribe({
+                  next: (suggestedMapping) => {
+                    this.isAutoMapping = false;
+                    // Pre-fill any matched mappings from AI
+                    if (suggestedMapping && Object.keys(suggestedMapping).length > 0) {
+                      this.plaidMapping = { ...this.plaidMapping, ...suggestedMapping };
+                      this.isAutoMapped = true;
+                    }
+                  },
+                  error: () => {
+                    this.isAutoMapping = false; // Silently fail — user can still map manually
+                  }
+                });
               },
               error: err => {
                 console.error(err);

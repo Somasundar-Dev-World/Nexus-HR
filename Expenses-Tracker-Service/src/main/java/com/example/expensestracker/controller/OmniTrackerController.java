@@ -501,7 +501,8 @@ public class OmniTrackerController {
             if (!tracker.getUserId().equals(userId)) return ResponseEntity.status(403).build();
 
             String publicToken = payload.get("public_token");
-            TrackerIntegration integration = plaidService.exchangePublicToken(publicToken, tracker, user);
+            String institutionName = payload.get("institution_name");
+            TrackerIntegration integration = plaidService.exchangePublicToken(publicToken, institutionName, tracker, user);
             return ResponseEntity.ok(integration);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
@@ -532,6 +533,21 @@ public class OmniTrackerController {
 
             int addedCount = plaidService.syncTransactions(tracker, user);
             return ResponseEntity.ok(Collections.singletonMap("addedCount", addedCount));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/integrations/plaid/suggest-mapping/{trackerId}")
+    public ResponseEntity<?> suggestPlaidMapping(@PathVariable Long trackerId,
+                                                  @RequestAttribute("userId") Long userId) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow();
+            Tracker tracker = trackerRepository.findById(trackerId).orElseThrow();
+            if (!tracker.getUserId().equals(userId)) return ResponseEntity.status(403).build();
+
+            Map<String, String> suggestedMapping = aiInsightService.suggestPlaidMapping(tracker, user);
+            return ResponseEntity.ok(suggestedMapping);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         }

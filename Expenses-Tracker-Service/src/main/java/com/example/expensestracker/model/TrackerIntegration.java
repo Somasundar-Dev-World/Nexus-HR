@@ -18,6 +18,9 @@ public class TrackerIntegration {
     @Column(nullable = false)
     private String provider; // e.g., "PLAID"
 
+    @Column()
+    private String institutionName; // e.g., "Chase", "Bank of America"
+
     @Column(length = 1000)
     private String accessToken;
 
@@ -55,6 +58,14 @@ public class TrackerIntegration {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
     }
 
     public String getAccessToken() {

@@ -246,6 +246,7 @@
             <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
             <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">🪄</button>
             <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">🔌</button>
+            <span class="institution-badge" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
             <input type="file" accept=".csv,.pdf" #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
         </div>
@@ -536,10 +537,23 @@
 
   <!-- Plaid Mapping Modal -->
   <div class="modal-overlay" *ngIf="isPlaidMappingModalOpen" (click)="isPlaidMappingModalOpen = false">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal plaid-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>🔌 Map Plaid Bank Data</h3>
+        <div class="plaid-modal-title-row">
+          <h3>🔌 Map Plaid Bank Data</h3>
+          <span class="institution-badge-modal" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
+        </div>
         <p class="text-xs text-muted">Map Plaid fields to your Tracker's custom columns.</p>
+      </div>
+
+      <div class="ai-mapping-status" *ngIf="isAutoMapping">
+        <span class="btn-spinner"></span>
+        <span>✨ AI is analyzing your tracker schema...</span>
+      </div>
+
+      <div class="ai-mapped-badge" *ngIf="isAutoMapped && !isAutoMapping">
+        <span>✨ AI Auto-Mapped</span>
+        <p>Fields pre-filled by AI. Review and adjust if needed.</p>
       </div>
       
       <div class="mapping-grid mt-3">

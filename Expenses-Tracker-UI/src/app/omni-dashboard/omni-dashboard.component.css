@@ -1567,6 +1567,83 @@
   gap: 1rem;
 }
 
+/* Institution Badge — in Tracker Header */
+.institution-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(0,0,0,0.35);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.25);
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(4px);
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+/* Institution Badge — inside Modal */
+.institution-badge-modal {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.plaid-modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plaid-modal-title-row h3 {
+  margin: 0;
+}
+
+/* AI Mapping Status (loading spinner) */
+.ai-mapping-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #a5b4fc;
+}
+
+/* AI Auto-Mapped Success Badge */
+.ai-mapped-badge {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+.ai-mapped-badge span {
+  font-weight: 700;
+  color: #10b981;
+  font-size: 0.9rem;
+}
+.ai-mapped-badge p {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #6ee7b7;
+}
+
 /* --- Clear All Logs --- */
 .history-header {
   display: flex;

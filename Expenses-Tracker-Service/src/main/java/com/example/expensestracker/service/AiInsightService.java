@@ -487,6 +487,78 @@ public class AiInsightService {
         return mapping;
     }
 
+    public Map<String, String> suggestPlaidMapping(Tracker tracker, User user) throws Exception {
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            throw new RuntimeException("No active API Key found for " + provider);
+        }
+
+        StringBuilder fieldsSchema = new StringBuilder();
+        if (tracker.getFieldDefinitions() != null) {
+            for (Object def : tracker.getFieldDefinitions()) {
+                if (def instanceof Map) {
+                    Map<?, ?> fieldMap = (Map<?, ?>) def;
+                    fieldsSchema.append("- Name: '").append(fieldMap.get("name"))
+                                .append("', Type: '").append(fieldMap.get("type")).append("'\n");
+                }
+            }
+        }
+
+        String systemPrompt = "You are a mapping engine for a banking aggregation API. " +
+                "I will provide you with standard Plaid bank fields: amount, name, date, merchant_name, category, payment_channel. " +
+                "Your job is to smartly map these Plaid fields to the closest matching TARGET SCHEMA FIELDS in a private finance tracker.\n" +
+                "TARGET SCHEMA FIELDS:\n" + fieldsSchema.toString() + "\n" +
+                "Return ONLY a raw JSON object where Keys are the Plaid fields, and Values are the EXACT TARGET SCHEMA FIELDS they map to. " +
+                "Only map fields you are extremely confident about. A target schema field can only be used once.\n" +
+                "Example Answer: { \"amount\": \"Cost\", \"name\": \"Vendor\", \"date\": \"Date\" }";
+
+        String userPrompt = "STANDARD PLAID FIELDS:\namount, name, date, merchant_name, category, payment_channel";
+
+        String rawJson = "";
+        int retries = 2;
+        while (true) {
+            try {
+                if ("GOOGLE".equalsIgnoreCase(provider)) {
+                    rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                    rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                    rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                }
+                break;
+            } catch (Exception e) {
+                if (retries > 0 && e.getMessage() != null && e.getMessage().contains("503")) {
+                    retries--;
+                    Thread.sleep(3000);
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        Map<String, String> mapping = new java.util.HashMap<>();
+        JsonNode root = objectMapper.readTree(cleanJson(rawJson));
+        if (root.isObject()) {
+            java.util.Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                mapping.put(field.getKey(), field.getValue().asText());
+            }
+        }
+        return mapping;
+    }
+
     private String callGeminiRawForDoc(String userPrompt, String systemPrompt, String apiKey, String modelName) throws Exception {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent";
         Map<String, Object> requestBody = new HashMap<>();

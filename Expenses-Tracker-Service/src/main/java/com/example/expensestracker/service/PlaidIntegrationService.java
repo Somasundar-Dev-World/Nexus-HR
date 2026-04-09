@@ -62,7 +62,7 @@ public class PlaidIntegrationService {
         return root.path("link_token").asText();
     }
 
-    public TrackerIntegration exchangePublicToken(String publicToken, Tracker tracker, User user) throws Exception {
+    public TrackerIntegration exchangePublicToken(String publicToken, String institutionName, Tracker tracker, User user) throws Exception {
         String url = PLAID_ENV_URL + "/item/public_token/exchange";
 
         Map<String, Object> request = new HashMap<>();
@@ -86,6 +86,7 @@ public class PlaidIntegrationService {
         
         integration.setTrackerId(tracker.getId());
         integration.setProvider("PLAID");
+        integration.setInstitutionName(institutionName);
         integration.setAccessToken(accessToken);
         integration.setItemId(itemId);
         // By default, map is empty. The user will populate it next.

@@ -1,20 +1,26 @@
-<div class="omni-page">
+<div class="omni-page" [class.is-booting]="isLoading && viewMode === 'APP_GRID'">
+  
+  <!-- Modern Global Loader -->
+  <div class="global-boot-loader" *ngIf="isLoading && viewMode === 'APP_GRID'">
+    <div class="loader-content">
+      <div class="concentric-ring"></div>
+      <div class="concentric-ring"></div>
+      <div class="concentric-ring"></div>
+      <div class="boot-logo">OT</div>
+      <p class="boot-status">Initializing Omni Core...</p>
+    </div>
+  </div>
 
   <!-- ════════════════════════════════════════════════════════
        VIEW — APP GRID (Top Level)
   ════════════════════════════════════════════════════════ -->
-  <div class="home-screen" *ngIf="viewMode === 'APP_GRID'">
+  <div class="home-screen" *ngIf="viewMode === 'APP_GRID' && !isLoading">
     <div class="home-header animate-fade-down">
       <div class="home-title-wrap">
         <h1>OmniTracker</h1>
         <span class="beta-chip">BETA</span>
       </div>
       <p class="home-subtitle">Select an app to manage your trackers.</p>
-    </div>
-
-    <!-- Loading shimmer -->
-    <div class="app-grid" *ngIf="isLoading">
-      <div class="app-icon-shimmer" *ngFor="let i of [1,2,3,4,5,6]"></div>
     </div>
 
     <!-- App Icons Grid -->

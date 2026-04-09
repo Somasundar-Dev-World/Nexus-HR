@@ -520,6 +520,32 @@ export class OmniDashboardComponent implements OnInit {
       });
   }
 
+  onEntriesFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file && this.selectedTracker) {
+      this.isImporting = true;
+      this.omniService.importEntries(file, this.selectedTracker.id!)
+        .subscribe({
+          next: (res) => {
+            this.isImporting = false;
+            // Refetch entries
+            this.omniService.getEntries(this.selectedTracker!.id!).subscribe(data => {
+              this.entries = data;
+              this.calculateAppStats(this.selectedApp!.id!);
+              alert(`Successfully imported ${res.entryCount} entries into ${this.selectedTracker!.name}!`);
+            });
+          },
+          error: (err) => {
+            console.error(err);
+            this.isImporting = false;
+            alert('Failed to import entries: ' + (err.error || err.message));
+          }
+        });
+      // reset file input
+      event.target.value = null;
+    }
+  }
+
   // ── Log Entries ──────────────────────────────────────────────
   openAddEntry() {
     if (!this.selectedTracker) return;

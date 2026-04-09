@@ -267,6 +267,65 @@ public class OmniTrackerController {
         }
     }
 
+    @PostMapping("/entries/import")
+    public ResponseEntity<?> importEntriesForTracker(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("trackerId") Long trackerId,
+            @RequestAttribute("userId") Long userId) {
+
+        try {
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            Tracker tracker = trackerRepository.findById(trackerId).orElseThrow(() -> new RuntimeException("Tracker not found"));
+
+            if (!tracker.getUserId().equals(userId)) {
+                return ResponseEntity.status(403).body("Access denied to this tracker.");
+            }
+
+            String documentText = extractTextFromFile(file);
+            if (documentText == null || documentText.isEmpty()) {
+                return ResponseEntity.badRequest().body("Could not extract text from the provided file.");
+            }
+
+            JsonNode entriesNode = aiInsightService.extractEntriesForTracker(documentText, tracker, user);
+
+            int entryCount = 0;
+            if (entriesNode.isArray()) {
+                for (JsonNode entryRow : entriesNode) {
+                    TrackerEntry entry = new TrackerEntry();
+                    entry.setTrackerId(tracker.getId());
+                    entry.setUserId(userId);
+                    
+                    Map<String, Object> fieldValues = new HashMap<>();
+                    Iterator<String> fieldNames = entryRow.fieldNames();
+                    while (fieldNames.hasNext()) {
+                        String fieldName = fieldNames.next();
+                        JsonNode valNode = entryRow.get(fieldName);
+                        
+                        if (valNode.isNumber()) {
+                            fieldValues.put(fieldName, valNode.asDouble());
+                        } else if (valNode.isBoolean()) {
+                            fieldValues.put(fieldName, valNode.asBoolean());
+                        } else {
+                            fieldValues.put(fieldName, valNode.asText());
+                        }
+                    }
+                    entry.setFieldValues(fieldValues);
+                    entryRepository.save(entry);
+                    entryCount++;
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("entryCount", entryCount);
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error importing entries: " + e.getMessage());
+        }
+    }
+
     private String extractTextFromFile(MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
         if (filename.endsWith(".pdf") || file.getContentType() != null && file.getContentType().contains("pdf")) {

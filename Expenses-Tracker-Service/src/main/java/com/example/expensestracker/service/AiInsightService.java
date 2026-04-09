@@ -341,6 +341,55 @@ public class AiInsightService {
         return objectMapper.readTree(cleanJson(rawJson));
     }
 
+    public JsonNode extractEntriesForTracker(String documentText, Tracker tracker, User user) throws Exception {
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+        
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            throw new RuntimeException("No active API Key found for " + provider);
+        }
+
+        StringBuilder fieldsSchema = new StringBuilder();
+        if (tracker.getFieldDefinitions() != null) {
+            for (Object def : tracker.getFieldDefinitions()) {
+                if (def instanceof Map) {
+                    Map<?, ?> fieldMap = (Map<?, ?>) def;
+                    fieldsSchema.append("- Name: '").append(fieldMap.get("name"))
+                                .append("', Type: '").append(fieldMap.get("type")).append("'\n");
+                }
+            }
+        }
+
+        String systemPrompt = "You are a precise data extractor tool. " +
+                "Your ONLY task is to parse raw text from a document and map it to an exact JSON array of objects based on a PRE-EXISTING schema.\n" +
+                "You must use EXACTLY the field names provided. Do not invent new fields. Ignore data that does not fit the schema.\n" +
+                "TARGET SCHEMA FIELDS:\n" + fieldsSchema.toString() + "\n" +
+                "Return ONLY a raw JSON array of objects, e.g.:\n" +
+                "[\n  { \"Field1\": \"Value1\", \"Field2\": \"Value2\" }\n]";
+
+        String userPrompt = "DOCUMENT TEXT:\n" + documentText;
+
+        String rawJson = "";
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        }
+
+        return objectMapper.readTree(cleanJson(rawJson));
+    }
+
     private String callGeminiRawForDoc(String userPrompt, String systemPrompt, String apiKey, String modelName) throws Exception {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent";
         Map<String, Object> requestBody = new HashMap<>();

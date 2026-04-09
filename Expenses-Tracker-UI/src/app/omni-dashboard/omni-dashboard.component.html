@@ -244,6 +244,8 @@
           <div class="detail-badge-row">
             <span class="detail-badge">{{ selectedTracker.type }}</span>
             <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
+            <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">🪄</button>
+            <input type="file" accept=".csv,.pdf" #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
         </div>
       </div>
@@ -268,9 +270,18 @@
 
     <!-- Log History -->
     <div class="detail-body">
-      <h2 class="section-title" *ngIf="entries.length">History</h2>
+      <h2 class="section-title" *ngIf="entries.length && !isImporting">History</h2>
 
-      <div class="log-cards" *ngIf="entries.length">
+      <div class="ai-loading-wrap" *ngIf="isImporting">
+        <div class="mini-boot-loader">
+          <div class="concentric-ring"></div>
+          <div class="concentric-ring"></div>
+          <div class="boot-logo-sm">AI</div>
+          <p class="boot-status-sm">Extracting Data...</p>
+        </div>
+      </div>
+
+      <div class="log-cards" *ngIf="entries.length && !isImporting">
         <div class="log-card animate-fade-up" *ngFor="let entry of entries">
           <div class="log-card-header">
             <span class="log-timestamp">{{ entry.date | date:'MMM d, y · h:mm a' }}</span>
@@ -289,7 +300,7 @@
         </div>
       </div>
 
-      <div class="detail-empty" *ngIf="!entries.length">
+      <div class="detail-empty" *ngIf="!entries.length && !isImporting">
         <div class="empty-emoji">📋</div>
         <h3>No logs yet</h3>
         <p>Tap the <strong>＋</strong> button below to log your first entry!</p>

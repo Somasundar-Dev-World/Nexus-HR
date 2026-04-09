@@ -105,12 +105,13 @@
         </div>
       </div>
 
-      <!-- AI Loading State -->
-      <div class="insights-grid" *ngIf="loadingInsights">
-        <div class="insight-card skeleton" *ngFor="let i of [1,2,3]">
-          <div class="skeleton-line title"></div>
-          <div class="skeleton-line val"></div>
-          <div class="skeleton-line sub"></div>
+      <!-- AI Loading State — Modern Spinner -->
+      <div class="ai-loading-wrap" *ngIf="loadingInsights">
+        <div class="mini-boot-loader">
+          <div class="concentric-ring"></div>
+          <div class="concentric-ring"></div>
+          <div class="boot-logo-sm">AI</div>
+          <p class="boot-status-sm">Thinking...</p>
         </div>
       </div>
     </div>

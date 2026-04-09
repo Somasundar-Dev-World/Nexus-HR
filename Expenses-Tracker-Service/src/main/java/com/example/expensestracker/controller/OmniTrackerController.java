@@ -10,8 +10,22 @@ import com.example.expensestracker.repository.TrackerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import com.opencsv.CSVReader;
+import com.example.expensestracker.service.AiInsightService;
+import com.example.expensestracker.model.User;
+import com.example.expensestracker.repository.UserRepository;
 
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/omni")
@@ -26,6 +40,15 @@ public class OmniTrackerController {
 
     @Autowired
     private TrackerAppRepository appRepository;
+
+    @Autowired
+    private AiInsightService aiInsightService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     // --- Apps ---
 
@@ -150,5 +173,119 @@ public class OmniTrackerController {
             }
             return ResponseEntity.status(403).build();
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- Document Import AI ---
+    @PostMapping("/trackers/import")
+    public ResponseEntity<?> importTrackerFromDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("appId") Long appId,
+            @RequestParam(value = "trackerName", required = false) String trackerName,
+            @RequestAttribute("userId") Long userId) {
+
+        try {
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            TrackerApp app = appRepository.findById(appId).orElseThrow(() -> new RuntimeException("App not found"));
+
+            if (!app.getUserId().equals(userId)) {
+                return ResponseEntity.status(403).body("Access denied to this app.");
+            }
+
+            String documentText = extractTextFromFile(file);
+            if (documentText == null || documentText.isEmpty()) {
+                return ResponseEntity.badRequest().body("Could not extract text from the provided file.");
+            }
+
+            JsonNode aiResult = aiInsightService.generateTrackerFromDocument(documentText, trackerName, user);
+
+            // Create Tracker
+            Tracker tracker = new Tracker();
+            tracker.setUserId(userId);
+            tracker.setAppId(appId);
+            tracker.setName(aiResult.path("name").asText("AI Imported Tracker"));
+            tracker.setIcon(aiResult.path("icon").asText("📄"));
+            
+            try {
+                tracker.setType(TrackerType.valueOf(aiResult.path("type").asText("CUSTOM").toUpperCase()));
+            } catch (Exception e) {
+                tracker.setType(TrackerType.CUSTOM);
+            }
+
+            JsonNode fieldsNode = aiResult.path("fieldDefinitions");
+            List<Object> fieldDefs = new ArrayList<>();
+            if (fieldsNode.isArray()) {
+                for (JsonNode field : fieldsNode) {
+                    Map<String, Object> fd = new HashMap<>();
+                    fd.put("name", field.path("name").asText());
+                    fd.put("type", field.path("type").asText("TEXT"));
+                    if (field.has("options")) fd.put("options", field.path("options").asText());
+                    fieldDefs.add(fd);
+                }
+            }
+            tracker.setFieldDefinitions(fieldDefs);
+            tracker = trackerRepository.save(tracker);
+
+            // Create Entries
+            JsonNode entriesNode = aiResult.path("entries");
+            int entryCount = 0;
+            if (entriesNode.isArray()) {
+                for (JsonNode entryRow : entriesNode) {
+                    TrackerEntry entry = new TrackerEntry();
+                    entry.setTrackerId(tracker.getId());
+                    entry.setUserId(userId);
+                    
+                    Map<String, Object> fieldValues = new HashMap<>();
+                    Iterator<String> fieldNames = entryRow.fieldNames();
+                    while (fieldNames.hasNext()) {
+                        String fieldName = fieldNames.next();
+                        JsonNode valNode = entryRow.get(fieldName);
+                        
+                        // Parse values based on field schema types roughly
+                        if (valNode.isNumber()) {
+                            fieldValues.put(fieldName, valNode.asDouble());
+                        } else if (valNode.isBoolean()) {
+                            fieldValues.put(fieldName, valNode.asBoolean());
+                        } else {
+                            fieldValues.put(fieldName, valNode.asText());
+                        }
+                    }
+                    entry.setFieldValues(fieldValues);
+                    entryRepository.save(entry);
+                    entryCount++;
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("tracker", tracker);
+            response.put("entryCount", entryCount);
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error importing document: " + e.getMessage());
+        }
+    }
+
+    private String extractTextFromFile(MultipartFile file) throws Exception {
+        String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+        if (filename.endsWith(".pdf") || file.getContentType() != null && file.getContentType().contains("pdf")) {
+            try (PDDocument document = PDDocument.load(file.getInputStream())) {
+                PDFTextStripper stripper = new PDFTextStripper();
+                return stripper.getText(document);
+            }
+        } else if (filename.endsWith(".csv") || file.getContentType() != null && file.getContentType().contains("csv")) {
+            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+                List<String[]> allData = csvReader.readAll();
+                StringBuilder sb = new StringBuilder();
+                for (String[] row : allData) {
+                    sb.append(String.join(",", row)).append("\n");
+                }
+                return sb.toString();
+            }
+        } else {
+            // Fallback to reading as standard text
+            return new String(file.getBytes());
+        }
     }
 }

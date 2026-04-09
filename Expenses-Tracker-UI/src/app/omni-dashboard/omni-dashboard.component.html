@@ -364,7 +364,32 @@
         </div>
       </div>
 
-      <form [formGroup]="trackerForm" (ngSubmit)="createTracker()">
+      <!-- AI Document Import Section -->
+      <div class="ai-import-wrap" *ngIf="!editingTrackerId">
+        <h4 class="section-subtitle">🪄 AI Document Import</h4>
+        <p class="import-desc">Upload a CSV or PDF (e.g. Bank Statement), and AI will autogenerate the tracker schema and populate it.</p>
+        
+        <div class="import-controls" *ngIf="!isImporting">
+          <input type="text" [(ngModel)]="importTrackerName" placeholder="Tracker Name (Optional)" class="import-input">
+          <div class="file-upload-row">
+            <input type="file" accept=".csv,.pdf" (change)="onFileSelected($event)" class="file-input">
+            <button type="button" class="btn btn-primary" [disabled]="!selectedFile" (click)="autoImportTracker()">Import</button>
+          </div>
+        </div>
+
+        <div class="ai-loading-wrap" *ngIf="isImporting">
+          <div class="mini-boot-loader">
+            <div class="concentric-ring"></div>
+            <div class="concentric-ring"></div>
+            <div class="boot-logo-sm">AI</div>
+            <p class="boot-status-sm">Thinking...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-divider" *ngIf="!editingTrackerId"><span>OR CUSTOM BUILD</span></div>
+
+      <form [formGroup]="trackerForm" (ngSubmit)="createTracker()" *ngIf="!isImporting">
         <div class="form-group">
           <label>Tracker Name</label>
           <input formControlName="name" placeholder="e.g. Daily Check-in">

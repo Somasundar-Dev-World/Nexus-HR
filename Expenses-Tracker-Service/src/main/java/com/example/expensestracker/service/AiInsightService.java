@@ -286,4 +286,120 @@ public class AiInsightService {
             new SmartInsight("ADVICE", "Pro Tip", "Usage Limits", "Your API tier may have reached its hourly or daily limit.", "💡", "primary", 2, "Check " + provider + " Dashboard.")
         );
     }
+    
+    // --- Document to Tracker Generation ---
+    public JsonNode generateTrackerFromDocument(String documentText, String trackerName, User user) throws Exception {
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+        
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            throw new RuntimeException("No active API Key found for " + provider);
+        }
+
+        String systemPrompt = "You are an intelligent data architect inside a Personal OS dashboard. " +
+                "You are provided with raw text extracted from a user's document (such as a CSV or PDF). " +
+                "Your task is to:\n" +
+                "1. Infer a logical Tracker Schema to hold this data. If the user provided a name, use it, otherwise invent an appropriate one.\n" +
+                "2. Determine the 'type' of tracker: FINANCE, HEALTH, STOCK, or CUSTOM.\n" +
+                "3. Define the 'fieldDefinitions' which must be an array of objects. Available types for fields: NUMBER, CURRENCY, TEXT, LONG_TEXT, DATE, TIME, BOOLEAN, SELECT, RATING.\n" +
+                "4. Extract ALL logical rows of data from the raw text as 'entries'. Each entry should map string field names exactly to string/number values.\n" +
+                "Return ONLY a raw JSON object with this exact structure:\n" +
+                "{\n" +
+                "  \"name\": \"Tracker Name\",\n" +
+                "  \"type\": \"Tracker Type\",\n" +
+                "  \"icon\": \"Emoji for the tracker\",\n" +
+                "  \"fieldDefinitions\": [\n" +
+                "    { \"name\": \"FieldName\", \"type\": \"FIELD_TYPE\" }\n" +
+                "  ],\n" +
+                "  \"entries\": [\n" +
+                "    { \"FieldName\": \"Value1\", ... }\n" +
+                "  ]\n" +
+                "}";
+
+        String userPrompt = "User Suggested Tracker Name (if any): " + (trackerName != null ? trackerName : "None") + "\n\n" +
+                            "DOCUMENT TEXT:\n" + documentText;
+
+        String rawJson = "";
+        
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        }
+
+        return objectMapper.readTree(cleanJson(rawJson));
+    }
+
+    private String callGeminiRawForDoc(String userPrompt, String systemPrompt, String apiKey, String modelName) throws Exception {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent";
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("systemInstruction", Map.of("parts", List.of(Map.of("text", systemPrompt))));
+        requestBody.put("contents", List.of(Map.of("parts", List.of(Map.of("text", userPrompt)))));
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", apiKey);
+        
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            return cleanJson(root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText().trim());
+        }
+        throw new RuntimeException("Gemini API failed: " + response.getStatusCode());
+    }
+
+    private String callClaudeRawForDoc(String userPrompt, String systemPrompt, String apiKey, String modelName) throws Exception {
+        String url = "https://api.anthropic.com/v1/messages";
+        Map<String, Object> requestBody = Map.of(
+                "model", modelName,
+                "max_tokens", 8192,
+                "system", systemPrompt,
+                "messages", List.of(Map.of("role", "user", "content", userPrompt))
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", apiKey);
+        headers.set("anthropic-version", "2023-06-01");
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            return cleanJson(root.path("content").get(0).path("text").asText().trim());
+        }
+        throw new RuntimeException("Claude API failed: " + response.getStatusCode());
+    }
+
+    private String callOpenAiRawForDoc(String userPrompt, String systemPrompt, String apiKey, String modelName) throws Exception {
+        String url = "https://api.openai.com/v1/chat/completions";
+        Map<String, Object> requestBody = Map.of(
+                "model", modelName,
+                "messages", List.of(
+                        Map.of("role", "system", "content", systemPrompt),
+                        Map.of("role", "user", "content", userPrompt)
+                )
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + apiKey);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            return cleanJson(root.path("choices").get(0).path("message").path("content").asText().trim());
+        }
+        throw new RuntimeException("OpenAI API failed: " + response.getStatusCode());
+    }
 }

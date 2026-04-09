@@ -45,6 +45,11 @@ export class OmniDashboardComponent implements OnInit {
   editingTrackerId: number | null = null;
   deleteConfirm: { type: 'APP' | 'TRACKER' | 'ENTRY', id: number } | null = null;
 
+  // AI Import state
+  selectedFile: File | null = null;
+  importTrackerName = '';
+  isImporting = false;
+
   readonly TRACKER_TEMPLATES = [
     {
       name: 'Biohacker Recovery',
@@ -482,6 +487,37 @@ export class OmniDashboardComponent implements OnInit {
         this.calculateAppStats(this.selectedApp!.id!); // Refresh stats
       });
     }
+  }
+
+  // --- AI Tracker Import ---
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+  }
+
+  autoImportTracker() {
+    if (!this.selectedFile || !this.selectedApp) return;
+    
+    this.isImporting = true;
+    this.omniService.importTracker(this.selectedFile, this.selectedApp.id!, this.importTrackerName)
+      .subscribe({
+        next: (res) => {
+          this.trackers.push(res.tracker);
+          this.isAddingTracker = false;
+          this.isImporting = false;
+          this.selectedFile = null;
+          this.importTrackerName = '';
+          alert(`Successfully imported tracker and ${res.entryCount} entries!`);
+          this.calculateAppStats(this.selectedApp!.id!);
+        },
+        error: (err) => {
+          console.error(err);
+          this.isImporting = false;
+          alert('Failed to import document: ' + (err.error || err.message));
+        }
+      });
   }
 
   // ── Log Entries ──────────────────────────────────────────────

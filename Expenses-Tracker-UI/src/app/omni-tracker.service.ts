@@ -81,6 +81,16 @@ export class OmniTrackerService {
     return this.http.delete(`${this.apiUrl}/trackers/${id}`); 
   }
 
+  importTracker(file: File, appId: number, trackerName?: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('appId', appId.toString());
+    if (trackerName) {
+      formData.append('trackerName', trackerName);
+    }
+    return this.http.post<any>(`${this.apiUrl}/trackers/import`, formData);
+  }
+
   // --- Entries ---
   getEntries(trackerId: number): Observable<TrackerEntry[]> { 
     return this.http.get<TrackerEntry[]>(`${this.apiUrl}/entries/tracker/${trackerId}`); 

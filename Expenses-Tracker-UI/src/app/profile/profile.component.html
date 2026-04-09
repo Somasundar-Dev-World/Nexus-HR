@@ -76,6 +76,23 @@
         }
       </div>
 
+      </div>
+
+      <div class="glass-section mb-2 bg-darker pb-2">
+        <h3 class="section-title text-sm mb-1" style="color: #64748b;">Plaid Integrations API</h3>
+        
+        <div class="form-group">
+          <label class="form-label">Client ID</label>
+          <input type="text" class="form-control" name="plaidClientId" [(ngModel)]="profile.plaidClientId" placeholder="Enter Plaid Client ID">
+        </div>
+
+        <div class="form-group mb-0">
+          <label class="form-label">Sandbox Secret</label>
+          <input type="password" class="form-control" name="plaidSecret" [(ngModel)]="profile.plaidSecret" placeholder="Enter Plaid Sandbox Secret">
+          <p class="text-xs text-muted mt-1">Required for live bank connections.</p>
+        </div>
+      </div>
+
       <div class="form-group mb-2">
         <label class="form-label">Account Security</label>
         <input type="password" class="form-control" name="password" [(ngModel)]="profile.password" placeholder="New Password (or leave blank)" minlength="6">

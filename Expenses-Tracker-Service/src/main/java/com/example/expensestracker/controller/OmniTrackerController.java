@@ -19,10 +19,13 @@ import com.opencsv.CSVReader;
 import com.example.expensestracker.service.AiInsightService;
 import com.example.expensestracker.repository.TrackerMappingRepository;
 import com.example.expensestracker.model.TrackerMapping;
+import com.example.expensestracker.model.TrackerIntegration;
+import com.example.expensestracker.service.PlaidIntegrationService;
 import com.example.expensestracker.model.User;
 import com.example.expensestracker.repository.UserRepository;
 
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +54,9 @@ public class OmniTrackerController {
 
     @Autowired
     private TrackerMappingRepository trackerMappingRepository;
+
+    @Autowired
+    private PlaidIntegrationService plaidService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -469,6 +475,65 @@ public class OmniTrackerController {
         } else {
             // Fallback to reading as standard text
             return new String(file.getBytes());
+        }
+    }
+
+    // --- Plaid Integrations (Plugin Model) ---
+
+    @PostMapping("/integrations/plaid/link-token")
+    public ResponseEntity<?> createPlaidLinkToken(@RequestAttribute("userId") Long userId) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow();
+            String linkToken = plaidService.createLinkToken(user);
+            return ResponseEntity.ok(Collections.singletonMap("link_token", linkToken));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/integrations/plaid/exchange/{trackerId}")
+    public ResponseEntity<?> exchangePlaidToken(@PathVariable Long trackerId, 
+                                                @RequestBody Map<String, String> payload, 
+                                                @RequestAttribute("userId") Long userId) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow();
+            Tracker tracker = trackerRepository.findById(trackerId).orElseThrow();
+            if (!tracker.getUserId().equals(userId)) return ResponseEntity.status(403).build();
+
+            String publicToken = payload.get("public_token");
+            TrackerIntegration integration = plaidService.exchangePublicToken(publicToken, tracker, user);
+            return ResponseEntity.ok(integration);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/integrations/plaid/mapping/{trackerId}")
+    public ResponseEntity<?> setPlaidMapping(@PathVariable Long trackerId, 
+                                             @RequestBody Map<String, String> mapping, 
+                                             @RequestAttribute("userId") Long userId) {
+        try {
+            Tracker tracker = trackerRepository.findById(trackerId).orElseThrow();
+            if (!tracker.getUserId().equals(userId)) return ResponseEntity.status(403).build();
+
+            return ResponseEntity.ok(plaidService.setMapping(trackerId, mapping));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/integrations/plaid/sync/{trackerId}")
+    public ResponseEntity<?> syncPlaidTransactions(@PathVariable Long trackerId, 
+                                                   @RequestAttribute("userId") Long userId) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow();
+            Tracker tracker = trackerRepository.findById(trackerId).orElseThrow();
+            if (!tracker.getUserId().equals(userId)) return ResponseEntity.status(403).build();
+
+            int addedCount = plaidService.syncTransactions(tracker, user);
+            return ResponseEntity.ok(Collections.singletonMap("addedCount", addedCount));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         }
     }
 }

@@ -25,6 +25,9 @@ public class User {
     private String aiProvider = "GOOGLE"; // Default to Gemini
     private String aiModel = "gemini-2.0-flash"; // Confirmed available ID
 
+    private String plaidClientId;
+    private String plaidSecret;
+
     public User() {}
 
     public User(String username, String password, String name) {
@@ -51,4 +54,8 @@ public class User {
     public void setAiProvider(String aiProvider) { this.aiProvider = aiProvider; }
     public String getAiModel() { return aiModel; }
     public void setAiModel(String aiModel) { this.aiModel = aiModel; }
+    public String getPlaidClientId() { return plaidClientId; }
+    public void setPlaidClientId(String plaidClientId) { this.plaidClientId = plaidClientId; }
+    public String getPlaidSecret() { return plaidSecret; }
+    public void setPlaidSecret(String plaidSecret) { this.plaidSecret = plaidSecret; }
 }

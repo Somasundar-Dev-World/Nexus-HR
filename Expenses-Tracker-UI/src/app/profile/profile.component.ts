@@ -21,7 +21,9 @@ export class ProfileComponent implements OnInit {
     anthropicApiKey: '', 
     openaiApiKey: '',
     aiProvider: 'GOOGLE',
-    aiModel: 'gemini-1.5-flash'
+    aiModel: 'gemini-1.5-flash',
+    plaidClientId: '',
+    plaidSecret: ''
   };
 
   providers = [

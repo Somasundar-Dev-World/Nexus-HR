@@ -124,4 +124,21 @@ export class OmniTrackerService {
     if (refresh) params = params.set('refresh', 'true');
     return this.http.get<SmartInsight[]>(`${this.apiUrl}/apps/${appId}/insights`, { params });
   }
+
+  // --- Plaid Integrations (Plugin Model) ---
+  createPlaidLinkToken(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/integrations/plaid/link-token`, {});
+  }
+
+  exchangePlaidToken(trackerId: number, publicToken: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/integrations/plaid/exchange/${trackerId}`, { public_token: publicToken });
+  }
+
+  setPlaidMapping(trackerId: number, mapping: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/integrations/plaid/mapping/${trackerId}`, mapping);
+  }
+
+  syncPlaidTransactions(trackerId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/integrations/plaid/sync/${trackerId}`, {});
+  }
 }

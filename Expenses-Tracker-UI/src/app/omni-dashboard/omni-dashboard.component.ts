@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Va
 import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight } from '../omni-tracker.service';
 import { OmniApp } from '../omni-app.model';
 
+declare var Plaid: any;
+
 @Component({
   selector: 'app-omni-dashboard',
   standalone: true,
@@ -50,6 +52,15 @@ export class OmniDashboardComponent implements OnInit {
   importTrackerName = '';
   isImporting = false;
   importResult: { entryCount: number, skippedCount: number } | null = null;
+
+  // Plaid Mapping State
+  isPlaidMappingModalOpen = false;
+  plaidMapping: { [plaidField: string]: string } = { amount: '', name: '', date: '' };
+  plaidStandardFields = [
+    { id: 'amount', label: 'Transaction Amount' },
+    { id: 'name', label: 'Merchant Name' },
+    { id: 'date', label: 'Transaction Date' }
+  ];
 
   readonly TRACKER_TEMPLATES = [
     {
@@ -656,7 +667,6 @@ export class OmniDashboardComponent implements OnInit {
     }
   }
 
-  // ── Helpers ──────────────────────────────────────────────────
   getIcon(type: string): string {
     switch(type) {
       case 'FINANCE': return '🏦';
@@ -664,6 +674,70 @@ export class OmniDashboardComponent implements OnInit {
       case 'STOCK': return '📈';
       default: return '⚙️';
     }
+  }
+
+  // ── Plaid Integrations ───────────────────────────────────────
+  connectPlaid() {
+    if (!this.selectedTracker) return;
+    this.isLoading = true;
+    this.omniService.createPlaidLinkToken().subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        const handler = Plaid.create({
+          token: res.link_token,
+          onSuccess: (public_token: string, metadata: any) => {
+            console.log("Plaid connected, exchanging token...");
+            this.omniService.exchangePlaidToken(this.selectedTracker!.id!, public_token).subscribe({
+              next: (integration) => {
+                this.isPlaidMappingModalOpen = true;
+              },
+              error: err => {
+                console.error(err);
+                alert('Failed to exchange token.');
+              }
+            });
+          },
+          onLoad: () => {},
+          onExit: (err: any, metadata: any) => { console.log('Exit Plaid', err); }
+        });
+        handler.open();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error(err);
+        alert('Make sure your Plaid API Sandbox keys are set in your Profile Settings.');
+      }
+    });
+  }
+
+  savePlaidMapping() {
+    if (!this.selectedTracker) return;
+    this.isLoading = true;
+    this.omniService.setPlaidMapping(this.selectedTracker.id!, this.plaidMapping).subscribe({
+      next: () => {
+        // Sync immediately after mapping
+        this.omniService.syncPlaidTransactions(this.selectedTracker!.id!).subscribe({
+          next: (res: any) => {
+            this.isLoading = false;
+            this.isPlaidMappingModalOpen = false;
+            this.importResult = { entryCount: res.addedCount, skippedCount: 0 };
+            this.calculateAppStats(this.selectedApp!.id!); // Refresh data
+            // Refresh entries if on detail view
+            this.omniService.getEntries(this.selectedTracker!.id!).subscribe(entries => this.entries = entries);
+          },
+          error: (err) => {
+            this.isLoading = false;
+            console.error(err);
+            alert('Failed to sync bank transactions.');
+          }
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error(err);
+        alert('Failed to save mapping.');
+      }
+    });
   }
 
   getGradient(type: string): string {

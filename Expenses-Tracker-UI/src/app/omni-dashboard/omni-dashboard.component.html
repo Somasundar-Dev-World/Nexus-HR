@@ -245,6 +245,7 @@
             <span class="detail-badge">{{ selectedTracker.type }}</span>
             <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
             <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">🪄</button>
+            <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">🔌</button>
             <input type="file" accept=".csv,.pdf" #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
         </div>
@@ -529,6 +530,34 @@
       <div class="modal-actions confirm-actions">
         <button class="btn btn-outline" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plaid Mapping Modal -->
+  <div class="modal-overlay" *ngIf="isPlaidMappingModalOpen" (click)="isPlaidMappingModalOpen = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🔌 Map Plaid Bank Data</h3>
+        <p class="text-xs text-muted">Map Plaid fields to your Tracker's custom columns.</p>
+      </div>
+      
+      <div class="mapping-grid mt-3">
+        <div class="form-group" *ngFor="let pField of plaidStandardFields">
+          <label class="form-label" style="font-weight: 600;">{{ pField.label }}</label>
+          <p class="text-xs text-muted" style="margin-top: -5px; margin-bottom: 5px;">Plaid field: <code>{{ pField.id }}</code></p>
+          <select class="form-control" [(ngModel)]="plaidMapping[pField.id]">
+            <option value="">-- Ignore this field --</option>
+            <option *ngFor="let tField of selectedTracker?.fieldDefinitions" [value]="tField.name">
+              ⮑ Map to [{{ tField.name }}] ({{ tField.type }})
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions mt-4">
+        <button type="button" class="btn btn-outline" (click)="isPlaidMappingModalOpen = false">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="savePlaidMapping()">Save & Sync 🚀</button>
       </div>
     </div>
   </div>

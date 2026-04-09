@@ -175,6 +175,15 @@ public class OmniTrackerController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/entries/tracker/{trackerId}")
+    public ResponseEntity<?> deleteAllEntries(@RequestAttribute("userId") Long userId, @PathVariable Long trackerId) {
+        List<TrackerEntry> entries = entryRepository.findByTrackerIdAndUserId(trackerId, userId);
+        if (!entries.isEmpty()) {
+            entryRepository.deleteAll(entries);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     // --- Document Import AI ---
     @PostMapping("/trackers/import")
     public ResponseEntity<?> importTrackerFromDocument(

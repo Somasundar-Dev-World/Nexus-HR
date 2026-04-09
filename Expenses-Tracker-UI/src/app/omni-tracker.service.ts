@@ -115,6 +115,10 @@ export class OmniTrackerService {
     return this.http.delete(`${this.apiUrl}/entries/${id}`); 
   }
 
+  deleteAllEntries(trackerId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/entries/tracker/${trackerId}`);
+  }
+
   getAiInsights(appId: number, refresh: boolean = false): Observable<SmartInsight[]> {
     let params = new HttpParams();
     if (refresh) params = params.set('refresh', 'true');

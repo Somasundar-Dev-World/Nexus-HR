@@ -1557,3 +1557,24 @@
 
 .btn-import-header { background: rgba(255,255,255,0.2) !important; color: white !important; border-radius: 50% !important; padding: 0.4rem !important; }
 .btn-import-header:hover { background: rgba(255,255,255,0.4) !important; transform: scale(1.1); }
+
+/* --- Clear All Logs --- */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.btn-danger-outline {
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  background: transparent;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+.btn-danger-outline:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}

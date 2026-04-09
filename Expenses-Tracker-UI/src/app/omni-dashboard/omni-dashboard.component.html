@@ -270,7 +270,10 @@
 
     <!-- Log History -->
     <div class="detail-body">
-      <h2 class="section-title" *ngIf="entries.length && !isImporting">History</h2>
+      <div class="history-header" *ngIf="entries.length && !isImporting">
+        <h2 class="section-title" style="margin: 0;">History</h2>
+        <button class="btn-sm btn-outline btn-danger-outline" (click)="deleteAllLogs()">🗑️ Clear All</button>
+      </div>
 
       <div class="ai-loading-wrap" *ngIf="isImporting">
         <div class="mini-boot-loader">

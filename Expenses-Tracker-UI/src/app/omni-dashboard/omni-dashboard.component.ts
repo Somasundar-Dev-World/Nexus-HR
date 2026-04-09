@@ -601,6 +601,23 @@ export class OmniDashboardComponent implements OnInit {
   // ── Delete ───────────────────────────────────────────────────
   deleteLog(id: number) { this.deleteConfirm = { type: 'ENTRY', id }; }
 
+  deleteAllLogs() {
+    if (!this.selectedTracker) return;
+    if (confirm(`Are you sure you want to DELETE ALL logs in ${this.selectedTracker.name}?\n\nThis action cannot be undone.`)) {
+      this.omniService.deleteAllEntries(this.selectedTracker.id!).subscribe({
+        next: () => {
+          this.entries = [];
+          this.calculateAppStats(this.selectedApp!.id!);
+          alert('All logs have been cleared.');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Failed to delete logs.');
+        }
+      });
+    }
+  }
+
   deleteAppIcon(id: number, event: Event) {
     event.stopPropagation();
     this.deleteConfirm = { type: 'APP', id };

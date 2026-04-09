@@ -227,13 +227,13 @@ public class OmniTrackerController {
 
             // Create Entries
             JsonNode entriesNode = aiResult.path("entries");
+            
             int entryCount = 0;
+            int skippedCount = 0;
+            List<TrackerEntry> existingEntries = new ArrayList<>(); // To track internal duplicates
+            
             if (entriesNode.isArray()) {
                 for (JsonNode entryRow : entriesNode) {
-                    TrackerEntry entry = new TrackerEntry();
-                    entry.setTrackerId(tracker.getId());
-                    entry.setUserId(userId);
-                    
                     Map<String, Object> fieldValues = new HashMap<>();
                     Iterator<String> fieldNames = entryRow.fieldNames();
                     while (fieldNames.hasNext()) {
@@ -249,15 +249,33 @@ public class OmniTrackerController {
                             fieldValues.put(fieldName, valNode.asText());
                         }
                     }
-                    entry.setFieldValues(fieldValues);
-                    entryRepository.save(entry);
-                    entryCount++;
+                    
+                    boolean isDuplicate = false;
+                    for (TrackerEntry existing : existingEntries) {
+                        if (existing.getFieldValues() != null && existing.getFieldValues().equals(fieldValues)) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    
+                    if (isDuplicate) {
+                        skippedCount++;
+                    } else {
+                        TrackerEntry entry = new TrackerEntry();
+                        entry.setTrackerId(tracker.getId());
+                        entry.setUserId(userId);
+                        entry.setFieldValues(fieldValues);
+                        TrackerEntry saved = entryRepository.save(entry);
+                        existingEntries.add(saved);
+                        entryCount++;
+                    }
                 }
             }
 
             Map<String, Object> response = new HashMap<>();
             response.put("tracker", tracker);
             response.put("entryCount", entryCount);
+            response.put("skippedCount", skippedCount);
             
             return ResponseEntity.ok(response);
 
@@ -288,13 +306,13 @@ public class OmniTrackerController {
 
             JsonNode entriesNode = aiInsightService.extractEntriesForTracker(documentText, tracker, user);
 
+            List<TrackerEntry> existingEntries = entryRepository.findByTrackerIdAndUserId(tracker.getId(), userId);
+            
             int entryCount = 0;
+            int skippedCount = 0;
+            
             if (entriesNode.isArray()) {
                 for (JsonNode entryRow : entriesNode) {
-                    TrackerEntry entry = new TrackerEntry();
-                    entry.setTrackerId(tracker.getId());
-                    entry.setUserId(userId);
-                    
                     Map<String, Object> fieldValues = new HashMap<>();
                     Iterator<String> fieldNames = entryRow.fieldNames();
                     while (fieldNames.hasNext()) {
@@ -309,14 +327,34 @@ public class OmniTrackerController {
                             fieldValues.put(fieldName, valNode.asText());
                         }
                     }
-                    entry.setFieldValues(fieldValues);
-                    entryRepository.save(entry);
-                    entryCount++;
+                    
+                    // Duplicate Check Logic
+                    boolean isDuplicate = false;
+                    for (TrackerEntry existing : existingEntries) {
+                        // Compare maps
+                        if (existing.getFieldValues() != null && existing.getFieldValues().equals(fieldValues)) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    
+                    if (isDuplicate) {
+                        skippedCount++;
+                    } else {
+                        TrackerEntry entry = new TrackerEntry();
+                        entry.setTrackerId(tracker.getId());
+                        entry.setUserId(userId);
+                        entry.setFieldValues(fieldValues);
+                        TrackerEntry saved = entryRepository.save(entry);
+                        existingEntries.add(saved); // add to existing to prevent internal file duplicates
+                        entryCount++;
+                    }
                 }
             }
 
             Map<String, Object> response = new HashMap<>();
             response.put("entryCount", entryCount);
+            response.put("skippedCount", skippedCount);
             
             return ResponseEntity.ok(response);
 

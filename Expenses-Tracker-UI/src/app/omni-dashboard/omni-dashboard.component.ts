@@ -532,7 +532,11 @@ export class OmniDashboardComponent implements OnInit {
             this.omniService.getEntries(this.selectedTracker!.id!).subscribe(data => {
               this.entries = data;
               this.calculateAppStats(this.selectedApp!.id!);
-              alert(`Successfully imported ${res.entryCount} entries into ${this.selectedTracker!.name}!`);
+              let msg = `Successfully imported ${res.entryCount} entries into ${this.selectedTracker!.name}!`;
+              if (res.skippedCount > 0) {
+                msg += `\nSkipped ${res.skippedCount} duplicate entries.`;
+              }
+              alert(msg);
             });
           },
           error: (err) => {

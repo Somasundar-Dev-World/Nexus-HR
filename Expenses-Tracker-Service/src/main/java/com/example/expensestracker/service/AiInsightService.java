@@ -329,13 +329,25 @@ public class AiInsightService {
                             "DOCUMENT TEXT:\n" + documentText;
 
         String rawJson = "";
-        
-        if ("GOOGLE".equalsIgnoreCase(provider)) {
-            rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
-            rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-        } else if ("OPENAI".equalsIgnoreCase(provider)) {
-            rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        int retries = 2;
+        while (true) {
+            try {
+                if ("GOOGLE".equalsIgnoreCase(provider)) {
+                    rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                    rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                    rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                }
+                break;
+            } catch (Exception e) {
+                if (retries > 0 && e.getMessage().contains("503")) {
+                    retries--;
+                    Thread.sleep(3000);
+                } else {
+                    throw e;
+                }
+            }
         }
 
         return objectMapper.readTree(cleanJson(rawJson));
@@ -379,15 +391,100 @@ public class AiInsightService {
         String userPrompt = "DOCUMENT TEXT:\n" + documentText;
 
         String rawJson = "";
-        if ("GOOGLE".equalsIgnoreCase(provider)) {
-            rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
-            rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-        } else if ("OPENAI".equalsIgnoreCase(provider)) {
-            rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+        int retries = 2;
+        while (true) {
+            try {
+                if ("GOOGLE".equalsIgnoreCase(provider)) {
+                    rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                    rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                    rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                }
+                break;
+            } catch (Exception e) {
+                if (retries > 0 && e.getMessage().contains("503")) {
+                    retries--;
+                    Thread.sleep(3000);
+                } else {
+                    throw e;
+                }
+            }
         }
 
         return objectMapper.readTree(cleanJson(rawJson));
+    }
+
+    public Map<String, String> learnCsvMapping(String csvHeaders, Tracker tracker, User user) throws Exception {
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+        
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            throw new RuntimeException("No active API Key found for " + provider);
+        }
+
+        StringBuilder fieldsSchema = new StringBuilder();
+        if (tracker.getFieldDefinitions() != null) {
+            for (Object def : tracker.getFieldDefinitions()) {
+                if (def instanceof Map) {
+                    Map<?, ?> fieldMap = (Map<?, ?>) def;
+                    fieldsSchema.append("- Name: '").append(fieldMap.get("name"))
+                                .append("', Type: '").append(fieldMap.get("type")).append("'\n");
+                }
+            }
+        }
+
+        String systemPrompt = "You are a CSV mapping engine. " +
+                "I will provide you with a list of CSV HEADERS. " +
+                "Your job is to map these headers to the closest matching TARGET SCHEMA FIELDS.\n" +
+                "TARGET SCHEMA FIELDS:\n" + fieldsSchema.toString() + "\n" +
+                "Return ONLY a raw JSON object where Keys are the CSV HEADERS, and Values are the EXACT TARGET SCHEMA FIELDS they map to. " +
+                "If a header does not match any field, skip it. Do not include it in the object.\n" +
+                "Example Answer: { \"Transaction Date\": \"Date\", \"Cost\": \"Amount\" }";
+
+        String userPrompt = "CSV HEADERS:\n" + csvHeaders;
+
+        String rawJson = "";
+        int retries = 2;
+        while (true) {
+            try {
+                if ("GOOGLE".equalsIgnoreCase(provider)) {
+                    rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                    rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                    rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+                }
+                break; // Break if successful
+            } catch (Exception e) {
+                if (retries > 0 && e.getMessage().contains("503")) {
+                    retries--;
+                    Thread.sleep(3000); // Wait 3 seconds
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        JsonNode root = objectMapper.readTree(cleanJson(rawJson));
+        Map<String, String> mapping = new java.util.HashMap<>();
+        if (root.isObject()) {
+            java.util.Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                mapping.put(field.getKey(), field.getValue().asText());
+            }
+        }
+        return mapping;
     }
 
     private String callGeminiRawForDoc(String userPrompt, String systemPrompt, String apiKey, String modelName) throws Exception {

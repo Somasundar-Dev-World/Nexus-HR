@@ -17,6 +17,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import com.opencsv.CSVReader;
 import com.example.expensestracker.service.AiInsightService;
+import com.example.expensestracker.repository.TrackerMappingRepository;
+import com.example.expensestracker.model.TrackerMapping;
 import com.example.expensestracker.model.User;
 import com.example.expensestracker.repository.UserRepository;
 
@@ -46,6 +48,9 @@ public class OmniTrackerController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TrackerMappingRepository trackerMappingRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -308,55 +313,130 @@ public class OmniTrackerController {
                 return ResponseEntity.status(403).body("Access denied to this tracker.");
             }
 
-            String documentText = extractTextFromFile(file);
-            if (documentText == null || documentText.isEmpty()) {
-                return ResponseEntity.badRequest().body("Could not extract text from the provided file.");
-            }
-
-            JsonNode entriesNode = aiInsightService.extractEntriesForTracker(documentText, tracker, user);
+            String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            boolean isCsv = filename.endsWith(".csv") || (file.getContentType() != null && file.getContentType().contains("csv"));
 
             List<TrackerEntry> existingEntries = entryRepository.findByTrackerIdAndUserId(tracker.getId(), userId);
             
             int entryCount = 0;
             int skippedCount = 0;
-            
-            if (entriesNode.isArray()) {
-                for (JsonNode entryRow : entriesNode) {
-                    Map<String, Object> fieldValues = new HashMap<>();
-                    Iterator<String> fieldNames = entryRow.fieldNames();
-                    while (fieldNames.hasNext()) {
-                        String fieldName = fieldNames.next();
-                        JsonNode valNode = entryRow.get(fieldName);
+
+            if (isCsv) {
+                try (CSVReader csvReader = new CSVReader(new java.io.InputStreamReader(file.getInputStream()))) {
+                    List<String[]> allData = csvReader.readAll();
+                    if (!allData.isEmpty()) {
+                        String[] headers = allData.get(0);
+                        String headersString = String.join(",", headers);
                         
-                        if (valNode.isNumber()) {
-                            fieldValues.put(fieldName, valNode.asDouble());
-                        } else if (valNode.isBoolean()) {
-                            fieldValues.put(fieldName, valNode.asBoolean());
+                        Map<String, Object> colMap;
+                        java.util.Optional<TrackerMapping> optMapping = trackerMappingRepository.findByTrackerIdAndCsvHeaders(tracker.getId(), headersString);
+                        if (optMapping.isPresent()) {
+                            colMap = optMapping.get().getColumnMapping();
                         } else {
-                            fieldValues.put(fieldName, valNode.asText());
+                            Map<String, String> learned = aiInsightService.learnCsvMapping(headersString, tracker, user);
+                            colMap = new HashMap<>(learned);
+                            TrackerMapping mapping = new TrackerMapping();
+                            mapping.setTrackerId(tracker.getId());
+                            mapping.setCsvHeaders(headersString);
+                            mapping.setColumnMapping(colMap);
+                            trackerMappingRepository.save(mapping);
+                        }
+
+                        for (int i = 1; i < allData.size(); i++) {
+                            String[] row = allData.get(i);
+                            Map<String, Object> fieldValues = new HashMap<>();
+                            for (int j = 0; j < headers.length && j < row.length; j++) {
+                                String header = headers[j];
+                                if (colMap.containsKey(header)) {
+                                    String targetField = String.valueOf(colMap.get(header));
+                                    String val = row[j].trim();
+                                    if (val.isEmpty()) continue;
+                                    
+                                    // Basic type inference
+                                    try {
+                                        if (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("false")) {
+                                            fieldValues.put(targetField, Boolean.parseBoolean(val));
+                                        } else if (val.matches("-?\\d+(\\.\\d+)?")) {
+                                            fieldValues.put(targetField, Double.parseDouble(val));
+                                        } else if (val.startsWith("$")) {
+                                            fieldValues.put(targetField, Double.parseDouble(val.replace("$", "").replace(",", "")));
+                                        } else {
+                                            fieldValues.put(targetField, val);
+                                        }
+                                    } catch (Exception e) {
+                                        fieldValues.put(targetField, val);
+                                    }
+                                }
+                            }
+                            
+                            if (fieldValues.isEmpty()) continue;
+
+                            boolean isDuplicate = false;
+                            for (TrackerEntry existing : existingEntries) {
+                                if (existing.getFieldValues() != null && existing.getFieldValues().equals(fieldValues)) {
+                                    isDuplicate = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (isDuplicate) {
+                                skippedCount++;
+                            } else {
+                                TrackerEntry entry = new TrackerEntry();
+                                entry.setTrackerId(tracker.getId());
+                                entry.setUserId(userId);
+                                entry.setFieldValues(fieldValues);
+                                TrackerEntry saved = entryRepository.save(entry);
+                                existingEntries.add(saved);
+                                entryCount++;
+                            }
                         }
                     }
-                    
-                    // Duplicate Check Logic
-                    boolean isDuplicate = false;
-                    for (TrackerEntry existing : existingEntries) {
-                        // Compare maps
-                        if (existing.getFieldValues() != null && existing.getFieldValues().equals(fieldValues)) {
-                            isDuplicate = true;
-                            break;
+                }
+            } else {
+                String documentText = extractTextFromFile(file);
+                if (documentText == null || documentText.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Could not extract text from the provided file.");
+                }
+
+                com.fasterxml.jackson.databind.JsonNode entriesNode = aiInsightService.extractEntriesForTracker(documentText, tracker, user);
+                
+                if (entriesNode.isArray()) {
+                    for (com.fasterxml.jackson.databind.JsonNode entryRow : entriesNode) {
+                        Map<String, Object> fieldValues = new HashMap<>();
+                        java.util.Iterator<String> fieldNames = entryRow.fieldNames();
+                        while (fieldNames.hasNext()) {
+                            String fieldName = fieldNames.next();
+                            com.fasterxml.jackson.databind.JsonNode valNode = entryRow.get(fieldName);
+                            
+                            if (valNode.isNumber()) {
+                                fieldValues.put(fieldName, valNode.asDouble());
+                            } else if (valNode.isBoolean()) {
+                                fieldValues.put(fieldName, valNode.asBoolean());
+                            } else {
+                                fieldValues.put(fieldName, valNode.asText());
+                            }
                         }
-                    }
-                    
-                    if (isDuplicate) {
-                        skippedCount++;
-                    } else {
-                        TrackerEntry entry = new TrackerEntry();
-                        entry.setTrackerId(tracker.getId());
-                        entry.setUserId(userId);
-                        entry.setFieldValues(fieldValues);
-                        TrackerEntry saved = entryRepository.save(entry);
-                        existingEntries.add(saved); // add to existing to prevent internal file duplicates
-                        entryCount++;
+                        
+                        boolean isDuplicate = false;
+                        for (TrackerEntry existing : existingEntries) {
+                            if (existing.getFieldValues() != null && existing.getFieldValues().equals(fieldValues)) {
+                                isDuplicate = true;
+                                break;
+                            }
+                        }
+                        
+                        if (isDuplicate) {
+                            skippedCount++;
+                        } else {
+                            TrackerEntry entry = new TrackerEntry();
+                            entry.setTrackerId(tracker.getId());
+                            entry.setUserId(userId);
+                            entry.setFieldValues(fieldValues);
+                            TrackerEntry saved = entryRepository.save(entry);
+                            existingEntries.add(saved); 
+                            entryCount++;
+                        }
                     }
                 }
             }

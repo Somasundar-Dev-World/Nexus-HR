@@ -1,110 +1,116 @@
-<div class="container" style="max-width: 600px; padding-top: 2rem;">
-  <div class="flex-between mb-2">
-    <div>
-      <h1 class="font-bold text-main">Profile Settings</h1>
-      <p class="text-sm text-muted">Manage your account details and password.</p>
+<div class="profile-container animate-fade-up" *ngIf="profile">
+  
+  <!-- Header Card -->
+  <div class="profile-header-card">
+    <div class="profile-avatar-large">
+      {{ profile.name.charAt(0).toUpperCase() }}
+    </div>
+    <div class="profile-intro">
+      <h1>Profile Settings</h1>
+      <p>Manage your account configuration and integrations.</p>
     </div>
   </div>
 
-  <div class="card form-card">
-    @if (errorMsg) {
-      <div class="alert alert-danger mb-2" style="background: #fee2e2; color: var(--danger); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.875rem;">
-        {{ errorMsg }}
-      </div>
-    }
-    
-    @if (successMsg) {
-      <div class="alert mb-2" style="background: #dcfce7; color: var(--primary); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.875rem;">
-        {{ successMsg }}
-      </div>
-    }
+  <form (ngSubmit)="onSubmit()" #profileForm="ngForm">
+    <!-- Notifications / Alerts -->
+    <div *ngIf="errorMsg" class="alert alert-danger mb-2" style="background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 16px;">
+      {{ errorMsg }}
+    </div>
+    <div *ngIf="successMsg" class="alert alert-success mb-2" style="background: #dcfce7; color: #059669; padding: 1rem; border-radius: 16px;">
+      {{ successMsg }}
+    </div>
 
-    <form (ngSubmit)="onSubmit()" #profileForm="ngForm" class="grid-form" style="display: flex; flex-direction: column; gap: 1rem;">
-      <div class="form-group mb-1">
-        <label class="form-label">Username (Read-Only)</label>
-        <input type="text" class="form-control" name="username" [ngModel]="profile.username" disabled style="opacity: 0.7;">
-      </div>
-
-      <div class="form-group mb-1">
-        <label class="form-label">Full Name</label>
-        <input type="text" class="form-control" name="name" [(ngModel)]="profile.name" required>
-      </div>
-
-      <div style="background: rgba(var(--primary-rgb), 0.05); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid rgba(var(--primary-rgb), 0.1); display: flex; flex-direction: column; gap: 1rem; margin: 0.5rem 0 1rem 0;">
-        <h3 class="text-sm font-semibold text-primary mb-1">AI Smart Dashboard Configuration</h3>
+    <div class="settings-grid">
+      <!-- Section 1: Account Information -->
+      <div class="settings-card">
+        <div class="card-icon-title">
+          <span class="card-icon">👤</span>
+          <span class="card-title">Account Details</span>
+        </div>
         
-        <div class="form-group">
-          <label class="form-label">LLM Provider</label>
-          <select class="form-control" name="aiProvider" [(ngModel)]="profile.aiProvider" (change)="onProviderChange()">
-            @for (p of providers; track p.id) {
-              <option [value]="p.id">{{ p.name }}</option>
-            }
-          </select>
+        <div class="field-group">
+          <label class="field-label">Username (Read-Only)</label>
+          <input type="text" class="profile-input" [ngModel]="profile.username" name="username" disabled>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Model</label>
-          <select class="form-control" name="aiModel" [(ngModel)]="profile.aiModel">
-            @for (m of selectedProviderModels; track m) {
-              <option [value]="m">{{ m }}</option>
-            }
-          </select>
+        <div class="field-group">
+          <label class="field-label">Full Name</label>
+          <input type="text" class="profile-input" [(ngModel)]="profile.name" name="fullName" required placeholder="Enter your full name">
         </div>
 
-        @if (profile.aiProvider === 'GOOGLE') {
-          <div class="form-group">
-            <label class="form-label">Gemini API Key</label>
-            <input type="password" class="form-control" name="geminiApiKey" [(ngModel)]="profile.geminiApiKey" placeholder="Enter Google Gemini Key">
-            <p class="text-xs text-muted mt-1">Get your key from Google AI Studio.</p>
-          </div>
-        }
-
-        @if (profile.aiProvider === 'ANTHROPIC') {
-          <div class="form-group">
-            <label class="form-label">Claude API Key</label>
-            <input type="password" class="form-control" name="anthropicApiKey" [(ngModel)]="profile.anthropicApiKey" placeholder="Enter Anthropic Claude Key">
-            <p class="text-xs text-muted mt-1">Get your key from Anthropic Console.</p>
-          </div>
-        }
-
-        @if (profile.aiProvider === 'OPENAI') {
-          <div class="form-group">
-            <label class="form-label">OpenAI API Key</label>
-            <input type="password" class="form-control" name="openaiApiKey" [(ngModel)]="profile.openaiApiKey" placeholder="Enter OpenAI API Key">
-            <p class="text-xs text-muted mt-1">Get your key from OpenAI Platform.</p>
-          </div>
-        }
+        <div class="field-group">
+          <label class="field-label">Account Security</label>
+          <input type="password" class="profile-input" [(ngModel)]="profile.password" name="password" placeholder="New Password (leave blank to keep current)">
+        </div>
       </div>
 
-      <div class="glass-section mb-2 bg-darker pb-2">
-        <h3 class="section-title text-sm mb-1" style="color: #64748b;">Plaid Integrations API</h3>
+      <!-- Section 2: AI Configuration -->
+      <div class="settings-card">
+        <div class="card-icon-title">
+          <span class="card-icon">🤖</span>
+          <span class="card-title">AI Intelligence</span>
+        </div>
         
-        <div class="form-group">
-          <label class="form-label">Client ID</label>
-          <input type="text" class="form-control" name="plaidClientId" [(ngModel)]="profile.plaidClientId" placeholder="Enter Plaid Client ID">
+        <div class="ai-inner-section">
+          <div class="field-group">
+            <label class="field-label">LLM Provider</label>
+            <select class="profile-input" name="aiProvider" [(ngModel)]="profile.aiProvider" (change)="onProviderChange()">
+              <option *ngFor="let p of providers" [value]="p.id">{{ p.name }}</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Intelligence Model</label>
+            <select class="profile-input" name="aiModel" [(ngModel)]="profile.aiModel">
+              <option *ngFor="let m of selectedProviderModels" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+
+          <div class="field-group" *ngIf="profile.aiProvider === 'GOOGLE'">
+            <label class="field-label">Gemini API Key</label>
+            <input type="password" class="profile-input" name="geminiApiKey" [(ngModel)]="profile.geminiApiKey" placeholder="Enter Google Gemini Key">
+            <small style="color: #64748b; margin-top: 4px; display: block;">Authorized key required for deep analysis.</small>
+          </div>
+
+          <div class="field-group" *ngIf="profile.aiProvider === 'ANTHROPIC'">
+            <label class="field-label">Claude API Key</label>
+            <input type="password" class="profile-input" name="anthropicApiKey" [(ngModel)]="profile.anthropicApiKey" placeholder="Enter Anthropic Key">
+          </div>
+
+          <div class="field-group" *ngIf="profile.aiProvider === 'OPENAI'">
+            <label class="field-label">OpenAI API Key</label>
+            <input type="password" class="profile-input" name="openaiApiKey" [(ngModel)]="profile.openaiApiKey" placeholder="Enter OpenAI Key">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Third-Party APIs -->
+      <div class="settings-card">
+        <div class="card-icon-title">
+          <span class="card-icon">🔌</span>
+          <span class="card-title">External Connections</span>
+        </div>
+        
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem;">Configure Plaid to synchronize your live bank transactions automatically.</p>
+
+        <div class="field-group">
+          <label class="field-label">Plaid Client ID</label>
+          <input type="text" class="profile-input" name="plaidClientId" [(ngModel)]="profile.plaidClientId" placeholder="Enter Plaid Client ID">
         </div>
 
-        <div class="form-group mb-0">
-          <label class="form-label">Sandbox Secret</label>
-          <input type="password" class="form-control" name="plaidSecret" [(ngModel)]="profile.plaidSecret" placeholder="Enter Plaid Sandbox Secret">
-          <p class="text-xs text-muted mt-1">Required for live bank connections.</p>
+        <div class="field-group">
+          <label class="field-label">Plaid Secret Key</label>
+          <input type="password" class="profile-input" name="plaidSecret" [(ngModel)]="profile.plaidSecret" placeholder="Enter Plaid Sandbox/Production Secret">
         </div>
       </div>
+    </div>
 
-      <div class="form-group mb-2">
-        <label class="form-label">Account Security</label>
-        <input type="password" class="form-control" name="password" [(ngModel)]="profile.password" placeholder="New Password (or leave blank)" minlength="6">
-      </div>
-      
-      <div style="display: flex; justify-content: flex-end;">
-        <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isLoading">
-          @if (isLoading) {
-            <span class="btn-spinner"></span> Saving...
-          } @else {
-            Save Changes
-          }
-        </button>
-      </div>
-    </form>
-  </div>
+    <!-- Sticky Save Bar -->
+    <div class="save-actions">
+      <button type="submit" class="btn-premium-save" [disabled]="profileForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="btn-spinner"></span>
+        {{ isLoading ? 'Synchronizing...' : 'Save Settings' }}
+      </button>
+    </div>
+  </form>
 </div>

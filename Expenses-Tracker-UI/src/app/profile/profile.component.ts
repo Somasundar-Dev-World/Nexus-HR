@@ -10,7 +10,7 @@ import { environment } from '../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
-  styleUrl: '../login/login.component.css'
+  styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
   profile = { 

@@ -253,7 +253,7 @@
             <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">🔌</button>
             <button class="btn-icon btn-delete-tracker" (click)="showDeleteTrackerConfirm = true" title="Delete this Tracker">🗑️</button>
             <span class="institution-badge" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
-            <input type="file" accept=".csv,.pdf" #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
+            <input type="file" accept=".csv,.pdf" multiple #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
         </div>
       </div>

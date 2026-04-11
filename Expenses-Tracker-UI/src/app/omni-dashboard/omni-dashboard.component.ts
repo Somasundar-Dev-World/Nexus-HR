@@ -558,10 +558,10 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   onEntriesFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file && this.selectedTracker) {
+    const files: File[] = Array.from(event.target.files || []);
+    if (files.length > 0 && this.selectedTracker) {
       this.isImporting = true;
-      this.omniService.importEntries(file, this.selectedTracker.id!)
+      this.omniService.importEntries(files, this.selectedTracker.id!)
         .subscribe({
           next: (res) => {
             this.isImporting = false;
@@ -569,7 +569,8 @@ export class OmniDashboardComponent implements OnInit {
             this.omniService.getEntries(this.selectedTracker!.id!).subscribe(data => {
               this.entries = data;
               this.calculateAppStats(this.selectedApp!.id!);
-              this.importResult = { entryCount: res.entryCount, skippedCount: res.skippedCount || 0, fileName: file.name };
+              const fileNameDesc = files.length === 1 ? files[0].name : `${files.length} files`;
+              this.importResult = { entryCount: res.entryCount, skippedCount: res.skippedCount || 0, fileName: fileNameDesc };
               this.isImportModalOpen = true;
             });
           },

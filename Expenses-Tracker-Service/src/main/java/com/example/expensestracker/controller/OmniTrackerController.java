@@ -103,13 +103,6 @@ public class OmniTrackerController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/apps/{appId}/insights")
-    public ResponseEntity<?> getAppInsights(@PathVariable Long appId,
-                                             @RequestParam(defaultValue = "false") boolean refresh,
-                                             @RequestAttribute("userId") Long userId) {
-        return ResponseEntity.ok(aiInsightService.getInsightsForApp(appId, userId, refresh));
-    }
-
     @GetMapping("/apps/{appId}/deep-insight")
     public ResponseEntity<?> getDeepInsight(@PathVariable Long appId,
                                              @RequestAttribute("userId") Long userId) {

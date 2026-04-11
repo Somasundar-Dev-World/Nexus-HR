@@ -55,6 +55,20 @@ export class OmniDashboardComponent implements OnInit {
   isImportModalOpen = false;
   showDeleteTrackerConfirm = false;
 
+  // Deep Research State
+  isDeepInsightOpen = false;
+  isDeepInsightLoading = false;
+  deepInsightReport: any = null;
+  deepInsightLoadingSteps = [
+    { label: 'Scanning all tracker records...', done: false },
+    { label: 'Computing field statistics...', done: false },
+    { label: 'Detecting anomalies & trends...', done: false },
+    { label: 'Generating AI forecast...', done: false },
+    { label: 'Assembling deep report...', done: false },
+  ];
+  deepInsightStepIndex = 0;
+  private deepInsightStepTimer: any;
+
   // Plaid Mapping State
   isPlaidMappingModalOpen = false;
   isAutoMapping = false;
@@ -635,6 +649,68 @@ export class OmniDashboardComponent implements OnInit {
         this.isAddingEntry = false;
       });
     }
+  }
+
+  // ── Deep Research ─────────────────────────────────────────────
+  loadDeepInsight() {
+    if (!this.selectedApp) return;
+    this.isDeepInsightOpen = true;
+    this.isDeepInsightLoading = true;
+    this.deepInsightReport = null;
+    this.deepInsightStepIndex = 0;
+    this.deepInsightLoadingSteps.forEach(s => s.done = false);
+
+    // Animate loading steps
+    this.deepInsightStepTimer = setInterval(() => {
+      if (this.deepInsightStepIndex < this.deepInsightLoadingSteps.length) {
+        this.deepInsightLoadingSteps[this.deepInsightStepIndex].done = true;
+        this.deepInsightStepIndex++;
+      }
+    }, 1800);
+
+    this.omniService.getDeepInsight(this.selectedApp.id!).subscribe({
+      next: (report) => {
+        clearInterval(this.deepInsightStepTimer);
+        this.deepInsightLoadingSteps.forEach(s => s.done = true);
+        setTimeout(() => {
+          this.isDeepInsightLoading = false;
+          this.deepInsightReport = report;
+        }, 600);
+      },
+      error: (err) => {
+        clearInterval(this.deepInsightStepTimer);
+        this.isDeepInsightLoading = false;
+        this.deepInsightReport = {
+          executiveSummary: 'Failed to generate deep insight: ' + (err?.error?.message || err.message || 'Unknown error'),
+          overallScore: 0, scoreLabel: 'Error', sections: []
+        };
+      }
+    });
+  }
+
+  closeDeepInsight() {
+    clearInterval(this.deepInsightStepTimer);
+    this.isDeepInsightOpen = false;
+    this.deepInsightReport = null;
+  }
+
+  getScoreColor(score: number): string {
+    if (score >= 80) return '#10b981';
+    if (score >= 60) return '#f59e0b';
+    if (score >= 40) return '#f97316';
+    return '#ef4444';
+  }
+
+  getSectionColorClass(color: string): string {
+    const map: any = {
+      success: 'deep-card-success',
+      warning: 'deep-card-warning',
+      danger: 'deep-card-danger',
+      primary: 'deep-card-primary',
+      magic: 'deep-card-magic',
+      info: 'deep-card-info',
+    };
+    return map[color] || 'deep-card-primary';
   }
 
   // ── Delete ───────────────────────────────────────────────────

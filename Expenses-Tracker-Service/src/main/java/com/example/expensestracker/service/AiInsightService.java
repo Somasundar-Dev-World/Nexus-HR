@@ -134,6 +134,164 @@ public class AiInsightService {
         }
     }
 
+    // ══════════════════════════════════════════════════════════
+    //  AI DEEP RESEARCH
+    // ══════════════════════════════════════════════════════════
+    public DeepInsightReport getDeepInsightForApp(Long appId, Long userId) {
+        TrackerApp app = trackerAppRepository.findById(appId).orElse(null);
+        if (app == null || !app.getUserId().equals(userId)) return null;
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return null;
+
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            return buildErrorDeepReport("No AI API key configured. Please set your key in Profile Settings.");
+        }
+
+        List<Tracker> trackers = trackerRepository.findByUserIdAndAppId(userId, appId);
+        int[] counts = {0};
+        String dataContext = buildDeepDataContext(app, trackers, counts);
+        int totalEntries = counts[0];
+
+        String systemPrompt = "You are an elite AI data analyst embedded inside a personal productivity OS called Omni Tracker. " +
+            "You will receive full historical tracking data from a user's personal app. " +
+            "Your job is to produce a DEEP RESEARCH REPORT — exhaustive, rigorous, insightful, and actionable. " +
+            "You MUST analyze every angle: trends over time, anomalies, risk factors, cross-tracker correlations, " +
+            "behavioral patterns, forecasting, and prioritized recommendations. " +
+            "Be specific. Reference actual data values, dates, and field names from the context. " +
+            "The response MUST be a single raw JSON object (no markdown, no preamble) matching this exact structure:\n" +
+            "{\n" +
+            "  \"executiveSummary\": \"4-6 sentence high-level synthesis of the entire dataset\",\n" +
+            "  \"overallScore\": <integer 0-100 representing overall health/performance>,\n" +
+            "  \"scoreLabel\": \"e.g. Excellent / Good / Needs Attention / Critical\",\n" +
+            "  \"sections\": [\n" +
+            "    {\n" +
+            "      \"id\": \"unique_id\",\n" +
+            "      \"title\": \"Section title\",\n" +
+            "      \"icon\": \"single emoji\",\n" +
+            "      \"type\": \"SUMMARY|TREND|ANOMALY|FORECAST|RECOMMENDATION|RISK|CORRELATION\",\n" +
+            "      \"color\": \"success|warning|danger|primary|magic|info\",\n" +
+            "      \"priority\": <1-5>,\n" +
+            "      \"headline\": \"One-line key finding or stat\",\n" +
+            "      \"content\": \"Detailed 3-5 sentence analysis of this section\",\n" +
+            "      \"dataPoints\": [\"bullet 1\", \"bullet 2\", \"bullet 3\"],\n" +
+            "      \"actionItems\": [\"actionable step 1\", \"actionable step 2\"]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}\n" +
+            "Include at least 6-8 sections covering: overall performance, key trends, anomalies/outliers, " +
+            "30/60/90 day forecast, top recommendations, risk assessment, and if multiple trackers exist, cross-tracker correlations.";
+
+        String userPrompt = "FULL DATA CONTEXT:\n" + dataContext;
+
+        try {
+            String rawJson = "";
+            if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                rawJson = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                rawJson = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            } else {
+                rawJson = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            }
+
+            DeepInsightReport report = objectMapper.readValue(cleanJson(rawJson), DeepInsightReport.class);
+            report.setAnalysisDepth(totalEntries);
+            report.setTrackerCount(trackers.size());
+            report.setGeneratedAt(LocalDateTime.now().toString());
+            report.setProvider(provider);
+            return report;
+        } catch (Exception e) {
+            System.err.println("Deep Insight Generation Failed: " + e.getMessage());
+            return buildErrorDeepReport("AI analysis failed: " + e.getMessage());
+        }
+    }
+
+    private String buildDeepDataContext(TrackerApp app, List<Tracker> trackers, int[] totalCount) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== APP: ").append(app.getName()).append(" ===\n");
+        sb.append("Description: ").append(app.getDescription() != null ? app.getDescription() : "N/A").append("\n\n");
+
+        int total = 0;
+        for (Tracker t : trackers) {
+            sb.append("== TRACKER: ").append(t.getName()).append(" (Type: ").append(t.getType()).append(") ==\n");
+            sb.append("Fields: ");
+            if (t.getFieldDefinitions() != null) {
+                for (Object def : t.getFieldDefinitions()) {
+                    if (def instanceof Map) {
+                        Map<?, ?> m = (Map<?, ?>) def;
+                        sb.append(m.get("name")).append("(").append(m.get("type")).append(") ");
+                    }
+                }
+            }
+            sb.append("\n");
+
+            List<TrackerEntry> entries = trackerEntryRepository.findByTrackerIdOrderByDateAsc(t.getId());
+            total += entries.size();
+            sb.append("Total entries: ").append(entries.size()).append("\n");
+
+            if (!entries.isEmpty()) {
+                sb.append("Date range: ").append(entries.get(0).getDate())
+                  .append(" → ").append(entries.get(entries.size() - 1).getDate()).append("\n");
+
+                // Compute simple numeric stats per field
+                Map<String, List<Double>> numericFields = new LinkedHashMap<>();
+                for (TrackerEntry e : entries) {
+                    if (e.getFieldValues() != null) {
+                        for (Map.Entry<String, Object> fv : e.getFieldValues().entrySet()) {
+                            try {
+                                double val = Double.parseDouble(fv.getValue().toString());
+                                numericFields.computeIfAbsent(fv.getKey(), k -> new ArrayList<>()).add(val);
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                }
+                for (Map.Entry<String, List<Double>> nf : numericFields.entrySet()) {
+                    List<Double> vals = nf.getValue();
+                    double min = vals.stream().mapToDouble(Double::doubleValue).min().orElse(0);
+                    double max = vals.stream().mapToDouble(Double::doubleValue).max().orElse(0);
+                    double avg = vals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+                    double first = vals.get(0);
+                    double last = vals.get(vals.size() - 1);
+                    String trend = last > first ? "↑ increasing" : last < first ? "↓ decreasing" : "→ stable";
+                    sb.append(String.format("  [STATS] %s: min=%.2f, max=%.2f, avg=%.2f, trend=%s\n",
+                        nf.getKey(), min, max, avg, trend));
+                }
+
+                // All entries (up to 200 for deep context)
+                int start = Math.max(0, entries.size() - 200);
+                sb.append("  All Data:\n");
+                for (TrackerEntry e : entries.subList(start, entries.size())) {
+                    sb.append("    ").append(e.getDate()).append(": ").append(e.getFieldValues()).append("\n");
+                }
+            }
+            sb.append("\n");
+        }
+        totalCount[0] = total;
+        return sb.toString();
+    }
+
+    private DeepInsightReport buildErrorDeepReport(String message) {
+        DeepInsightReport report = new DeepInsightReport();
+        report.setExecutiveSummary(message);
+        report.setOverallScore(0);
+        report.setScoreLabel("Error");
+        report.setGeneratedAt(LocalDateTime.now().toString());
+        report.setSections(Collections.emptyList());
+        return report;
+    }
+
     private String buildDataContext(TrackerApp app, List<Tracker> trackers) {
         StringBuilder sb = new StringBuilder();
         sb.append("App Name: ").append(app.getName()).append("\n");

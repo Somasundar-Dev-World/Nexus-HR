@@ -1,4 +1,4 @@
-<div class="omni-page" [class.is-booting]="isLoading && viewMode === 'APP_GRID'">
+﻿<div class="omni-page" [class.is-booting]="isLoading && viewMode === 'APP_GRID'">
   
   <!-- Modern Global Loader -->
   <div class="global-boot-loader" *ngIf="isLoading && viewMode === 'APP_GRID'">
@@ -11,9 +11,9 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════════════════
-       VIEW — APP GRID (Top Level)
-  ════════════════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       VIEW â€” APP GRID (Top Level)
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="home-screen" *ngIf="viewMode === 'APP_GRID' && !isLoading">
     <div class="home-header animate-fade-down">
       <div class="home-title-wrap">
@@ -29,7 +29,7 @@
       <div class="app-icon-wrap" *ngFor="let app of apps" (click)="selectApp(app)">
         <div class="app-icon app-icon-wrapper" [style.background]="app.colorStyle || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
           <span class="app-emoji">{{ app.icon }}</span>
-          <button class="icon-delete-btn" (click)="deleteAppIcon(app.id!, $event)" title="Delete App">✕</button>
+          <button class="icon-delete-btn" (click)="deleteAppIcon(app.id!, $event)" title="Delete App">âœ•</button>
         </div>
         <span class="app-label">{{ app.name }}</span>
         <span class="app-type-badge">App</span>
@@ -38,7 +38,7 @@
       <!-- Add New App Tile -->
       <div class="app-icon-wrap" (click)="openAddApp()">
         <div class="app-icon app-icon-add">
-          <span class="add-cross">＋</span>
+          <span class="add-cross">ï¼‹</span>
         </div>
         <span class="app-label">New App</span>
         <span class="app-type-badge">&nbsp;</span>
@@ -47,35 +47,40 @@
 
     <!-- Empty state -->
     <div class="home-empty animate-fade-up" *ngIf="!isLoading && apps.length === 0">
-      <div class="empty-emoji">🚀</div>
+      <div class="empty-emoji">ðŸš€</div>
       <h2>Start Your Journey</h2>
       <p>Create your first App container (e.g. "Work", "Life") to organize your trackers!</p>
     </div>
   </div>
 
 
-  <!-- ════════════════════════════════════════════════════════
-       VIEW — APP DASHBOARD (Insights & Trackers)
-  ════════════════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       VIEW â€” APP DASHBOARD (Insights & Trackers)
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="home-screen" *ngIf="viewMode === 'APP_DASHBOARD' && selectedApp">
     <div class="home-header animate-fade-down">
       <button class="back-btn-pill" (click)="goBack()">
-        <span class="back-arrow">←</span> All Apps
+        <span class="back-arrow">â†</span> All Apps
       </button>
       <div class="home-title-wrap" style="margin-top: 1rem;">
         <span class="app-emoji-large">{{ selectedApp.icon }}</span>
         <h1>{{ selectedApp.name }} Dashboard</h1>
-        <button class="btn-icon btn-edit-header" (click)="openEditApp(selectedApp)" title="Edit App">✏️</button>
+        <button class="btn-icon btn-edit-header" (click)="openEditApp(selectedApp)" title="Edit App">âœï¸</button>
       </div>
       <p class="home-subtitle">{{ selectedApp.description || 'Intelligent insights across all your trackers.' }}</p>
 
     <!-- AI Smart Insights Section -->
     <div class="ai-insights-section animate-fade-up" *ngIf="aiInsights.length || loadingInsights">
       <div class="section-badge-row">
-        <div class="section-badge"><span class="magic-sparkle">✨</span> AI SMART INSIGHTS</div>
-        <button class="btn-refresh-ai" (click)="refreshAI()" [disabled]="loadingInsights" title="Refresh AI Insights">
-          <span class="refresh-icon" [class.spinning]="loadingInsights">🔄</span>
-        </button>
+        <div class="section-badge"><span class="magic-sparkle">âœ¨</span> AI SMART INSIGHTS</div>
+        <div class="ai-section-actions">
+          <button class="btn-refresh-ai" (click)="refreshAI()" [disabled]="loadingInsights" title="Refresh AI Insights">
+            <span class="refresh-icon" [class.spinning]="loadingInsights">ðŸ”„</span>
+          </button>
+          <button class="btn-deep-research" (click)="loadDeepInsight()" title="AI Deep Research â€” Full analysis report">
+            ðŸ”¬ Deep Research
+          </button>
+        </div>
       </div>
       
       <div class="insights-grid" *ngIf="!loadingInsights">
@@ -95,7 +100,7 @@
             <h4 class="insight-title">{{ insight.title }}</h4>
             <div class="insight-value-wrap">
               <span class="insight-value">{{ insight.value }}</span>
-              <span class="insight-sparkle" *ngIf="insight.color === 'magic'">✨</span>
+              <span class="insight-sparkle" *ngIf="insight.color === 'magic'">âœ¨</span>
             </div>
             <p class="insight-subtitle">{{ insight.subtitle }}</p>
           </div>
@@ -105,7 +110,7 @@
         </div>
       </div>
 
-      <!-- AI Loading State — Modern Spinner -->
+      <!-- AI Loading State â€” Modern Spinner -->
       <div class="ai-loading-wrap" *ngIf="loadingInsights">
         <div class="mini-boot-loader">
           <div class="concentric-ring"></div>
@@ -142,7 +147,7 @@
             <div class="pulse-details">
               <span class="pulse-tracker">{{ log.trackerName }}</span>
               <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
-              <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
+              <span class="pulse-date">{{ log.date | date:'shortTime' }} Â· {{ log.date | date:'MMM d' }}</span>
             </div>
           </div>
         </div>
@@ -167,7 +172,7 @@
           <!-- Add New Tracker Tile -->
           <div class="app-icon-wrap mini" (click)="openAddTracker()">
             <div class="app-icon mini app-icon-add">
-              <span class="add-cross">＋</span>
+              <span class="add-cross">ï¼‹</span>
             </div>
             <span class="app-label mini">Add New</span>
           </div>
@@ -177,13 +182,13 @@
   </div>
 
 
-  <!-- ════════════════════════════════════════════════════════
-       VIEW — TRACKER GRID (Inside an App) -- KEEP AS FALLBACK OR LEGACY
-  ════════════════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       VIEW â€” TRACKER GRID (Inside an App) -- KEEP AS FALLBACK OR LEGACY
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="home-screen" *ngIf="viewMode === 'TRACKER_GRID' && selectedApp">
     <div class="home-header animate-fade-down">
       <button class="back-btn-pill" (click)="goBack()">
-        <span class="back-arrow">←</span> All Apps
+        <span class="back-arrow">â†</span> All Apps
       </button>
       <div class="home-title-wrap" style="margin-top: 1rem;">
         <span class="app-emoji-large">{{ selectedApp.icon }}</span>
@@ -202,7 +207,7 @@
       <div class="app-icon-wrap" *ngFor="let t of trackers" (click)="goToDetail(t)">
         <div class="app-icon" [style.background]="getGradient(t.type)">
           <span class="app-emoji">{{ getIcon(t.type) }}</span>
-          <button class="icon-delete-btn" (click)="deleteTrackerIcon(t.id!, $event)" title="Delete Tracker">✕</button>
+          <button class="icon-delete-btn" (click)="deleteTrackerIcon(t.id!, $event)" title="Delete Tracker">âœ•</button>
         </div>
         <span class="app-label">{{ t.name }}</span>
         <span class="app-type-badge">{{ t.type }}</span>
@@ -211,7 +216,7 @@
       <!-- Add New Tracker Tile -->
       <div class="app-icon-wrap" (click)="openAddTracker()">
         <div class="app-icon app-icon-add">
-          <span class="add-cross">＋</span>
+          <span class="add-cross">ï¼‹</span>
         </div>
         <span class="app-label">New Tracker</span>
         <span class="app-type-badge">&nbsp;</span>
@@ -220,22 +225,22 @@
 
     <!-- Empty state -->
     <div class="home-empty animate-fade-up" *ngIf="!isLoading && trackers.length === 0">
-      <div class="empty-emoji">🎯</div>
+      <div class="empty-emoji">ðŸŽ¯</div>
       <h2>No Trackers in {{ selectedApp.name }}</h2>
       <p>Tap "New Tracker" to start monitoring metrics in this app!</p>
     </div>
   </div>
 
 
-  <!-- ════════════════════════════════════════════════════════
-       VIEW 2 — TRACKER DETAIL (App Home Page)
-  ════════════════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       VIEW 2 â€” TRACKER DETAIL (App Home Page)
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="detail-page animate-slide-in" *ngIf="viewMode === 'DETAIL' && selectedTracker">
 
     <!-- Detail Header -->
     <div class="detail-header" [style.background]="getGradient(selectedTracker.type)">
       <button class="back-btn" (click)="goBack()">
-        <span class="back-arrow">←</span> {{ selectedApp?.name || 'Back' }}
+        <span class="back-arrow">â†</span> {{ selectedApp?.name || 'Back' }}
       </button>
       <div class="detail-title-row">
         <span class="detail-emoji">{{ getIcon(selectedTracker.type) }}</span>
@@ -243,11 +248,11 @@
           <h1 class="detail-name">{{ selectedTracker.name }}</h1>
           <div class="detail-badge-row">
             <span class="detail-badge">{{ selectedTracker.type }}</span>
-            <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
-            <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">🪄</button>
-            <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">🔌</button>
-            <button class="btn-icon btn-delete-tracker" (click)="showDeleteTrackerConfirm = true" title="Delete this Tracker">🗑️</button>
-            <span class="institution-badge" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
+            <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">âœï¸</button>
+            <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">ðŸª„</button>
+            <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">ðŸ”Œ</button>
+            <button class="btn-icon btn-delete-tracker" (click)="showDeleteTrackerConfirm = true" title="Delete this Tracker">ðŸ—‘ï¸</button>
+            <span class="institution-badge" *ngIf="connectedInstitution">ðŸ¦ {{ connectedInstitution }}</span>
             <input type="file" accept=".csv,.pdf" #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
         </div>
@@ -275,7 +280,7 @@
     <div class="detail-body">
       <div class="history-header" *ngIf="entries.length && !isImporting">
         <h2 class="section-title" style="margin: 0;">History</h2>
-        <button class="btn-sm btn-outline btn-danger-outline" (click)="deleteAllLogs()">🗑️ Clear All</button>
+        <button class="btn-sm btn-outline btn-danger-outline" (click)="deleteAllLogs()">ðŸ—‘ï¸ Clear All</button>
       </div>
 
       <div class="ai-loading-wrap" *ngIf="isImporting">
@@ -289,18 +294,18 @@
 
       <!-- Import Complete status toast (click to reopen modal) -->
       <div class="import-toast animate-fade-in" *ngIf="importResult && !isImporting" (click)="isImportModalOpen = true">
-        <span class="import-toast-icon">✨</span>
-        <span><strong>{{ importResult.entryCount }}</strong> entries imported — <span class="toast-link">View Details</span></span>
-        <button class="toast-close" (click)="$event.stopPropagation(); closeImportResult()">×</button>
+        <span class="import-toast-icon">âœ¨</span>
+        <span><strong>{{ importResult.entryCount }}</strong> entries imported â€” <span class="toast-link">View Details</span></span>
+        <button class="toast-close" (click)="$event.stopPropagation(); closeImportResult()">Ã—</button>
       </div>
 
       <div class="log-cards" *ngIf="entries.length && !isImporting">
         <div class="log-card animate-fade-up" *ngFor="let entry of entries">
           <div class="log-card-header">
-            <span class="log-timestamp">{{ entry.date | date:'MMM d, y · h:mm a' }}</span>
+            <span class="log-timestamp">{{ entry.date | date:'MMM d, y Â· h:mm a' }}</span>
             <div class="log-card-actions">
-              <button class="btn-icon" (click)="editLog(entry)" title="Edit">✏️</button>
-              <button class="btn-icon btn-icon-danger" (click)="deleteLog(entry.id!)" title="Delete">🗑️</button>
+              <button class="btn-icon" (click)="editLog(entry)" title="Edit">âœï¸</button>
+              <button class="btn-icon btn-icon-danger" (click)="deleteLog(entry.id!)" title="Delete">ðŸ—‘ï¸</button>
             </div>
           </div>
           <div class="log-fields">
@@ -309,20 +314,20 @@
               <span class="field-val">{{ formatFieldValue(entry.fieldValues[key], getFieldDef(key)) }}</span>
             </div>
           </div>
-          <p class="log-note-text" *ngIf="entry.note">💬 {{ entry.note }}</p>
+          <p class="log-note-text" *ngIf="entry.note">ðŸ’¬ {{ entry.note }}</p>
         </div>
       </div>
 
       <div class="detail-empty" *ngIf="!entries.length && !isImporting">
-        <div class="empty-emoji">📋</div>
+        <div class="empty-emoji">ðŸ“‹</div>
         <h3>No logs yet</h3>
-        <p>Tap the <strong>＋</strong> button below to log your first entry!</p>
+        <p>Tap the <strong>ï¼‹</strong> button below to log your first entry!</p>
       </div>
     </div>
 
-    <!-- Floating Action Button (FAB) — iOS style -->
+    <!-- Floating Action Button (FAB) â€” iOS style -->
     <button class="fab" (click)="openAddEntry()">
-      <span class="fab-icon">＋</span>
+      <span class="fab-icon">ï¼‹</span>
     </button>
   </div>
 
@@ -330,14 +335,14 @@
   <!-- Create App Modal -->
   <div class="modal-overlay" *ngIf="isAddingApp" (click)="isAddingApp = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>{{ editingAppId ? '✏️ Edit App Instance' : '🚀 Create New App Instance' }}</h3>
+      <h3>{{ editingAppId ? 'âœï¸ Edit App Instance' : 'ðŸš€ Create New App Instance' }}</h3>
       <p class="modal-desc">{{ editingAppId ? 'Update your workspace settings.' : 'Apps serve as individual workspaces for your trackers.' }}</p>
       
       <form [formGroup]="appForm" (ngSubmit)="createApp()">
         <div class="form-group">
           <label>App Icon (Emoji)</label>
           <div class="icon-selector-grid">
-            <span *ngFor="let icon of ['🚀','💼','💹','🍎','🧠','✨','🏠','⚽','🎬']" 
+            <span *ngFor="let icon of ['ðŸš€','ðŸ’¼','ðŸ’¹','ðŸŽ','ðŸ§ ','âœ¨','ðŸ ','âš½','ðŸŽ¬']" 
                   class="icon-opt" 
                   [class.active]="appForm.get('icon')?.value === icon"
                   (click)="appForm.get('icon')?.setValue(icon)">
@@ -362,14 +367,14 @@
   </div>
 
 
-  <!-- ════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        MODALS (shared across views)
-  ════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 
   <!-- Create Tracker Modal -->
   <div class="modal-overlay" *ngIf="isAddingTracker" (click)="isAddingTracker = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>{{ editingTrackerId ? '✏️ Edit Tracker' : '✨ Create New Tracker' }}</h3>
+      <h3>{{ editingTrackerId ? 'âœï¸ Edit Tracker' : 'âœ¨ Create New Tracker' }}</h3>
       
       <!-- Template Gallery Section -->
       <div class="template-gallery-wrap">
@@ -390,7 +395,7 @@
 
       <!-- AI Document Import Section -->
       <div class="ai-import-wrap" *ngIf="!editingTrackerId">
-        <h4 class="section-subtitle">🪄 AI Document Import</h4>
+        <h4 class="section-subtitle">ðŸª„ AI Document Import</h4>
         <p class="import-desc">Upload a CSV or PDF (e.g. Bank Statement), and AI will autogenerate the tracker schema and populate it.</p>
         
         <div class="import-controls" *ngIf="!isImporting">
@@ -421,10 +426,10 @@
         <div class="form-group">
           <label>Category</label>
           <select formControlName="type">
-            <option value="FINANCE">🏦 Financials</option>
-            <option value="HEALTH">🍎 Health & Bio</option>
-            <option value="STOCK">📈 Market Watch</option>
-            <option value="CUSTOM">⚙️ Custom Metric</option>
+            <option value="FINANCE">ðŸ¦ Financials</option>
+            <option value="HEALTH">ðŸŽ Health & Bio</option>
+            <option value="STOCK">ðŸ“ˆ Market Watch</option>
+            <option value="CUSTOM">âš™ï¸ Custom Metric</option>
           </select>
         </div>
         <div class="dynamic-fields" formArrayName="fieldDefinitions">
@@ -445,7 +450,7 @@
               </select>
               <input formControlName="unit" placeholder="Unit (e.g. kg, %)" *ngIf="field.get('type')?.value === 'NUMBER'">
               <input formControlName="options" placeholder="Options (comma-separated)" *ngIf="field.get('type')?.value === 'SELECT'">
-              <button type="button" class="btn-icon" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
+              <button type="button" class="btn-icon" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">âœ•</button>
             </div>
           </div>
         </div>
@@ -460,7 +465,7 @@
   <!-- Log Entry Modal -->
   <div class="modal-overlay" *ngIf="isAddingEntry" (click)="isAddingEntry = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>{{ editingEntryId ? '✏️ Edit Log' : '💪 Log Progress' }}: {{ selectedTracker?.name }}</h3>
+      <h3>{{ editingEntryId ? 'âœï¸ Edit Log' : 'ðŸ’ª Log Progress' }}: {{ selectedTracker?.name }}</h3>
       <form [formGroup]="entryForm" (ngSubmit)="addEntry()">
         <div formGroupName="fieldValues" class="dynamic-inputs">
           <div class="form-group" *ngFor="let field of selectedTracker?.fieldDefinitions">
@@ -495,11 +500,11 @@
 
               <div *ngSwitchCase="'RATING'" class="rating-input-wrap">
                 <select [formControlName]="field.name">
-                  <option value="1">⭐ (1)</option>
-                  <option value="2">⭐⭐ (2)</option>
-                  <option value="3">⭐⭐⭐ (3)</option>
-                  <option value="4">⭐⭐⭐⭐ (4)</option>
-                  <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                  <option value="1">â­ (1)</option>
+                  <option value="2">â­â­ (2)</option>
+                  <option value="3">â­â­â­ (3)</option>
+                  <option value="4">â­â­â­â­ (4)</option>
+                  <option value="5">â­â­â­â­â­ (5)</option>
                 </select>
               </div>
 
@@ -522,7 +527,7 @@
   <!-- Delete Confirm Modal -->
   <div class="modal-overlay" *ngIf="deleteConfirm" (click)="cancelDelete()">
     <div class="modal confirm-modal" (click)="$event.stopPropagation()">
-      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-icon">âš ï¸</div>
       <h3>Are you sure?</h3>
       <p>This action cannot be undone. Do you really want to delete this {{ deleteConfirm.type === 'APP' ? 'entire App and ALL its trackers' : (deleteConfirm.type === 'TRACKER' ? 'tracker and its history' : 'log entry') }}?</p>
       <div class="modal-actions confirm-actions">
@@ -537,19 +542,19 @@
     <div class="modal plaid-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="plaid-modal-title-row">
-          <h3>🔌 Map Plaid Bank Data</h3>
-          <span class="institution-badge-modal" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
+          <h3>ðŸ”Œ Map Plaid Bank Data</h3>
+          <span class="institution-badge-modal" *ngIf="connectedInstitution">ðŸ¦ {{ connectedInstitution }}</span>
         </div>
         <p class="text-xs text-muted">Map Plaid fields to your Tracker's custom columns.</p>
       </div>
 
       <div class="ai-mapping-status" *ngIf="isAutoMapping">
         <span class="btn-spinner"></span>
-        <span>✨ AI is analyzing your tracker schema...</span>
+        <span>âœ¨ AI is analyzing your tracker schema...</span>
       </div>
 
       <div class="ai-mapped-badge" *ngIf="isAutoMapped && !isAutoMapping">
-        <span>✨ AI Auto-Mapped</span>
+        <span>âœ¨ AI Auto-Mapped</span>
         <p>Fields pre-filled by AI. Review and adjust if needed.</p>
       </div>
       
@@ -560,7 +565,7 @@
           <select class="form-control" [(ngModel)]="plaidMapping[pField.id]">
             <option value="">-- Ignore this field --</option>
             <option *ngFor="let tField of selectedTracker?.fieldDefinitions" [value]="tField.name">
-              ⮑ Map to [{{ tField.name }}] ({{ tField.type }})
+              â®‘ Map to [{{ tField.name }}] ({{ tField.type }})
             </option>
           </select>
         </div>
@@ -568,20 +573,20 @@
 
       <div class="modal-actions mt-4">
         <button type="button" class="btn btn-outline" (click)="isPlaidMappingModalOpen = false">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="savePlaidMapping()">Save & Sync 🚀</button>
+        <button type="button" class="btn btn-primary" (click)="savePlaidMapping()">Save & Sync ðŸš€</button>
       </div>
     </div>
   </div>
-  <!-- ════ IMPORT SUCCESS MODAL ════ -->
+  <!-- â•â•â•â• IMPORT SUCCESS MODAL â•â•â•â• -->
   <div class="modal-overlay import-modal-overlay" *ngIf="isImportModalOpen" (click)="isImportModalOpen = false">
     <div class="import-success-modal" (click)="$event.stopPropagation()">
       <div class="import-modal-bg-glow"></div>
 
       <div class="import-modal-header">
         <div class="import-modal-icon-ring">
-          <span class="import-modal-icon">✅</span>
+          <span class="import-modal-icon">âœ…</span>
         </div>
-        <button class="import-modal-close" (click)="isImportModalOpen = false">✕</button>
+        <button class="import-modal-close" (click)="isImportModalOpen = false">âœ•</button>
       </div>
 
       <div class="import-modal-body">
@@ -604,28 +609,28 @@
         </div>
 
         <div class="import-source-row" *ngIf="importResult?.fileName">
-          <span class="import-source-label">📄 Source File</span>
+          <span class="import-source-label">ðŸ“„ Source File</span>
           <span class="import-source-name">{{ importResult?.fileName }}</span>
         </div>
 
         <div class="import-dedup-note" *ngIf="(importResult?.skippedCount || 0) > 0">
-          <span>ℹ️</span>
+          <span>â„¹ï¸</span>
           <p>{{ importResult?.skippedCount }} entries already existed in your database and were safely skipped to prevent duplicates.</p>
         </div>
       </div>
 
       <div class="import-modal-actions">
         <button class="btn btn-outline" (click)="closeImportResult()">Dismiss</button>
-        <button class="btn btn-primary" (click)="isImportModalOpen = false">View My Data →</button>
+        <button class="btn btn-primary" (click)="isImportModalOpen = false">View My Data â†’</button>
       </div>
     </div>
   </div>
 
-  <!-- ════ DELETE TRACKER MODAL ════ -->
+  <!-- â•â•â•â• DELETE TRACKER MODAL â•â•â•â• -->
   <div class="modal-overlay delete-tracker-overlay" *ngIf="showDeleteTrackerConfirm" (click)="showDeleteTrackerConfirm = false">
     <div class="delete-tracker-modal" (click)="$event.stopPropagation()">
       <div class="delete-modal-icon-ring">
-        <span>🗑️</span>
+        <span>ðŸ—‘ï¸</span>
       </div>
       <h2>Delete Tracker?</h2>
       <p>You are about to permanently delete</p>
@@ -638,4 +643,107 @@
     </div>
   </div>
 
+
+  <!-- ════ AI DEEP RESEARCH PANEL ════ -->
+  <div class="deep-research-overlay" *ngIf="isDeepInsightOpen" (click)="closeDeepInsight()">
+    <div class="deep-research-panel" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="drp-header">
+        <div class="drp-header-left">
+          <span class="drp-icon">🔬</span>
+          <div>
+            <h2>AI Deep Research</h2>
+            <p class="drp-subtitle">{{ selectedApp?.name }} — Exhaustive AI Analysis</p>
+          </div>
+        </div>
+        <button class="drp-close" (click)="closeDeepInsight()">✕</button>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div class="drp-loading" *ngIf="isDeepInsightLoading">
+        <div class="drp-loading-orbit">
+          <div class="drp-orbit-ring r1"></div>
+          <div class="drp-orbit-ring r2"></div>
+          <div class="drp-orbit-ring r3"></div>
+          <span class="drp-orbit-core">🧠</span>
+        </div>
+        <h3 class="drp-loading-title">Performing Deep Analysis...</h3>
+        <p class="drp-loading-sub">AI is processing all your data</p>
+        <div class="drp-steps">
+          <div class="drp-step" *ngFor="let step of deepInsightLoadingSteps" [class.done]="step.done">
+            <span class="drp-step-check">{{ step.done ? '✓' : '○' }}</span>
+            <span>{{ step.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="drp-body" *ngIf="!isDeepInsightLoading && deepInsightReport">
+
+        <!-- Score Hero -->
+        <div class="drp-score-hero">
+          <div class="drp-score-ring" [style.--score-color]="getScoreColor(deepInsightReport.overallScore)">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="50"/>
+              <circle class="ring-fill" cx="60" cy="60" r="50"
+                [style.stroke]="getScoreColor(deepInsightReport.overallScore)"
+                [style.stroke-dasharray]="(deepInsightReport.overallScore / 100 * 314) + ' 314'"/>
+            </svg>
+            <div class="ring-label">
+              <span class="ring-num">{{ deepInsightReport.overallScore }}</span>
+              <span class="ring-sub">/ 100</span>
+            </div>
+          </div>
+          <div class="drp-score-info">
+            <div class="drp-score-label" [style.color]="getScoreColor(deepInsightReport.overallScore)">
+              {{ deepInsightReport.scoreLabel }}
+            </div>
+            <p class="drp-executive">{{ deepInsightReport.executiveSummary }}</p>
+            <div class="drp-meta-chips">
+              <span class="drp-chip">📊 {{ deepInsightReport.analysisDepth }} Records</span>
+              <span class="drp-chip">📁 {{ deepInsightReport.trackerCount }} Trackers</span>
+              <span class="drp-chip">🤖 {{ deepInsightReport.provider }}</span>
+              <span class="drp-chip" *ngIf="deepInsightReport.generatedAt">🕒 {{ deepInsightReport.generatedAt | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Cards -->
+        <div class="drp-sections">
+          <div class="drp-section-card" *ngFor="let section of deepInsightReport.sections"
+               [ngClass]="getSectionColorClass(section.color)">
+            <div class="dsc-header">
+              <div class="dsc-icon-wrap">
+                <span class="dsc-icon">{{ section.icon }}</span>
+              </div>
+              <div class="dsc-title-block">
+                <div class="dsc-type-badge">{{ section.type }}</div>
+                <h3 class="dsc-title">{{ section.title }}</h3>
+              </div>
+              <div class="dsc-priority">
+                <span *ngFor="let dot of [1,2,3,4,5]"
+                      class="priority-dot" [class.active]="dot <= section.priority"></span>
+              </div>
+            </div>
+
+            <div class="dsc-headline">{{ section.headline }}</div>
+            <p class="dsc-content">{{ section.content }}</p>
+
+            <ul class="dsc-data-points" *ngIf="section.dataPoints?.length">
+              <li *ngFor="let point of section.dataPoints">{{ point }}</li>
+            </ul>
+
+            <div class="dsc-actions" *ngIf="section.actionItems?.length">
+              <div class="dsc-actions-label">✅ Action Items</div>
+              <div class="dsc-action-item" *ngFor="let action of section.actionItems">
+                → {{ action }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </div>

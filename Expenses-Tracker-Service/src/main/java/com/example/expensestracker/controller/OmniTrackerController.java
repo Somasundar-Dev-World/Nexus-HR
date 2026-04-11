@@ -20,6 +20,7 @@ import com.example.expensestracker.service.AiInsightService;
 import com.example.expensestracker.repository.TrackerMappingRepository;
 import com.example.expensestracker.model.TrackerMapping;
 import com.example.expensestracker.model.TrackerIntegration;
+import com.example.expensestracker.model.DeepInsightReport;
 import com.example.expensestracker.service.PlaidIntegrationService;
 import com.example.expensestracker.model.User;
 import com.example.expensestracker.repository.UserRepository;
@@ -100,6 +101,21 @@ public class OmniTrackerController {
             }
             return ResponseEntity.status(403).build();
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/apps/{appId}/insights")
+    public ResponseEntity<?> getAppInsights(@PathVariable Long appId,
+                                             @RequestParam(defaultValue = "false") boolean refresh,
+                                             @RequestAttribute("userId") Long userId) {
+        return ResponseEntity.ok(aiInsightService.getInsightsForApp(appId, userId, refresh));
+    }
+
+    @GetMapping("/apps/{appId}/deep-insight")
+    public ResponseEntity<?> getDeepInsight(@PathVariable Long appId,
+                                             @RequestAttribute("userId") Long userId) {
+        DeepInsightReport report = aiInsightService.getDeepInsightForApp(appId, userId);
+        if (report == null) return ResponseEntity.status(404).body("App not found or access denied.");
+        return ResponseEntity.ok(report);
     }
 
     // --- Trackers ---

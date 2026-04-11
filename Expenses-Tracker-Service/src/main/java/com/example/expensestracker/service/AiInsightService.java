@@ -243,6 +243,69 @@ public class AiInsightService {
         }
     }
 
+    public Map<String, String> chatWithApp(Long appId, Long userId, com.example.expensestracker.dto.ChatRequest request) {
+        TrackerApp app = trackerAppRepository.findById(appId).orElse(null);
+        if (app == null || !app.getUserId().equals(userId)) return null;
+
+        List<Tracker> trackers = trackerRepository.findByUserIdAndAppId(userId, appId);
+        int[] totalCount = {0};
+        String dataContext = buildDeepDataContext(app, trackers, totalCount);
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return null;
+
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            throw new RuntimeException("No active API Key found for " + provider);
+        }
+
+        String systemPrompt = "You are an ultra-modern, helpful AI Chatbot integrated into the OmniTracker Personal OS. " +
+            "Your purpose is to answer the user's questions based on their application data context. " +
+            "Be concise, insightful, and user-friendly. Format your responses in clean Markdown.";
+
+        StringBuilder userPromptBuilder = new StringBuilder();
+        userPromptBuilder.append("APP DATA CONTEXT:\n").append(dataContext).append("\n\n");
+        userPromptBuilder.append("CHAT HISTORY:\n");
+        if (request.getHistory() != null) {
+            for (com.example.expensestracker.dto.ChatMessage msg : request.getHistory()) {
+                userPromptBuilder.append(msg.getRole().toUpperCase()).append(": ").append(msg.getContent()).append("\n");
+            }
+        }
+        userPromptBuilder.append("USER: ").append(request.getMessage()).append("\n");
+        userPromptBuilder.append("ASSISTANT: ");
+
+        String userPrompt = userPromptBuilder.toString();
+        String rawResponse = "";
+
+        try {
+            if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                rawResponse = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                rawResponse = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            } else {
+                rawResponse = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            }
+        } catch (Exception e) {
+            System.err.println("Chat Generation Failed: " + e.getMessage());
+            rawResponse = "AI Chat failed: " + e.getMessage();
+        }
+
+        Map<String, String> result = new java.util.HashMap<>();
+        result.put("reply", rawResponse);
+        return result;
+    }
+
     private String buildDeepDataContext(TrackerApp app, List<Tracker> trackers, int[] totalCount) {
         StringBuilder sb = new StringBuilder();
         sb.append("=== APP: ").append(app.getName()).append(" ===\n");

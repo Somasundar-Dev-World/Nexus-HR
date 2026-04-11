@@ -131,6 +131,10 @@ export class OmniTrackerService {
     });
   }
 
+  chatWithApp(appId: number, request: { history: any[], message: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/apps/${appId}/chat`, request);
+  }
+
   // --- Plaid Integrations (Plugin Model) ---
   createPlaidLinkToken(): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/integrations/plaid/link-token`, {});

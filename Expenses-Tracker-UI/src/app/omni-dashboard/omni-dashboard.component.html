@@ -659,6 +659,9 @@
           </div>
         </div>
         <div class="drp-header-actions">
+          <button class="drp-chat-btn" (click)="toggleChat()" title="Ask AI about your data">
+            <span class="chat-icon">💬</span> Ask AI
+          </button>
           <button class="drp-refresh-btn" (click)="loadDeepInsight(true)" [disabled]="isDeepInsightLoading" title="Run fresh AI analysis">
             <span class="refresh-icon" [class.spinning]="isDeepInsightLoading">🔄</span> Refresh
           </button>
@@ -746,6 +749,49 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- AI CHAT DRAWER -->
+    <div class="ai-chat-drawer" [class.open]="isChatOpen" (click)="$event.stopPropagation()">
+      <div class="chat-header">
+        <div class="chat-title">
+          <span class="chat-icon">💬</span> Ask AI
+        </div>
+        <button class="chat-close" (click)="toggleChat()">✕</button>
+      </div>
+
+      <div class="chat-body" #chatBody>
+        <!-- Welcome Message -->
+        <div class="chat-message assistant" *ngIf="chatMessages.length === 0">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-bubble">
+            Hello! I'm your Omni AI assistant. I have full context of your <strong>{{ selectedApp?.name }}</strong> app including all trackers, logs, and insights. How can I help you today?
+          </div>
+        </div>
+
+        <!-- Chat History -->
+        <div class="chat-message" *ngFor="let msg of chatMessages" [ngClass]="msg.role">
+          <div class="msg-avatar">{{ msg.role === 'user' ? '👤' : '🤖' }}</div>
+          <div class="msg-bubble" [innerHTML]="msg.content"></div>
+        </div>
+
+        <!-- Loading -->
+        <div class="chat-message assistant" *ngIf="isChatLoading">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-bubble typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-footer">
+        <input type="text" class="chat-input" [(ngModel)]="chatInputText" 
+               (keyup.enter)="sendChatMessage()" placeholder="Ask about trends, totals, or insights..."
+               [disabled]="isChatLoading" />
+        <button class="chat-send-btn" (click)="sendChatMessage()" [disabled]="!chatInputText || isChatLoading">
+          ➤
+        </button>
       </div>
     </div>
   </div>

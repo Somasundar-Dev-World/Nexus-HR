@@ -58,6 +58,12 @@ export class OmniDashboardComponent implements OnInit {
   // Deep Research State
   isDeepInsightOpen = false;
   isDeepInsightLoading = false;
+  
+  // AI Chat State
+  isChatOpen = false;
+  isChatLoading = false;
+  chatInputText = '';
+  chatMessages: { role: string, content: string }[] = [];
   deepInsightReport: any = null;
   deepInsightLoadingSteps = [
     { label: 'Scanning all tracker records...', done: false },
@@ -711,6 +717,50 @@ export class OmniDashboardComponent implements OnInit {
       info: 'deep-card-info',
     };
     return map[color] || 'deep-card-primary';
+  }
+
+  // ── AI Chat ──────────────────────────────────────────────────
+  toggleChat() {
+    this.isChatOpen = !this.isChatOpen;
+    // Scroll chat to bottom when opened
+    if (this.isChatOpen) {
+      setTimeout(() => this.scrollToBottom(), 100);
+    }
+  }
+
+  sendChatMessage() {
+    if (!this.chatInputText.trim() || !this.selectedApp) return;
+
+    const userMessage = this.chatInputText.trim();
+    this.chatMessages.push({ role: 'user', content: userMessage });
+    this.chatInputText = '';
+    this.isChatLoading = true;
+    this.scrollToBottom();
+
+    // The history excludes the new message we just pushed
+    const history = this.chatMessages.slice(0, -1);
+
+    this.omniService.chatWithApp(this.selectedApp.id!, { history, message: userMessage }).subscribe({
+      next: (res) => {
+        this.isChatLoading = false;
+        this.chatMessages.push({ role: 'assistant', content: res.reply || 'No response.' });
+        this.scrollToBottom();
+      },
+      error: (err) => {
+        this.isChatLoading = false;
+        this.chatMessages.push({ role: 'assistant', content: 'Connection failed. Please try again.' });
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      const chatBody = document.querySelector('.chat-body');
+      if (chatBody) {
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
+    }, 50);
   }
 
   // ── Delete ───────────────────────────────────────────────────

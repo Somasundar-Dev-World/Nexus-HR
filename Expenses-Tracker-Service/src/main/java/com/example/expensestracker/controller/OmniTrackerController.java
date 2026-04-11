@@ -112,6 +112,15 @@ public class OmniTrackerController {
         return ResponseEntity.ok(report);
     }
 
+    @PostMapping("/apps/{appId}/chat")
+    public ResponseEntity<?> chatWithApp(@PathVariable Long appId,
+                                         @RequestBody com.example.expensestracker.dto.ChatRequest request,
+                                         @RequestAttribute("userId") Long userId) {
+        Map<String, String> response = aiInsightService.chatWithApp(appId, userId, request);
+        if (response == null) return ResponseEntity.status(404).body("App not found or access denied.");
+        return ResponseEntity.ok(response);
+    }
+
     // --- Trackers ---
 
     @GetMapping("/trackers")

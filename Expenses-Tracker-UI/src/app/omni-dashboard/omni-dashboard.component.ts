@@ -652,7 +652,7 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   // ── Deep Research ─────────────────────────────────────────────
-  loadDeepInsight() {
+  loadDeepInsight(forceRefresh: boolean = false) {
     if (!this.selectedApp) return;
     this.isDeepInsightOpen = true;
     this.isDeepInsightLoading = true;
@@ -668,7 +668,7 @@ export class OmniDashboardComponent implements OnInit {
       }
     }, 1800);
 
-    this.omniService.getDeepInsight(this.selectedApp.id!).subscribe({
+    this.omniService.getDeepInsight(this.selectedApp.id!, forceRefresh).subscribe({
       next: (report) => {
         clearInterval(this.deepInsightStepTimer);
         this.deepInsightLoadingSteps.forEach(s => s.done = true);

@@ -125,8 +125,10 @@ export class OmniTrackerService {
     return this.http.get<SmartInsight[]>(`${this.apiUrl}/apps/${appId}/insights`, { params });
   }
 
-  getDeepInsight(appId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/apps/${appId}/deep-insight`);
+  getDeepInsight(appId: number, refresh: boolean = false): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/apps/${appId}/deep-insight`, {
+      params: { refresh: String(refresh) }
+    });
   }
 
   // --- Plaid Integrations (Plugin Model) ---

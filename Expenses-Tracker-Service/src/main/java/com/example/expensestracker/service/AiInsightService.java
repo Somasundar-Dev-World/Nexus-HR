@@ -21,6 +21,7 @@ public class AiInsightService {
     private final TrackerEntryRepository trackerEntryRepository;
     private final UserRepository userRepository;
     private final AiInsightCacheRepository aiInsightCacheRepository;
+    private final DeepInsightCacheRepository deepInsightCacheRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -38,6 +39,7 @@ public class AiInsightService {
                             TrackerEntryRepository trackerEntryRepository,
                             UserRepository userRepository,
                             AiInsightCacheRepository aiInsightCacheRepository,
+                            DeepInsightCacheRepository deepInsightCacheRepository,
                             RestTemplate restTemplate,
                             ObjectMapper objectMapper) {
         this.trackerAppRepository = trackerAppRepository;
@@ -45,6 +47,7 @@ public class AiInsightService {
         this.trackerEntryRepository = trackerEntryRepository;
         this.userRepository = userRepository;
         this.aiInsightCacheRepository = aiInsightCacheRepository;
+        this.deepInsightCacheRepository = deepInsightCacheRepository;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
@@ -137,9 +140,22 @@ public class AiInsightService {
     // ══════════════════════════════════════════════════════════
     //  AI DEEP RESEARCH
     // ══════════════════════════════════════════════════════════
-    public DeepInsightReport getDeepInsightForApp(Long appId, Long userId) {
+    public DeepInsightReport getDeepInsightForApp(Long appId, Long userId, boolean forceRefresh) {
         TrackerApp app = trackerAppRepository.findById(appId).orElse(null);
         if (app == null || !app.getUserId().equals(userId)) return null;
+
+        // Serve from cache unless forceRefresh
+        if (!forceRefresh) {
+            Optional<DeepInsightCache> cached = deepInsightCacheRepository.findById(appId);
+            if (cached.isPresent()) {
+                System.out.println("Deep Insight: Serving from DB cache for appId " + appId);
+                try {
+                    return objectMapper.readValue(cached.get().getReportJson(), DeepInsightReport.class);
+                } catch (Exception e) {
+                    System.err.println("Deep Insight: Cache deserialization failed: " + e.getMessage());
+                }
+            }
+        }
 
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) return null;
@@ -211,6 +227,15 @@ public class AiInsightService {
             report.setTrackerCount(trackers.size());
             report.setGeneratedAt(LocalDateTime.now().toString());
             report.setProvider(provider);
+
+            // Persist to cache
+            try {
+                String reportJson = objectMapper.writeValueAsString(report);
+                deepInsightCacheRepository.save(new DeepInsightCache(appId, reportJson));
+            } catch (Exception cacheEx) {
+                System.err.println("Deep Insight: Failed to save cache: " + cacheEx.getMessage());
+            }
+
             return report;
         } catch (Exception e) {
             System.err.println("Deep Insight Generation Failed: " + e.getMessage());

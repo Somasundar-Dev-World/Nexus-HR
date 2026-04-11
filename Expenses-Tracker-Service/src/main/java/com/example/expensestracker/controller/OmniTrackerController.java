@@ -105,8 +105,9 @@ public class OmniTrackerController {
 
     @GetMapping("/apps/{appId}/deep-insight")
     public ResponseEntity<?> getDeepInsight(@PathVariable Long appId,
+                                             @RequestParam(defaultValue = "false") boolean refresh,
                                              @RequestAttribute("userId") Long userId) {
-        DeepInsightReport report = aiInsightService.getDeepInsightForApp(appId, userId);
+        DeepInsightReport report = aiInsightService.getDeepInsightForApp(appId, userId, refresh);
         if (report == null) return ResponseEntity.status(404).body("App not found or access denied.");
         return ResponseEntity.ok(report);
     }

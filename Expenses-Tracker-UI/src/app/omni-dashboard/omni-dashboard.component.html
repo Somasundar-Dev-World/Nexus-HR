@@ -615,7 +615,17 @@
 
         <div class="import-dedup-note" *ngIf="(importResult?.skippedCount || 0) > 0">
           <span>ℹ️</span>
-          <p>{{ importResult?.skippedCount }} entries already existed in your database and were safely skipped to prevent duplicates.</p>
+          <p>
+            {{ importResult?.skippedCount }} entries already existed in your database and were safely skipped to prevent duplicates. 
+            <a href="javascript:void(0)" class="view-skipped-link" (click)="toggleSkippedRecords()">{{ showSkippedRecords ? 'Hide details' : 'View skipped' }}</a>
+          </p>
+        </div>
+
+        <div class="skipped-records-list animate-fade-in" *ngIf="showSkippedRecords && importResult?.skippedRecords?.length">
+          <h4>Skipped Records Data</h4>
+          <div class="skipped-record-item" *ngFor="let rec of importResult?.skippedRecords">
+            <code>{{ formatSkippedRecord(rec) }}</code>
+          </div>
         </div>
       </div>
 

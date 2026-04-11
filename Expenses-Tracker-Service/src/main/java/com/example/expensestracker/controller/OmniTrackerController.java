@@ -341,6 +341,7 @@ public class OmniTrackerController {
             
             int totalEntryCount = 0;
             int totalSkippedCount = 0;
+            List<Map<String, Object>> skippedRecords = new ArrayList<>();
 
             for (MultipartFile file : files) {
                 if (file.isEmpty()) continue;
@@ -408,6 +409,7 @@ public class OmniTrackerController {
                                 
                                 if (isDuplicate) {
                                     totalSkippedCount++;
+                                    skippedRecords.add(fieldValues);
                                 } else {
                                     TrackerEntry entry = new TrackerEntry();
                                     entry.setTrackerId(tracker.getId());
@@ -455,6 +457,7 @@ public class OmniTrackerController {
                             
                             if (isDuplicate) {
                                 totalSkippedCount++;
+                                skippedRecords.add(fieldValues);
                             } else {
                                 TrackerEntry entry = new TrackerEntry();
                                 entry.setTrackerId(tracker.getId());
@@ -472,6 +475,7 @@ public class OmniTrackerController {
             Map<String, Object> response = new HashMap<>();
             response.put("entryCount", totalEntryCount);
             response.put("skippedCount", totalSkippedCount);
+            response.put("skippedRecords", skippedRecords);
             
             return ResponseEntity.ok(response);
 

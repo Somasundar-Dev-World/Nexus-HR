@@ -51,7 +51,7 @@ export class OmniDashboardComponent implements OnInit {
   selectedFile: File | null = null;
   importTrackerName = '';
   isImporting = false;
-  importResult: { entryCount: number, skippedCount: number, fileName?: string } | null = null;
+  importResult: { entryCount: number, skippedCount: number, fileName?: string, skippedRecords?: any[] } | null = null;
   isImportModalOpen = false;
   showDeleteTrackerConfirm = false;
 
@@ -570,7 +570,12 @@ export class OmniDashboardComponent implements OnInit {
               this.entries = data;
               this.calculateAppStats(this.selectedApp!.id!);
               const fileNameDesc = files.length === 1 ? files[0].name : `${files.length} files`;
-              this.importResult = { entryCount: res.entryCount, skippedCount: res.skippedCount || 0, fileName: fileNameDesc };
+              this.importResult = { 
+                entryCount: res.entryCount, 
+                skippedCount: res.skippedCount || 0, 
+                fileName: fileNameDesc,
+                skippedRecords: res.skippedRecords || [] 
+              };
               this.isImportModalOpen = true;
             });
           },
@@ -588,6 +593,21 @@ export class OmniDashboardComponent implements OnInit {
   closeImportResult() {
     this.importResult = null;
     this.isImportModalOpen = false;
+    this.showSkippedRecords = false;
+  }
+
+  showSkippedRecords = false;
+  toggleSkippedRecords() {
+    this.showSkippedRecords = !this.showSkippedRecords;
+  }
+
+  formatSkippedRecord(record: any): string {
+    if (!record) return '';
+    try {
+      return JSON.stringify(record).replace(/["{}]/g, '').replace(/,/g, ', ');
+    } catch {
+      return 'Invalid Record Data';
+    }
   }
 
   // ── Delete Current Tracker ───────────────────────────────────

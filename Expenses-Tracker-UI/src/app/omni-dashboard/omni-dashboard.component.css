@@ -2471,3 +2471,52 @@
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
 }
+
+/* ── Skipped Records List ───────────────────────────────────────── */
+.view-skipped-link {
+  color: #a78bfa;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  transition: color 0.2s;
+}
+.view-skipped-link:hover {
+  color: #c4b5fd;
+  text-decoration: underline;
+}
+
+.skipped-records-list {
+  margin-top: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  max-height: 250px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.skipped-records-list h4 {
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.9rem;
+  color: #e2e8f0;
+}
+
+.skipped-record-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.skipped-record-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.skipped-record-item code {
+  font-family: inherit;
+  word-break: break-all;
+}

@@ -246,6 +246,7 @@
             <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
             <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">🪄</button>
             <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">🔌</button>
+            <button class="btn-icon btn-delete-tracker" (click)="showDeleteTrackerConfirm = true" title="Delete this Tracker">🗑️</button>
             <span class="institution-badge" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
             <input type="file" accept=".csv,.pdf" #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
@@ -286,15 +287,11 @@
         </div>
       </div>
 
-      <!-- Import Success Result -->
-      <div class="import-success-card animate-fade-in" *ngIf="importResult && !isImporting">
-        <div class="success-icon">✨</div>
-        <div class="success-content">
-          <h3>Import Complete</h3>
-          <p>Successfully added <strong>{{ importResult.entryCount }}</strong> new entries to your tracker.</p>
-          <p class="text-muted" *ngIf="importResult.skippedCount > 0">Skipped <strong>{{ importResult.skippedCount }}</strong> exact duplicates that were already in your database.</p>
-        </div>
-        <button class="btn-close-sm" (click)="closeImportResult()">×</button>
+      <!-- Import Complete status toast (click to reopen modal) -->
+      <div class="import-toast animate-fade-in" *ngIf="importResult && !isImporting" (click)="isImportModalOpen = true">
+        <span class="import-toast-icon">✨</span>
+        <span><strong>{{ importResult.entryCount }}</strong> entries imported — <span class="toast-link">View Details</span></span>
+        <button class="toast-close" (click)="$event.stopPropagation(); closeImportResult()">×</button>
       </div>
 
       <div class="log-cards" *ngIf="entries.length && !isImporting">
@@ -572,6 +569,71 @@
       <div class="modal-actions mt-4">
         <button type="button" class="btn btn-outline" (click)="isPlaidMappingModalOpen = false">Cancel</button>
         <button type="button" class="btn btn-primary" (click)="savePlaidMapping()">Save & Sync 🚀</button>
+      </div>
+    </div>
+  </div>
+  <!-- ════ IMPORT SUCCESS MODAL ════ -->
+  <div class="modal-overlay import-modal-overlay" *ngIf="isImportModalOpen" (click)="isImportModalOpen = false">
+    <div class="import-success-modal" (click)="$event.stopPropagation()">
+      <div class="import-modal-bg-glow"></div>
+
+      <div class="import-modal-header">
+        <div class="import-modal-icon-ring">
+          <span class="import-modal-icon">✅</span>
+        </div>
+        <button class="import-modal-close" (click)="isImportModalOpen = false">✕</button>
+      </div>
+
+      <div class="import-modal-body">
+        <h2>Import Complete!</h2>
+        <p class="import-modal-subtitle">Your data was processed and added to the tracker</p>
+
+        <div class="import-stats-grid">
+          <div class="import-stat-card">
+            <span class="import-stat-num">{{ importResult?.entryCount }}</span>
+            <span class="import-stat-label">Records Added</span>
+          </div>
+          <div class="import-stat-card warn" *ngIf="(importResult?.skippedCount || 0) > 0">
+            <span class="import-stat-num">{{ importResult?.skippedCount }}</span>
+            <span class="import-stat-label">Duplicates Skipped</span>
+          </div>
+          <div class="import-stat-card success" *ngIf="(importResult?.skippedCount || 0) === 0">
+            <span class="import-stat-num">0</span>
+            <span class="import-stat-label">Duplicates Found</span>
+          </div>
+        </div>
+
+        <div class="import-source-row" *ngIf="importResult?.fileName">
+          <span class="import-source-label">📄 Source File</span>
+          <span class="import-source-name">{{ importResult?.fileName }}</span>
+        </div>
+
+        <div class="import-dedup-note" *ngIf="(importResult?.skippedCount || 0) > 0">
+          <span>ℹ️</span>
+          <p>{{ importResult?.skippedCount }} entries already existed in your database and were safely skipped to prevent duplicates.</p>
+        </div>
+      </div>
+
+      <div class="import-modal-actions">
+        <button class="btn btn-outline" (click)="closeImportResult()">Dismiss</button>
+        <button class="btn btn-primary" (click)="isImportModalOpen = false">View My Data →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ DELETE TRACKER MODAL ════ -->
+  <div class="modal-overlay delete-tracker-overlay" *ngIf="showDeleteTrackerConfirm" (click)="showDeleteTrackerConfirm = false">
+    <div class="delete-tracker-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal-icon-ring">
+        <span>🗑️</span>
+      </div>
+      <h2>Delete Tracker?</h2>
+      <p>You are about to permanently delete</p>
+      <strong class="delete-tracker-name">{{ selectedTracker?.name }}</strong>
+      <p class="delete-warning-text">This will delete the tracker and <strong>all {{ entries.length }} log entries</strong> inside it. This action <u>cannot be undone</u>.</p>
+      <div class="delete-modal-actions">
+        <button class="btn btn-outline" (click)="showDeleteTrackerConfirm = false">Cancel</button>
+        <button class="btn btn-danger delete-confirm-btn" (click)="confirmDeleteTracker()">Yes, Delete Forever</button>
       </div>
     </div>
   </div>

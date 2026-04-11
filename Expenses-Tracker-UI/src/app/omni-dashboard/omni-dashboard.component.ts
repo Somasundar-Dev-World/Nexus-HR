@@ -51,7 +51,9 @@ export class OmniDashboardComponent implements OnInit {
   selectedFile: File | null = null;
   importTrackerName = '';
   isImporting = false;
-  importResult: { entryCount: number, skippedCount: number } | null = null;
+  importResult: { entryCount: number, skippedCount: number, fileName?: string } | null = null;
+  isImportModalOpen = false;
+  showDeleteTrackerConfirm = false;
 
   // Plaid Mapping State
   isPlaidMappingModalOpen = false;
@@ -547,7 +549,8 @@ export class OmniDashboardComponent implements OnInit {
             this.omniService.getEntries(this.selectedTracker!.id!).subscribe(data => {
               this.entries = data;
               this.calculateAppStats(this.selectedApp!.id!);
-              this.importResult = { entryCount: res.entryCount, skippedCount: res.skippedCount || 0 };
+              this.importResult = { entryCount: res.entryCount, skippedCount: res.skippedCount || 0, fileName: file.name };
+              this.isImportModalOpen = true;
             });
           },
           error: (err) => {
@@ -563,6 +566,26 @@ export class OmniDashboardComponent implements OnInit {
 
   closeImportResult() {
     this.importResult = null;
+    this.isImportModalOpen = false;
+  }
+
+  // ── Delete Current Tracker ───────────────────────────────────
+  confirmDeleteTracker() {
+    if (!this.selectedTracker) return;
+    this.omniService.deleteTracker(this.selectedTracker.id!).subscribe({
+      next: () => {
+        this.showDeleteTrackerConfirm = false;
+        this.selectedTracker = undefined;
+        this.entries = [];
+        this.importResult = null;
+        this.isImportModalOpen = false;
+        this.goBack();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Failed to delete tracker.');
+      }
+    });
   }
 
 

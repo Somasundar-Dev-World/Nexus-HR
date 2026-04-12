@@ -763,12 +763,17 @@
     </div>
 
     <!-- AI CHAT DRAWER -->
-    <div class="ai-chat-drawer" [class.open]="isChatOpen" (click)="$event.stopPropagation()">
+    <div class="ai-chat-drawer" [class.open]="isChatOpen" [class.maximized]="isChatMaximized" (click)="$event.stopPropagation()">
       <div class="chat-header">
         <div class="chat-title">
           <span class="chat-icon">💬</span> Ask AI
         </div>
-        <button class="chat-close" (click)="toggleChat()">✕</button>
+        <div class="chat-actions">
+          <button class="chat-max-btn" (click)="toggleMaximizeChat()">
+            {{ isChatMaximized ? '🗗' : '⛶' }}
+          </button>
+          <button class="chat-close" (click)="toggleChat()">✕</button>
+        </div>
       </div>
 
       <div class="chat-body" #chatBody>

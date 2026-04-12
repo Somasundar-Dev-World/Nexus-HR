@@ -68,6 +68,7 @@ export class OmniDashboardComponent implements OnInit {
   isChatLoading = false;
   chatInputText = '';
   chatMessages: { role: string, content: string, richBlocks?: any[] }[] = [];
+  isChatMaximized = false;
   deepInsightReport: any = null;
   deepInsightLoadingSteps = [
     { label: 'Scanning all tracker records...', done: false },
@@ -783,10 +784,17 @@ export class OmniDashboardComponent implements OnInit {
   // ── AI Chat ──────────────────────────────────────────────────
   toggleChat() {
     this.isChatOpen = !this.isChatOpen;
+    if (!this.isChatOpen) {
+      this.isChatMaximized = false;
+    }
     // Scroll chat to bottom when opened
     if (this.isChatOpen) {
       setTimeout(() => this.scrollToBottom(), 100);
     }
+  }
+
+  toggleMaximizeChat() {
+    this.isChatMaximized = !this.isChatMaximized;
   }
 
   sendChatMessage() {

@@ -67,7 +67,7 @@ export class OmniDashboardComponent implements OnInit {
   isChatOpen = false;
   isChatLoading = false;
   chatInputText = '';
-  chatMessages: { role: string, content: string, richBlocks?: any[] }[] = [];
+  chatMessages: { role: string, content: string, richBlocks?: any[], id?: string }[] = [];
   isChatMaximized = false;
   deepInsightReport: any = null;
   deepInsightLoadingSteps = [
@@ -814,7 +814,8 @@ export class OmniDashboardComponent implements OnInit {
         this.isChatLoading = false;
         const reply = res.reply || 'No response.';
         const richBlocks = this.parseRichMessage(reply);
-        this.chatMessages.push({ role: 'assistant', content: reply, richBlocks });
+        const msgId = 'msg-' + Math.random().toString(36).substr(2, 9);
+        this.chatMessages.push({ role: 'assistant', content: reply, richBlocks, id: msgId });
         
         // Handle Charts post-push with multiple retry attempts if needed
         this.attemptChartInit(richBlocks, 5);
@@ -992,6 +993,49 @@ export class OmniDashboardComponent implements OnInit {
         chatBody.scrollTop = chatBody.scrollHeight;
       }
     }, 50);
+  }
+
+  async exportToPDF(elementId: string, filename: string) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    // Use global access to h2c and jspdf from CDN
+    const html2canvas = (window as any).html2canvas;
+    const { jsPDF } = (window as any).jspdf;
+
+    if (!html2canvas || !jsPDF) {
+      alert('PDF libraries are still loading. Please try again in 2 seconds.');
+      return;
+    }
+
+    try {
+      // Temporarily hide export buttons during capture
+      const buttons = element.querySelectorAll('.export-ignore');
+      buttons.forEach((b: any) => b.style.opacity = '0');
+
+      const canvas = await html2canvas(element, {
+        scale: 2, // High-res
+        useCORS: true,
+        backgroundColor: '#0f172a', // Match theme
+        logging: false
+      });
+
+      // Show buttons back
+      buttons.forEach((b: any) => b.style.opacity = '1');
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${filename}.pdf`);
+    } catch (err) {
+      console.error('PDF Export Error', err);
+      alert('Failed to generate PDF. Please check console.');
+    }
   }
 
   // ── Delete ───────────────────────────────────────────────────

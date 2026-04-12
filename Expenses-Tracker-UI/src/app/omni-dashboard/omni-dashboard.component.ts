@@ -816,8 +816,8 @@ export class OmniDashboardComponent implements OnInit {
         const richBlocks = this.parseRichMessage(reply);
         this.chatMessages.push({ role: 'assistant', content: reply, richBlocks });
         
-        // Handle Charts post-push
-        setTimeout(() => this.initializeCharts(richBlocks), 100);
+        // Handle Charts post-push with multiple retry attempts if needed
+        this.attemptChartInit(richBlocks, 5);
         
         this.scrollToBottom();
       },
@@ -850,8 +850,8 @@ export class OmniDashboardComponent implements OnInit {
       if (upper === '[TABLE]') { currentType = 'TABLE'; return; }
       if (upper === '[INSIGHT]') { currentType = 'INSIGHT'; return; }
       if (upper.startsWith('[CHART')) {
-        const match = upper.match(/TYPE=['"](.*?)['"]/);
-        currentType = 'CHART:' + (match ? match[1] : 'bar');
+        const match = part.match(/type=['"](.*?)['"]/i);
+        currentType = 'CHART:' + (match ? match[1].toLowerCase() : 'bar');
         return;
       }
 
@@ -905,6 +905,19 @@ export class OmniDashboardComponent implements OnInit {
     });
 
     return { headers, rows };
+  }
+
+  attemptChartInit(blocks: any[], retries: number) {
+    if (retries <= 0) return;
+    
+    setTimeout(() => {
+      const allExist = blocks.filter(b => b.type === 'CHART').every(b => document.getElementById(b.id));
+      if (allExist) {
+        this.initializeCharts(blocks);
+      } else {
+        this.attemptChartInit(blocks, retries - 1);
+      }
+    }, 200);
   }
 
   initializeCharts(blocks: any[]) {

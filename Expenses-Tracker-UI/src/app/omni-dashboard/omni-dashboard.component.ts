@@ -955,6 +955,7 @@ export class OmniDashboardComponent implements OnInit {
 
   formatMarkdown(text: string | number): string {
     if (text === undefined || text === null || text === '') return '—';
+    let html = String(text);
     // Bold (more robust regex for word boundaries)
     html = html.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
     // Italic

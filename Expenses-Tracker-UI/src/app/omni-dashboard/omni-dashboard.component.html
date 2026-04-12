@@ -807,12 +807,12 @@
                   <table class="modern-chat-table">
                     <thead>
                       <tr>
-                        <th *ngFor="let h of block.rows.headers">{{ h }}</th>
+                        <th *ngFor="let h of block.rows.headers" [innerHTML]="formatMarkdown(h)"></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr *ngFor="let row of block.rows.rows">
-                        <td *ngFor="let cell of row">{{ cell }}</td>
+                        <td *ngFor="let cell of row" [innerHTML]="formatMarkdown(cell)"></td>
                       </tr>
                     </tbody>
                   </table>

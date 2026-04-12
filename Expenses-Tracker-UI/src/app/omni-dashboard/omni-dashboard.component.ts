@@ -874,14 +874,19 @@ export class OmniDashboardComponent implements OnInit {
       } else if (currentType.startsWith('CHART:')) {
         try {
           const chartData = JSON.parse(content);
-          blocks.push({ 
-            type: 'CHART', 
-            chartType: currentType.split(':')[1], 
-            data: chartData,
-            id: 'chart-' + Math.random().toString(36).substr(2, 9)
-          });
+          // Only push if we have valid data series
+          if (chartData && chartData.series && chartData.series.length > 0) {
+            blocks.push({ 
+              type: 'CHART', 
+              chartType: currentType.split(':')[1], 
+              data: chartData,
+              id: 'chart-' + Math.random().toString(36).substr(2, 9)
+            });
+          } else {
+            console.warn('AI returned empty chart data, skipping block.');
+          }
         } catch (e) {
-          blocks.push({ type: 'TEXT', content: '[Invalid Chart Data]' });
+          blocks.push({ type: 'TEXT', content: '[Data unavailable]' });
         }
       }
       currentType = 'TEXT'; // Reset
@@ -937,18 +942,20 @@ export class OmniDashboardComponent implements OnInit {
     });
   }
 
-  formatMarkdown(text: string): string {
-    if (!text) return '—';
-    let html = text;
+  formatMarkdown(text: string | number): string {
+    if (text === undefined || text === null || text === '') return '—';
+    let html = String(text);
 
-    // Bold
+    // Bold (more robust regex for word boundaries)
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     // Italic
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
     // Headers
     html = html.replace(/^### (.*$)/gm, '<h3 class="chat-h3">$1</h3>');
-    // Code blocks (simple)
+    // Inline Code
     html = html.replace(/`(.*?)`/g, '<code class="chat-code">$1</code>');
+    // Bullets (at start of line or block)
+    html = html.replace(/^\* (.*$)/gm, '<div class="chat-bullet"><span>•</span> $1</div>');
     // Newlines
     html = html.replace(/\n/g, '<br/>');
 

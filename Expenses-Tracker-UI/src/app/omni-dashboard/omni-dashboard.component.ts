@@ -989,7 +989,7 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   formatFieldValue(val: any, fieldDef: any): string {
-    if (val === undefined || val === null || val === '') return '—';
+    if (val === undefined || val === null || val === '' || val === 'null' || val === 'undefined') return '—';
     
     switch(fieldDef.type) {
       case 'CURRENCY':

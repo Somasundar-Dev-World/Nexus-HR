@@ -101,7 +101,7 @@ public class SmartDataEngineService {
                 String val = row[i].trim();
                 String type = colTypes.get(i);
 
-                if (val.isEmpty()) {
+                if (val.isEmpty() || val.equalsIgnoreCase("null") || val.equalsIgnoreCase("undefined")) {
                     entry.putNull(header);
                     continue;
                 }

@@ -390,7 +390,7 @@ public class OmniTrackerController {
                                     if (colMap.containsKey(header)) {
                                         String targetField = String.valueOf(colMap.get(header));
                                         String val = row[j].trim();
-                                        if (val.isEmpty()) continue;
+                                        if (val.isEmpty() || val.equalsIgnoreCase("null") || val.equalsIgnoreCase("undefined")) continue;
                                         
                                         // Basic type inference
                                         try {

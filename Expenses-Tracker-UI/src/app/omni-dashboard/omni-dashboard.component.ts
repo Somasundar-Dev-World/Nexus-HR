@@ -72,6 +72,7 @@ export class OmniDashboardComponent implements OnInit {
   isArchitecting = false;
   architectSelectedTrackers: number[] = [];
   architectSuggestions: any[] = [];
+  reportNameInput: string = '';
   activeReportId: number | null = null;
   activeReportResult: any = null;
   isReportLoading = false;
@@ -1026,6 +1027,7 @@ export class OmniDashboardComponent implements OnInit {
     this.reportArchitectMode = true;
     this.architectSelectedTrackers = [];
     this.architectSuggestions = [];
+    this.reportNameInput = '';
   }
 
   toggleArchitectTrackerSelection(id: number) {
@@ -1049,7 +1051,7 @@ export class OmniDashboardComponent implements OnInit {
   saveArchitectReport(suggestion: any) {
     if (!this.selectedApp?.id) return;
     const report: AiReport = {
-      name: suggestion.name,
+      name: this.reportNameInput || suggestion.name,
       description: suggestion.description,
       appId: this.selectedApp.id,
       visualType: suggestion.visualType,
@@ -1073,7 +1075,11 @@ export class OmniDashboardComponent implements OnInit {
         this.isReportLoading = false;
         setTimeout(() => this.initializeReportChart(), 100);
       },
-      error: () => this.isReportLoading = false
+      error: (err) => {
+        console.error(err);
+        this.isReportLoading = false;
+        alert('Failed to execute intelligence report.');
+      }
     });
   }
 

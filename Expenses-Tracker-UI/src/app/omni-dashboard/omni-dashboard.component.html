@@ -936,7 +936,12 @@
       </div>
 
       <div class="architect-body">
-        <label>1. Select Trackers to Analyze</label>
+        <div class="architect-naming-section">
+          <label class="zenith-label">Report Title</label>
+          <input type="text" class="zenith-input" [(ngModel)]="reportNameInput" placeholder="e.g. Q4 Performance Synthesis">
+        </div>
+
+        <label style="margin-top: 1.5rem; display: block;">1. Select Trackers to Analyze</label>
         <div class="tracker-select-grid">
           <div class="tracker-select-item" 
                *ngFor="let t of trackers" 

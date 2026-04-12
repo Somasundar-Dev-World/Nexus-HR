@@ -49,7 +49,8 @@ public class ReportIntelligenceService {
 
         String systemPrompt = "You are a Senior Business Intelligence Architect for the OmniTracker platform. " +
             "Your job is to ARCHITECT 3-5 highly impactful, modern analytical reports based on the user's tracker schemas. " +
-            "Output MUST be a raw JSON array of objects with exactly this structure:\n" +
+            "Output MUST be a RAW JSON ARRAY ONLY. NO conversational text, NO headers, NO summary. " +
+            "Follow this exact structure:\n" +
             "[\n" +
             "  {\n" +
             "    \"name\": \"Clear Report Title\",\n" +
@@ -85,6 +86,13 @@ public class ReportIntelligenceService {
             aiText = aiText.substring(aiText.indexOf("```json") + 7, aiText.lastIndexOf("```")).trim();
         } else if (aiText.contains("```")) {
             aiText = aiText.substring(aiText.indexOf("```") + 3, aiText.lastIndexOf("```")).trim();
+        } else {
+            // Fallback: Find the first '[' and last ']' to extract the JSON array from surrounding text
+            int start = aiText.indexOf("[");
+            int end = aiText.lastIndexOf("]");
+            if (start != -1 && end != -1 && end > start) {
+                aiText = aiText.substring(start, end + 1).trim();
+            }
         }
         return aiText;
     }

@@ -137,6 +137,51 @@
         <div class="stat-card-trend" *ngIf="metric.trend">{{ metric.trend }}</div>
       </div>
     </div>
+    <div class="dashboard-content-grid">
+      <!-- Activity Feed -->
+      <div class="dashboard-col animate-fade-up">
+        <div class="col-header">
+          <h3>The Pulse</h3>
+          <span class="col-subtitle">Recent activity across trackers</span>
+        </div>
+        <div class="pulse-list" *ngIf="appStats.recentLogs.length">
+          <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
+            <div class="pulse-icon">{{ log.trackerIcon }}</div>
+            <div class="pulse-details">
+              <span class="pulse-tracker">{{ log.trackerName }}</span>
+              <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
+              <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
+          No recent activity to report.
+        </div>
+      </div>
+
+      <!-- Quick Tracker Grid -->
+      <div class="dashboard-col animate-fade-up">
+        <div class="col-header">
+          <h3>Quick Access</h3>
+          <span class="col-subtitle">Manage individual trackers</span>
+        </div>
+        <div class="mini-app-grid">
+          <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
+            <div class="app-icon mini" [style.background]="getGradient(t.type)">
+              <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
+            </div>
+            <span class="app-label mini">{{ t.name }}</span>
+          </div>
+          <!-- Add New Tracker Tile -->
+          <div class="app-icon-wrap mini" (click)="openAddTracker()">
+            <div class="app-icon mini app-icon-add">
+              <span class="add-cross">＋</span>
+            </div>
+            <span class="app-label mini">Add New</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 

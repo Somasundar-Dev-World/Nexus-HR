@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+/**
+ * v1.0.1 - Rich AI Chat with ApexCharts & PDF Export
+ */
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight } from '../omni-tracker.service';

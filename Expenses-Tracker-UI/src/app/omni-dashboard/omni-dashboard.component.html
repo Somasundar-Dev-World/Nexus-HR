@@ -941,15 +941,19 @@
           <input type="text" class="zenith-input" [(ngModel)]="reportNameInput" placeholder="e.g. Q4 Performance Synthesis">
         </div>
 
-        <label style="margin-top: 1.5rem; display: block;">1. Select Trackers to Analyze</label>
-        <div class="tracker-select-grid">
-          <div class="tracker-select-item" 
+        <label style="margin-top: 1.5rem; display: block;" class="zenith-label">1. Select Trackers to Analyze</label>
+        <div class="tracker-modern-grid">
+          <div class="tracker-card-modern" 
                *ngFor="let t of trackers" 
                [class.selected]="architectSelectedTrackers.includes(t.id!)"
                (click)="toggleArchitectTrackerSelection(t.id!)">
-            <span class="tracker-emoji">{{ t.icon || '📊' }}</span>
-            <span class="tracker-name">{{ t.name }}</span>
-            <span class="check-icon" *ngIf="architectSelectedTrackers.includes(t.id!)">✅</span>
+            <div class="tcm-icon-wrap">
+              {{ t.icon || '📊' }}
+            </div>
+            <div class="tcm-info">
+              <span class="tcm-name">{{ t.name }}</span>
+            </div>
+            <div class="tcm-check">✅</div>
           </div>
         </div>
 
@@ -965,13 +969,15 @@
 
         <!-- Suggestions List -->
         <div class="architect-suggestions animate-fade-up" *ngIf="architectSuggestions.length">
-          <label style="display: block; width: 100%; margin-bottom: 1rem;">2. Choose an AI Design</label>
+          <label style="display: block; width: 100%; margin: 2rem 0 1rem;" class="zenith-label">2. Choose an AI Design</label>
           <div class="suggestion-card" *ngFor="let s of architectSuggestions" (click)="saveArchitectReport(s)">
-            <div class="suggestion-type-badge">{{ s.visualType }}</div>
-            <h4 class="suggestion-name">{{ s.name }}</h4>
+            <div class="suggestion-header">
+              <div class="suggestion-type-badge">{{ s.visualType }}</div>
+              <h4 class="suggestion-name">{{ s.name }}</h4>
+            </div>
             <p class="suggestion-desc">{{ s.description }}</p>
             <div class="suggestion-meta">
-              <span *ngFor="let insight of s.config.suggestedInsights">💡 {{ insight }}</span>
+              <span *ngFor="let insight of s.config.suggestedInsights" class="suggestion-pill">💡 {{ insight }}</span>
             </div>
           </div>
         </div>

@@ -913,6 +913,20 @@ export class OmniDashboardComponent implements OnInit {
         const el = document.getElementById(block.id);
         if (el && (window as any).ApexCharts) {
           try {
+            // SMART SERIES MAPPING: Detect if AI returned a single array or a complex multi-series list
+            let chartSeries = [];
+            if (block.chartType === 'pie') {
+              chartSeries = block.data.series;
+            } else {
+              // If first element is an object with 'data', use series as is
+              if (block.data.series && block.data.series.length > 0 && typeof block.data.series[0] === 'object') {
+                chartSeries = block.data.series;
+              } else {
+                // Otherwise wrap it (for legacy simple series)
+                chartSeries = [{ name: 'Value', data: block.data.series }];
+              }
+            }
+
             const options = {
               chart: {
                 type: block.chartType,
@@ -921,10 +935,7 @@ export class OmniDashboardComponent implements OnInit {
                 toolbar: { show: false },
                 background: 'transparent'
               },
-              series: block.chartType === 'pie' ? block.data.series : [{
-                name: 'Value',
-                data: block.data.series
-              }],
+              series: chartSeries,
               labels: block.data.labels,
               theme: { mode: 'dark' },
               colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
@@ -944,18 +955,16 @@ export class OmniDashboardComponent implements OnInit {
 
   formatMarkdown(text: string | number): string {
     if (text === undefined || text === null || text === '') return '—';
-    let html = String(text);
-
     // Bold (more robust regex for word boundaries)
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
     // Italic
-    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    html = html.replace(/\*([\s\S]*?)\*/g, '<em>$1</em>');
     // Headers
     html = html.replace(/^### (.*$)/gm, '<h3 class="chat-h3">$1</h3>');
     // Inline Code
     html = html.replace(/`(.*?)`/g, '<code class="chat-code">$1</code>');
-    // Bullets (at start of line or block)
-    html = html.replace(/^\* (.*$)/gm, '<div class="chat-bullet"><span>•</span> $1</div>');
+    // Bullets (handles any number of spaces after *)
+    html = html.replace(/^\*\s+(.*$)/gm, '<div class="chat-bullet"><span>•</span> $1</div>');
     // Newlines
     html = html.replace(/\n/g, '<br/>');
 

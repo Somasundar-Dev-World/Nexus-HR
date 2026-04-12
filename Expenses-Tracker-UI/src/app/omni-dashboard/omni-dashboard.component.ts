@@ -55,6 +55,10 @@ export class OmniDashboardComponent implements OnInit {
   isImportModalOpen = false;
   showDeleteTrackerConfirm = false;
 
+  // Modern Success Modal
+  showSuccessModal = false;
+  successData: any = null;
+
   // Deep Research State
   isDeepInsightOpen = false;
   isDeepInsightLoading = false;
@@ -392,7 +396,14 @@ export class OmniDashboardComponent implements OnInit {
 
   showReasoning(insight: SmartInsight) {
     if (insight.reasoning) {
-      alert(`AI Reasoning: ${insight.reasoning}`);
+      // Use Success Modal for reasoning too, or a specialized one
+      this.successData = {
+        title: 'AI Insights Reasoning',
+        message: insight.reasoning,
+        icon: '🔬',
+        isReasoning: true
+      };
+      this.showSuccessModal = true;
     }
   }
 
@@ -412,7 +423,15 @@ export class OmniDashboardComponent implements OnInit {
       this.viewMode = 'APP_GRID';
       this.selectedApp = undefined;
       this.trackers = [];
+      this.showSuccessModal = false;
     }
+  }
+
+  onSuccessAction() {
+    if (this.successData?.tracker) {
+      this.goToDetail(this.successData.tracker);
+    }
+    this.showSuccessModal = false;
   }
 
   // ── Create App ───────────────────────────────────────────────
@@ -546,13 +565,28 @@ export class OmniDashboardComponent implements OnInit {
           this.isImporting = false;
           this.selectedFile = null;
           this.importTrackerName = '';
-          alert(`Successfully imported tracker and ${res.entryCount} entries!`);
           this.calculateAppStats(this.selectedApp!.id!);
+          
+          // Show Modern Success Modal instead of alert
+          this.successData = {
+            title: 'Import Successful',
+            message: `Successfully created the "${res.tracker.name}" tracker.`,
+            count: res.entryCount,
+            icon: res.tracker.icon || '📄',
+            tracker: res.tracker
+          };
+          this.showSuccessModal = true;
         },
         error: (err) => {
           console.error(err);
           this.isImporting = false;
-          alert('Failed to import document: ' + (err.error || err.message));
+          this.successData = {
+            title: 'Import Failed',
+            message: 'Failed to import document: ' + (err.error || err.message),
+            icon: '❌',
+            isError: true
+          };
+          this.showSuccessModal = true;
         }
       });
   }
@@ -582,7 +616,13 @@ export class OmniDashboardComponent implements OnInit {
           error: (err) => {
             console.error(err);
             this.isImporting = false;
-            alert('Failed to import entries: ' + (err.error || err.message));
+            this.successData = {
+              title: 'Upload Failed',
+              message: 'Failed to import entries: ' + (err.error || err.message),
+              icon: '❌',
+              isError: true
+            };
+            this.showSuccessModal = true;
           }
         });
       // reset file input

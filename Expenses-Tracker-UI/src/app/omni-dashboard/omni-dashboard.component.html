@@ -805,4 +805,33 @@
       </div>
     </div>
   </div>
+
+  <!-- ════ MODERN SUCCESS / STATUS MODAL ════ -->
+  <div class="modal-overlay success-modal-overlay" *ngIf="showSuccessModal" (click)="showSuccessModal = false">
+    <div class="success-card glass-premium animate-fade-scale" (click)="$event.stopPropagation()">
+      <div class="success-glow" [class.error-glow]="successData?.isError" [class.reasoning-glow]="successData?.isReasoning"></div>
+      
+      <div class="success-icon-wrap" [class.success]="!successData?.isError && !successData?.isReasoning" 
+           [class.error]="successData?.isError" [class.reasoning]="successData?.isReasoning">
+        <span class="success-emoji">{{ successData?.icon || '✨' }}</span>
+      </div>
+
+      <h2 class="success-title">{{ successData?.title || 'Action Complete' }}</h2>
+      <p class="success-message">{{ successData?.message }}</p>
+
+      <div class="success-stats" *ngIf="successData?.count !== undefined">
+        <div class="stat-pill">
+          <span class="stat-label">Entries Imported</span>
+          <span class="stat-count">{{ successData.count }}</span>
+        </div>
+      </div>
+
+      <div class="success-actions">
+        <button class="btn btn-outline" (click)="showSuccessModal = false">Dismiss</button>
+        <button class="btn btn-primary success-primary-btn" (click)="onSuccessAction()">
+          {{ successData?.isReasoning ? 'Got it' : 'Explore Tracker →' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

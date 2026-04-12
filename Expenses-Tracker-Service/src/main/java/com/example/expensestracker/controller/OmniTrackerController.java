@@ -16,7 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import com.opencsv.CSVReader;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.example.expensestracker.service.AiInsightService;
+import com.example.expensestracker.service.SmartDataEngineService;
 import com.example.expensestracker.repository.TrackerMappingRepository;
 import com.example.expensestracker.model.TrackerMapping;
 import com.example.expensestracker.model.TrackerIntegration;
@@ -52,6 +55,9 @@ public class OmniTrackerController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SmartDataEngineService smartDataEngineService;
 
     @Autowired
     private TrackerMappingRepository trackerMappingRepository;
@@ -230,27 +236,34 @@ public class OmniTrackerController {
                 return ResponseEntity.status(403).body("Access denied to this app.");
             }
 
-            String documentText = extractTextFromFile(file);
-            if (documentText == null || documentText.isEmpty()) {
-                return ResponseEntity.badRequest().body("Could not extract text from the provided file.");
-            }
+            String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            boolean isTabular = filename.endsWith(".csv") || filename.endsWith(".xlsx") || filename.endsWith(".xls");
 
-            JsonNode aiResult = aiInsightService.generateTrackerFromDocument(documentText, trackerName, user);
+            JsonNode importResult;
+            if (isTabular) {
+                importResult = smartDataEngineService.parseTabularData(file, trackerName);
+            } else {
+                String documentText = extractTextFromFile(file);
+                if (documentText == null || documentText.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Could not extract text from the provided file.");
+                }
+                importResult = aiInsightService.generateTrackerFromDocument(documentText, trackerName, user);
+            }
 
             // Create Tracker
             Tracker tracker = new Tracker();
             tracker.setUserId(userId);
             tracker.setAppId(appId);
-            tracker.setName(aiResult.path("name").asText("AI Imported Tracker"));
-            tracker.setIcon(aiResult.path("icon").asText("📄"));
+            tracker.setName(importResult.path("name").asText("Imported Tracker"));
+            tracker.setIcon(importResult.path("icon").asText("📄"));
             
             try {
-                tracker.setType(TrackerType.valueOf(aiResult.path("type").asText("CUSTOM").toUpperCase()));
+                tracker.setType(TrackerType.valueOf(importResult.path("type").asText("CUSTOM").toUpperCase()));
             } catch (Exception e) {
                 tracker.setType(TrackerType.CUSTOM);
             }
 
-            JsonNode fieldsNode = aiResult.path("fieldDefinitions");
+            JsonNode fieldsNode = importResult.path("fieldDefinitions");
             List<Object> fieldDefs = new ArrayList<>();
             if (fieldsNode.isArray()) {
                 for (JsonNode field : fieldsNode) {
@@ -265,7 +278,7 @@ public class OmniTrackerController {
             tracker = trackerRepository.save(tracker);
 
             // Create Entries
-            JsonNode entriesNode = aiResult.path("entries");
+            JsonNode entriesNode = importResult.path("entries");
             
             int entryCount = 0;
             int skippedCount = 0;
@@ -347,17 +360,16 @@ public class OmniTrackerController {
                 if (file.isEmpty()) continue;
                 
                 String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
-                boolean isCsv = filename.endsWith(".csv") || (file.getContentType() != null && file.getContentType().contains("csv"));
+                boolean isTabular = filename.endsWith(".csv") || filename.endsWith(".xlsx") || filename.endsWith(".xls");
 
-                if (isCsv) {
-                    try (CSVReader csvReader = new CSVReader(new java.io.InputStreamReader(file.getInputStream()))) {
-                        List<String[]> allData = csvReader.readAll();
-                        if (!allData.isEmpty()) {
-                            String[] headers = allData.get(0);
-                            String headersString = String.join(",", headers);
-                            
-                            Map<String, Object> colMap;
-                            java.util.Optional<TrackerMapping> optMapping = trackerMappingRepository.findByTrackerIdAndCsvHeaders(tracker.getId(), headersString);
+                if (isTabular) {
+                    List<String[]> allData = smartDataEngineService.getRawRows(file);
+                    if (!allData.isEmpty()) {
+                        String[] headers = allData.get(0);
+                        String headersString = String.join(",", headers);
+                        
+                        Map<String, Object> colMap;
+                        java.util.Optional<TrackerMapping> optMapping = trackerMappingRepository.findByTrackerIdAndCsvHeaders(tracker.getId(), headersString);
                             if (optMapping.isPresent()) {
                                 colMap = optMapping.get().getColumnMapping();
                             } else {
@@ -492,12 +504,25 @@ public class OmniTrackerController {
                 PDFTextStripper stripper = new PDFTextStripper();
                 return stripper.getText(document);
             }
-        } else if (filename.endsWith(".csv") || file.getContentType() != null && file.getContentType().contains("csv")) {
+        } else if (filename.endsWith(".csv") || (file.getContentType() != null && file.getContentType().contains("csv"))) {
             try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
                 List<String[]> allData = csvReader.readAll();
                 StringBuilder sb = new StringBuilder();
                 for (String[] row : allData) {
                     sb.append(String.join(",", row)).append("\n");
+                }
+                return sb.toString();
+            }
+        } else if (filename.endsWith(".xlsx") || filename.endsWith(".xls")) {
+            try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+                StringBuilder sb = new StringBuilder();
+                Sheet sheet = workbook.getSheetAt(0);
+                for (Row row : sheet) {
+                    for (Cell cell : row) {
+                        DataFormatter formatter = new DataFormatter();
+                        sb.append(formatter.formatCellValue(cell)).append("\t");
+                    }
+                    sb.append("\n");
                 }
                 return sb.toString();
             }

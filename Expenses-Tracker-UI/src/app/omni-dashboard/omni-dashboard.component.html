@@ -783,7 +783,51 @@
         <!-- Chat History -->
         <div class="chat-message" *ngFor="let msg of chatMessages" [ngClass]="msg.role">
           <div class="msg-avatar">{{ msg.role === 'user' ? '👤' : '🤖' }}</div>
-          <div class="msg-bubble" [innerHTML]="msg.content"></div>
+          <div class="msg-bubble">
+            <!-- Normal Text Content -->
+            <div *ngIf="!msg.richBlocks" [innerHTML]="msg.content"></div>
+
+            <!-- Rich Blocks Content -->
+            <div *ngIf="msg.richBlocks" class="rich-content-container">
+              <div *ngFor="let block of msg.richBlocks" [ngClass]="'block-' + block.type.toLowerCase()">
+                
+                <!-- Summary Block -->
+                <div *ngIf="block.type === 'SUMMARY'" class="rich-summary-card">
+                  <div class="summary-badge">EXECUTIVE SUMMARY</div>
+                  <p>{{ block.content }}</p>
+                </div>
+
+                <!-- Table Block -->
+                <div *ngIf="block.type === 'TABLE' && block.rows" class="rich-table-wrapper">
+                  <table class="modern-chat-table">
+                    <thead>
+                      <tr>
+                        <th *ngFor="let h of block.rows.headers">{{ h }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let row of block.rows.rows">
+                        <td *ngFor="let cell of row">{{ cell }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Insight Block -->
+                <div *ngIf="block.type === 'INSIGHT'" class="rich-insight-entry">
+                  {{ block.content }}
+                </div>
+
+                <!-- Chart Block -->
+                <div *ngIf="block.type === 'CHART'" class="rich-chart-wrap">
+                  <div [id]="block.id" class="apex-chat-chart"></div>
+                </div>
+
+                <!-- Fallback Text -->
+                <div *ngIf="block.type === 'TEXT'" class="rich-text-block" [innerHTML]="block.content"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Loading -->

@@ -67,7 +67,7 @@ export class OmniDashboardComponent implements OnInit {
   isChatOpen = false;
   isChatLoading = false;
   chatInputText = '';
-  chatMessages: { role: string, content: string }[] = [];
+  chatMessages: { role: string, content: string, richBlocks?: any[] }[] = [];
   deepInsightReport: any = null;
   deepInsightLoadingSteps = [
     { label: 'Scanning all tracker records...', done: false },
@@ -804,13 +804,122 @@ export class OmniDashboardComponent implements OnInit {
     this.omniService.chatWithApp(this.selectedApp.id!, { history, message: userMessage }).subscribe({
       next: (res) => {
         this.isChatLoading = false;
-        this.chatMessages.push({ role: 'assistant', content: res.reply || 'No response.' });
+        const reply = res.reply || 'No response.';
+        const richBlocks = this.parseRichMessage(reply);
+        this.chatMessages.push({ role: 'assistant', content: reply, richBlocks });
+        
+        // Handle Charts post-push
+        setTimeout(() => this.initializeCharts(richBlocks), 100);
+        
         this.scrollToBottom();
       },
       error: (err) => {
         this.isChatLoading = false;
         this.chatMessages.push({ role: 'assistant', content: 'Connection failed. Please try again.' });
         this.scrollToBottom();
+      }
+    });
+  }
+
+  parseRichMessage(text: string): any[] {
+    const blocks: any[] = [];
+    let remaining = text;
+
+    // Pattern for tags: [TAG] content [/TAG] (optional closing)
+    const tags = ['SUMMARY', 'TABLE', 'INSIGHT', 'CHART'];
+    
+    // We'll use a more advanced regex or a sequential scanner
+    // For simplicity, let's use a robust sequential scanner for these markers
+    
+    const parts = text.split(/(\[SUMMARY\]|\[TABLE\]|\[INSIGHT\]|\[CHART.*?\])/i);
+    let currentType = 'TEXT';
+    
+    parts.forEach(part => {
+      if (!part) return;
+
+      const upper = part.toUpperCase();
+      if (upper === '[SUMMARY]') { currentType = 'SUMMARY'; return; }
+      if (upper === '[TABLE]') { currentType = 'TABLE'; return; }
+      if (upper === '[INSIGHT]') { currentType = 'INSIGHT'; return; }
+      if (upper.startsWith('[CHART')) {
+        const match = upper.match(/TYPE=['"](.*?)['"]/);
+        currentType = 'CHART:' + (match ? match[1] : 'bar');
+        return;
+      }
+
+      // Normal content
+      let content = part.trim();
+      if (content.endsWith('[/SUMMARY]') || content.endsWith('[/TABLE]') || content.endsWith('[/INSIGHT]') || content.endsWith('[/CHART]')) {
+        content = content.substring(0, content.lastIndexOf('[')).trim();
+      }
+
+      if (!content) return;
+
+      if (currentType === 'TEXT') {
+        blocks.push({ type: 'TEXT', content });
+      } else if (currentType === 'SUMMARY') {
+        blocks.push({ type: 'SUMMARY', content });
+      } else if (currentType === 'TABLE') {
+        blocks.push({ type: 'TABLE', rows: this.parseMarkdownTable(content) });
+      } else if (currentType === 'INSIGHT') {
+        blocks.push({ type: 'INSIGHT', content });
+      } else if (currentType.startsWith('CHART:')) {
+        try {
+          const chartData = JSON.parse(content);
+          blocks.push({ 
+            type: 'CHART', 
+            chartType: currentType.split(':')[1], 
+            data: chartData,
+            id: 'chart-' + Math.random().toString(36).substr(2, 9)
+          });
+        } catch (e) {
+          blocks.push({ type: 'TEXT', content: '[Invalid Chart Data]' });
+        }
+      }
+      currentType = 'TEXT'; // Reset
+    });
+
+    return blocks;
+  }
+
+  parseMarkdownTable(md: string) {
+    const lines = md.split('\n').filter(l => l.includes('|'));
+    if (lines.length < 2) return null;
+
+    const headers = lines[0].split('|').map(h => h.trim()).filter(h => h);
+    const rows = lines.slice(2).map(line => {
+      return line.split('|').map(c => c.trim()).filter(c => c);
+    });
+
+    return { headers, rows };
+  }
+
+  initializeCharts(blocks: any[]) {
+    blocks.forEach(block => {
+      if (block.type === 'CHART') {
+        const el = document.getElementById(block.id);
+        if (el && (window as any).ApexCharts) {
+          const options = {
+            chart: {
+              type: block.chartType,
+              height: 250,
+              foreColor: '#94a3b8',
+              toolbar: { show: false },
+              background: 'transparent'
+            },
+            series: block.chartType === 'pie' ? block.data.series : [{
+              name: 'Value',
+              data: block.data.series
+            }],
+            labels: block.data.labels,
+            theme: { mode: 'dark' },
+            colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+            stroke: { curve: 'smooth', width: 2 },
+            grid: { borderColor: 'rgba(255,255,255,0.05)' }
+          };
+          const chart = new (window as any).ApexCharts(el, options);
+          chart.render();
+        }
       }
     });
   }

@@ -270,9 +270,16 @@ public class AiInsightService {
             throw new RuntimeException("No active API Key found for " + provider);
         }
 
-        String systemPrompt = "You are an ultra-modern, helpful AI Chatbot integrated into the OmniTracker Personal OS. " +
-            "Your purpose is to answer the user's questions based on their application data context. " +
-            "Be concise, insightful, and user-friendly. Format your responses in clean Markdown.";
+        String systemPrompt = "You are an ultra-modern, elite AI Analyst integrated into the OmniTracker Personal OS. " +
+            "Your purpose is to provide deep, visually-appealing insights based on the user's application data.\n\n" +
+            "STRATEGIC RESPONSE PROTOCOL:\n" +
+            "1. ALWAYS begin with a [SUMMARY] block if the answer is long. Use elegant, executive-level language.\n" +
+            "2. Use [TABLE] tags for any data comparisons or lists with more than 3 items. Format as standard Markdown Tables.\n" +
+            "3. Use [CHART type='bar|line|pie'] followed by a VALID RAW JSON OBJECT for data visualizations. " +
+            "Example: [CHART type='bar'] { \"labels\": [\"Jan\", \"Feb\"], \"series\": [10, 20] }\n" +
+            "4. Use [INSIGHT] for key bullet points with high-quality emojis.\n" +
+            "5. Keep the overall tone premium, analytical, and supportive.\n\n" +
+            "FORMATTING: Use clean Markdown. Avoid using basic code blocks unless they are specifically for [CHART] content.";
 
         StringBuilder userPromptBuilder = new StringBuilder();
         userPromptBuilder.append("APP DATA CONTEXT:\n").append(dataContext).append("\n\n");

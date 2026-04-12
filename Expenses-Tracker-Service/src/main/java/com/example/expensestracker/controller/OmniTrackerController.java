@@ -433,7 +433,6 @@ public class OmniTrackerController {
                                 }
                             }
                         }
-                    }
                 } else {
                     String documentText = extractTextFromFile(file);
                     if (documentText == null || documentText.isEmpty()) {

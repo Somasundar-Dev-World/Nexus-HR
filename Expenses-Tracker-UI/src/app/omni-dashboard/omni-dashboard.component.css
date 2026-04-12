@@ -2882,3 +2882,266 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 1.25rem !important;
 }
+
+/* 💎 Ultra Modern Luxury - Intelligence Page Styles */
+.btn-intel-center {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(37, 99, 235, 0.2));
+  color: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-intel-center:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(37, 99, 235, 0.3));
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
+}
+
+.reports-hero {
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent),
+              radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.1), transparent);
+  border-radius: 30px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.hero-intel-layer {
+  z-index: 2;
+}
+
+.intel-badge {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 950;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  margin-top: 1rem;
+  max-width: 400px;
+}
+
+.btn-architect-zenith {
+  background: #fff;
+  color: #0f172a;
+  border: none;
+  padding: 1.25rem 2.5rem;
+  border-radius: 18px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.15);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-architect-zenith:hover {
+  transform: scale(1.05) translateY(-5px);
+  box-shadow: 0 30px 60px rgba(255, 255, 255, 0.2);
+}
+
+.zenith-shimmer {
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: zenithShimmer 3s infinite;
+}
+
+@keyframes zenithShimmer {
+  0% { left: -100%; }
+  20%, 100% { left: 100%; }
+}
+
+.luxury-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 2rem;
+}
+
+.luxury-card {
+  height: 300px;
+  padding: 2rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.luxury-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+}
+
+.luxury-card-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.15), transparent 80%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.luxury-card:hover .luxury-card-glow { opacity: 1; }
+
+.luxury-icon {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.luxury-info .report-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.luxury-info .report-desc {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.luxury-meta {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.meta-pill {
+  padding: 0.4rem 0.8rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.meta-dot.blue { background: #3b82f6; }
+
+.report-card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #3b82f6;
+  font-weight: 700;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  transition: all 0.3s;
+}
+
+.luxury-card:hover .report-card-footer {
+  opacity: 1;
+  transform: translateX(5px);
+}
+
+.luxury-empty {
+  text-align: center;
+  padding: 6rem 0;
+}
+
+.empty-intel-orb {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 2rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orb-core {
+  font-size: 3rem;
+  z-index: 2;
+  animation: orbFloat 4s ease-in-out infinite;
+}
+
+.orb-ring {
+  position: absolute;
+  width: 100%; height: 100%;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 50%;
+  animation: orbRotate 10s linear infinite;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3)); }
+  50% { transform: translateY(-10px) scale(1.1); filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5)); }
+}
+
+@keyframes orbRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.luxury-cta {
+  margin-top: 2rem;
+  padding: 1.25rem 3rem;
+  border-radius: 100px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.luxury-sm-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 6px;
+}

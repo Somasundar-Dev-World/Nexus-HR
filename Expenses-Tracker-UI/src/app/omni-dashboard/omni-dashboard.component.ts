@@ -25,8 +25,8 @@ export class OmniDashboardComponent implements OnInit {
   aiInsights: SmartInsight[] = [];
   loadingInsights = false;
 
-  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs
-  viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' = 'APP_GRID';
+  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports
+  viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' | 'INTELLIGENCE_REPORTS' = 'APP_GRID';
 
   appStats = {
     archetype: 'GENERIC' as 'FINANCE' | 'HEALTH' | 'GENERIC',
@@ -67,7 +67,6 @@ export class OmniDashboardComponent implements OnInit {
   isDeepInsightLoading = false;
   
   // Intelligence Reporting State
-  appActiveTab: 'TRACKERS' | 'REPORTS' = 'TRACKERS';
   savedReports: AiReport[] = [];
   reportArchitectMode = false;
   isArchitecting = false;
@@ -1011,9 +1010,9 @@ export class OmniDashboardComponent implements OnInit {
 
   // --- Intelligence Reporting ---
 
-  selectAppTab(tab: 'TRACKERS' | 'REPORTS') {
-    this.appActiveTab = tab;
-    if (tab === 'REPORTS') this.loadReports();
+  goToReports() {
+    this.viewMode = 'INTELLIGENCE_REPORTS';
+    this.loadReports();
   }
 
   loadReports() {
@@ -1134,6 +1133,10 @@ export class OmniDashboardComponent implements OnInit {
 
     const chart = new ApexCharts(chartEl, options);
     chart.render();
+  }
+
+  goBackToDashboard() {
+    this.viewMode = 'APP_DASHBOARD';
   }
 
   async exportToPDF(elementId: string, filename: string) {

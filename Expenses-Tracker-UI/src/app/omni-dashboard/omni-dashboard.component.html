@@ -80,6 +80,9 @@
           <button class="btn-deep-research" (click)="loadDeepInsight()" title="AI Deep Research">
             🔬 Deep Research
           </button>
+          <button class="btn-intel-center" (click)="goToReports()" title="AI Intelligence Reporting">
+            📉 Intelligence Reports
+          </button>
         </div>
       </div>
       
@@ -120,124 +123,66 @@
         </div>
       </div>
     </div>
-      <!-- Tab Switcher -->
-      <div class="reporting-tabs animate-fade-in">
-        <div class="report-tab-item" [class.active]="appActiveTab === 'TRACKERS'" (click)="selectAppTab('TRACKERS')">
-          <span>📊</span> Summary
+    </div>
+
+    <!-- Dashboard Content -->
+    <!-- Dashboard Stat Cards (Dynamic Archetypes) -->
+    <div class="dashboard-stats animate-fade-up" [ngClass]="'archetype-' + appStats.archetype.toLowerCase()">
+      <div class="stat-card" *ngFor="let metric of appStats.primaryMetrics">
+        <div class="stat-card-icon">{{ metric.icon }}</div>
+        <div class="stat-card-info">
+          <span class="stat-card-val">{{ metric.value }}</span>
+          <span class="stat-card-label">{{ metric.label }}</span>
         </div>
-        <div class="report-tab-item" [class.active]="appActiveTab === 'REPORTS'" (click)="selectAppTab('REPORTS')">
-          <span>📉</span> Intelligence Reports
-        </div>
+        <div class="stat-card-trend" *ngIf="metric.trend">{{ metric.trend }}</div>
       </div>
     </div>
 
-    <!-- TRACKERS TAB CONTENT -->
-    <ng-container *ngIf="appActiveTab === 'TRACKERS'">
-      <!-- Dashboard Stat Cards (Dynamic Archetypes) -->
-      <div class="dashboard-stats animate-fade-up" [ngClass]="'archetype-' + appStats.archetype.toLowerCase()">
-        <div class="stat-card" *ngFor="let metric of appStats.primaryMetrics">
-          <div class="stat-card-icon">{{ metric.icon }}</div>
-          <div class="stat-card-info">
-            <span class="stat-card-val">{{ metric.value }}</span>
-            <span class="stat-card-label">{{ metric.label }}</span>
-          </div>
-          <div class="stat-card-trend" *ngIf="metric.trend">{{ metric.trend }}</div>
+    <div class="dashboard-content-grid">
+      <!-- Activity Feed -->
+      <div class="dashboard-col animate-fade-up">
+        <div class="col-header">
+          <h3>The Pulse</h3>
+          <span class="col-subtitle">Recent activity across trackers</span>
         </div>
-      </div>
-
-      <div class="dashboard-content-grid">
-        <!-- Activity Feed -->
-        <div class="dashboard-col animate-fade-up">
-          <div class="col-header">
-            <h3>The Pulse</h3>
-            <span class="col-subtitle">Recent activity across trackers</span>
-          </div>
-          <div class="pulse-list" *ngIf="appStats.recentLogs.length">
-            <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
-              <div class="pulse-icon">{{ log.trackerIcon }}</div>
-              <div class="pulse-details">
-                <span class="pulse-tracker">{{ log.trackerName }}</span>
-                <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
-                <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
-            No recent activity to report.
-          </div>
-        </div>
-
-        <!-- Quick Tracker Grid -->
-        <div class="dashboard-col animate-fade-up">
-          <div class="col-header">
-            <h3>Quick Access</h3>
-            <span class="col-subtitle">Manage individual trackers</span>
-          </div>
-          <div class="mini-app-grid">
-            <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
-              <div class="app-icon mini" [style.background]="getGradient(t.type)">
-                <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
-              </div>
-              <span class="app-label mini">{{ t.name }}</span>
-            </div>
-            <!-- Add New Tracker Tile -->
-            <div class="app-icon-wrap mini" (click)="openAddTracker()">
-              <div class="app-icon mini app-icon-add">
-                <span class="add-cross">＋</span>
-              </div>
-              <span class="app-label mini">Add New</span>
+        <div class="pulse-list" *ngIf="appStats.recentLogs.length">
+          <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
+            <div class="pulse-icon">{{ log.trackerIcon }}</div>
+            <div class="pulse-details">
+              <span class="pulse-tracker">{{ log.trackerName }}</span>
+              <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
+              <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
             </div>
           </div>
         </div>
-      </div>
-    </ng-container>
-
-    <!-- REPORTS TAB CONTENT -->
-    <ng-container *ngIf="appActiveTab === 'REPORTS'">
-      <div class="reports-header animate-fade-in" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
-        <div>
-          <h3>Saved Intelligence</h3>
-          <p class="text-muted text-xs">Persistent AI-architected reports for this app</p>
-        </div>
-        <button class="btn-architect-glow" (click)="openReportArchitect()">
-          <span>🪄</span> Architect New Report
-        </button>
-      </div>
-
-      <!-- Reports List -->
-      <div class="reports-grid animate-fade-up" *ngIf="savedReports.length">
-        <div class="report-card" *ngFor="let report of savedReports" (click)="runReport(report.id)">
-          <div class="report-card-header">
-            <div class="report-visual-icon">
-              <span *ngIf="report.visualType === 'BAR'">📊</span>
-              <span *ngIf="report.visualType === 'PIE'">🍕</span>
-              <span *ngIf="report.visualType === 'LINE'">📈</span>
-              <span *ngIf="report.visualType === 'RADAR'">🕸️</span>
-              <span *ngIf="report.visualType === 'METRIC_GRID'">🔢</span>
-            </div>
-            <div class="report-actions">
-              <button class="btn-icon" (click)="$event.stopPropagation(); deleteReport(report.id)">🗑️</button>
-            </div>
-          </div>
-          <div class="report-info">
-            <h4 class="report-name">{{ report.name }}</h4>
-            <p class="report-desc">{{ report.description }}</p>
-          </div>
-          <div class="report-meta">
-            <span>📅 {{ report.querySpec.groupBy || 'Static' }}</span>
-            <span>🧩 {{ report.querySpec.trackers.length }} Trackers</span>
-          </div>
-          <button class="btn-report-run">Execute Intelligence →</button>
+        <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
+          No recent activity to report.
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div class="home-empty animate-fade-up" *ngIf="savedReports.length === 0">
-        <div class="empty-emoji">📉</div>
-        <h2>No AI Reports Yet</h2>
-        <p>Use the "Architect New Report" wizard to have AI design deep insights based on your trackers.</p>
+      <!-- Quick Tracker Grid -->
+      <div class="dashboard-col animate-fade-up">
+        <div class="col-header">
+          <h3>Quick Access</h3>
+          <span class="col-subtitle">Manage individual trackers</span>
+        </div>
+        <div class="mini-app-grid">
+          <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
+            <div class="app-icon mini" [style.background]="getGradient(t.type)">
+              <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
+            </div>
+            <span class="app-label mini">{{ t.name }}</span>
+          </div>
+          <!-- Add New Tracker Tile -->
+          <div class="app-icon-wrap mini" (click)="openAddTracker()">
+            <div class="app-icon mini app-icon-add">
+              <span class="add-cross">＋</span>
+            </div>
+            <span class="app-label mini">Add New</span>
+          </div>
+        </div>
       </div>
-    </ng-container>
+    </div>
   </div>
 
 

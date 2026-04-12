@@ -857,11 +857,11 @@ export class OmniDashboardComponent implements OnInit {
 
       // Normal content
       let content = part.trim();
-      if (content.endsWith('[/SUMMARY]') || content.endsWith('[/TABLE]') || content.endsWith('[/INSIGHT]') || content.endsWith('[/CHART]')) {
-        content = content.substring(0, content.lastIndexOf('[')).trim();
-      }
+      
+      // Strip any lingering closing tags efficiently
+      content = content.replace(/\[\/(SUMMARY|TABLE|INSIGHT|CHART)\]/gi, '').trim();
 
-      if (!content) return;
+      if (!content || content === 'N/A' || content === 'null') return;
 
       if (currentType === 'TEXT') {
         blocks.push({ type: 'TEXT', content });
@@ -907,29 +907,52 @@ export class OmniDashboardComponent implements OnInit {
       if (block.type === 'CHART') {
         const el = document.getElementById(block.id);
         if (el && (window as any).ApexCharts) {
-          const options = {
-            chart: {
-              type: block.chartType,
-              height: 250,
-              foreColor: '#94a3b8',
-              toolbar: { show: false },
-              background: 'transparent'
-            },
-            series: block.chartType === 'pie' ? block.data.series : [{
-              name: 'Value',
-              data: block.data.series
-            }],
-            labels: block.data.labels,
-            theme: { mode: 'dark' },
-            colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-            stroke: { curve: 'smooth', width: 2 },
-            grid: { borderColor: 'rgba(255,255,255,0.05)' }
-          };
-          const chart = new (window as any).ApexCharts(el, options);
-          chart.render();
+          try {
+            const options = {
+              chart: {
+                type: block.chartType,
+                height: 250,
+                foreColor: '#94a3b8',
+                toolbar: { show: false },
+                background: 'transparent'
+              },
+              series: block.chartType === 'pie' ? block.data.series : [{
+                name: 'Value',
+                data: block.data.series
+              }],
+              labels: block.data.labels,
+              theme: { mode: 'dark' },
+              colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+              stroke: { curve: 'smooth', width: 2 },
+              grid: { borderColor: 'rgba(255,255,255,0.05)' }
+            };
+            const chart = new (window as any).ApexCharts(el, options);
+            chart.render();
+          } catch (e) {
+            console.error('ApexChart Init Failed', e);
+            if (el) el.style.display = 'none';
+          }
         }
       }
     });
+  }
+
+  formatMarkdown(text: string): string {
+    if (!text) return '—';
+    let html = text;
+
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Italic
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // Headers
+    html = html.replace(/^### (.*$)/gm, '<h3 class="chat-h3">$1</h3>');
+    // Code blocks (simple)
+    html = html.replace(/`(.*?)`/g, '<code class="chat-code">$1</code>');
+    // Newlines
+    html = html.replace(/\n/g, '<br/>');
+
+    return html;
   }
 
   scrollToBottom() {

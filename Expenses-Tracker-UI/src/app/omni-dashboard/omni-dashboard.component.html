@@ -797,9 +797,9 @@
               <div *ngFor="let block of msg.richBlocks" [ngClass]="'block-' + block.type.toLowerCase()">
                 
                 <!-- Summary Block -->
-                <div *ngIf="block.type === 'SUMMARY'" class="rich-summary-card">
+                <div *ngIf="block.type === 'SUMMARY' && block.content" class="rich-summary-card">
                   <div class="summary-badge">EXECUTIVE SUMMARY</div>
-                  <p>{{ block.content }}</p>
+                  <div [innerHTML]="formatMarkdown(block.content)"></div>
                 </div>
 
                 <!-- Table Block -->
@@ -819,8 +819,8 @@
                 </div>
 
                 <!-- Insight Block -->
-                <div *ngIf="block.type === 'INSIGHT'" class="rich-insight-entry">
-                  {{ block.content }}
+                <div *ngIf="block.type === 'INSIGHT' && block.content" class="rich-insight-entry">
+                  <div [innerHTML]="formatMarkdown(block.content)"></div>
                 </div>
 
                 <!-- Chart Block -->
@@ -829,7 +829,7 @@
                 </div>
 
                 <!-- Fallback Text -->
-                <div *ngIf="block.type === 'TEXT'" class="rich-text-block" [innerHTML]="block.content"></div>
+                <div *ngIf="block.type === 'TEXT' && block.content" class="rich-text-block" [innerHTML]="formatMarkdown(block.content)"></div>
               </div>
             </div>
           </div>

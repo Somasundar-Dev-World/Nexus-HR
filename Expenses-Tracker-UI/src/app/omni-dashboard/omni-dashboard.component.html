@@ -769,6 +769,9 @@
           <span class="chat-icon">💬</span> Ask AI ✨
         </div>
         <div class="chat-actions">
+          <button class="export-pdf-btn export-ignore" (click)="exportToPDF('chatFullBody', 'AI_Insight_Report')" title="Export Full Session">
+            📥 PDF
+          </button>
           <button class="chat-max-btn" (click)="toggleMaximizeChat()">
             {{ isChatMaximized ? '🗗' : '⛶' }}
           </button>
@@ -776,7 +779,7 @@
         </div>
       </div>
 
-      <div class="chat-body" #chatBody>
+      <div class="chat-body" #chatBody id="chatFullBody">
         <!-- Welcome Message -->
         <div class="chat-message assistant" *ngIf="chatMessages.length === 0">
           <div class="msg-avatar">🤖</div>
@@ -788,7 +791,15 @@
         <!-- Chat History -->
         <div class="chat-message" *ngFor="let msg of chatMessages" [ngClass]="msg.role">
           <div class="msg-avatar">{{ msg.role === 'user' ? '👤' : '🤖' }}</div>
-          <div class="msg-bubble">
+          <div class="msg-bubble" [id]="msg.id">
+            
+            <!-- Export Single Message Button (Assistant Only) -->
+            <button *ngIf="msg.role === 'assistant' && msg.id" 
+                    class="bubble-export-btn export-ignore" 
+                    (click)="exportToPDF(msg.id, 'AI_Insight')"
+                    title="Export this insight">
+              📄
+            </button>
             <!-- Normal Text Content -->
             <div *ngIf="!msg.richBlocks" [innerHTML]="msg.content"></div>
 

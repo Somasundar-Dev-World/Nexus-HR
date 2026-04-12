@@ -138,50 +138,77 @@
       </div>
     </div>
 
-    <div class="dashboard-content-grid">
-      <!-- Activity Feed -->
-      <div class="dashboard-col animate-fade-up">
-        <div class="col-header">
-          <h3>The Pulse</h3>
-          <span class="col-subtitle">Recent activity across trackers</span>
-        </div>
-        <div class="pulse-list" *ngIf="appStats.recentLogs.length">
-          <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
-            <div class="pulse-icon">{{ log.trackerIcon }}</div>
-            <div class="pulse-details">
-              <span class="pulse-tracker">{{ log.trackerName }}</span>
-              <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
-              <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
-          No recent activity to report.
-        </div>
-      </div>
+    </div>
+  </div>
 
-      <!-- Quick Tracker Grid -->
-      <div class="dashboard-col animate-fade-up">
-        <div class="col-header">
-          <h3>Quick Access</h3>
-          <span class="col-subtitle">Manage individual trackers</span>
-        </div>
-        <div class="mini-app-grid">
-          <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
-            <div class="app-icon mini" [style.background]="getGradient(t.type)">
-              <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
-            </div>
-            <span class="app-label mini">{{ t.name }}</span>
-          </div>
-          <!-- Add New Tracker Tile -->
-          <div class="app-icon-wrap mini" (click)="openAddTracker()">
-            <div class="app-icon mini app-icon-add">
-              <span class="add-cross">＋</span>
-            </div>
-            <span class="app-label mini">Add New</span>
-          </div>
-        </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       VIEW — INTELLIGENCE CENTER (Executive Hub)
+  ════════════════════════════════════════════════════════ -->
+  <div class="home-screen reports-page animate-slide-in" *ngIf="viewMode === 'INTELLIGENCE_REPORTS' && selectedApp">
+    <div class="home-header">
+      <button class="back-btn-pill" (click)="goBack()">
+        <span class="back-arrow">←</span> App Dashboard
+      </button>
+      <div class="home-title-wrap" style="margin-top: 1rem;">
+        <span class="app-emoji-large">📊</span>
+        <h1>Intelligence Hub</h1>
       </div>
+      <p class="home-subtitle">Multi-tracker analytical synthesis & behavioral architecture.</p>
+    </div>
+
+    <!-- Radiant Hero Section -->
+    <div class="reports-hero">
+      <div class="hero-intel-layer">
+        <div class="intel-badge">Project Zenith</div>
+        <h2 class="hero-title">Analytical <br> Synthesis</h2>
+        <p class="hero-subtitle">Engineering cross-tracker intelligence for executive decision making.</p>
+      </div>
+      <button class="btn-architect-zenith" (click)="openReportArchitect()">
+        <div class="zenith-shimmer"></div>
+        <span>🪄 Architect New Design</span>
+      </button>
+    </div>
+
+    <!-- Luxury Reports Grid -->
+    <div class="luxury-grid animate-fade-up" *ngIf="savedReports.length">
+      <div class="luxury-card" *ngFor="let report of savedReports" (click)="runReport(report.id)">
+        <div class="luxury-card-glow"></div>
+        <div class="luxury-icon">
+          <span *ngIf="report.visualType === 'BAR'">📊</span>
+          <span *ngIf="report.visualType === 'PIE'">💹</span>
+          <span *ngIf="report.visualType === 'LINE'">📈</span>
+          <span *ngIf="report.visualType === 'RADAR'">🕸️</span>
+          <span *ngIf="report.visualType === 'METRIC_GRID'">🔢</span>
+        </div>
+        <div class="luxury-info">
+          <h4 class="report-name">{{ report.name }}</h4>
+          <p class="report-desc">{{ report.description }}</p>
+        </div>
+        <div class="luxury-meta">
+          <div class="meta-pill"><span class="meta-dot blue"></span> {{ report.querySpec.groupBy || 'Static' }}</div>
+          <div class="meta-pill"><span class="meta-dot"></span> {{ report.querySpec.trackers.length }} Metrics</div>
+        </div>
+        <div class="report-card-footer">
+          <span>Run Synthesis</span>
+          <span class="footer-arrow">→</span>
+        </div>
+        <!-- Delete action -->
+        <button class="luxury-sm-btn" style="position: absolute; top: 1.5rem; right: 1.5rem; border: none; cursor: pointer;" (click)="$event.stopPropagation(); deleteReport(report.id)">🗑️</button>
+      </div>
+    </div>
+
+    <!-- Empty State LUXURY -->
+    <div class="luxury-empty animate-fade-up" *ngIf="savedReports.length === 0">
+      <div class="empty-intel-orb">
+        <div class="orb-ring"></div>
+        <div class="orb-core">📉</div>
+      </div>
+      <h2>Zero Intelligence Calculated</h2>
+      <p>Your current analytical node is void. Initiate the Architect Wizard to bridge cross-tracker data points.</p>
+      <button class="btn-architect-zenith luxury-cta" (click)="openReportArchitect()">
+        Initiate Architect →
+      </button>
     </div>
   </div>
 

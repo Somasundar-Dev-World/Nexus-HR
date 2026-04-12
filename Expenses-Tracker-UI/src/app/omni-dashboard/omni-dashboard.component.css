@@ -2267,6 +2267,27 @@
 }
 .drp-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.drp-export-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  padding: 0.6rem 1.1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.drp-export-btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #60a5fa;
+  color: white;
+  transform: translateY(-1px);
+}
+
 /* ── AI Chat Drawer ────────────────────────────────────────── */
 .drp-chat-btn {
   display: inline-flex;

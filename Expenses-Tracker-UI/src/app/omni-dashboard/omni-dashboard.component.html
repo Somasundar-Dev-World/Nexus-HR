@@ -657,7 +657,7 @@
 
   <!-- AI DEEP RESEARCH PANEL -->
   <div class="deep-research-overlay" *ngIf="isDeepInsightOpen" (click)="closeDeepInsight()">
-    <div class="deep-research-panel" (click)="$event.stopPropagation()">
+    <div class="deep-research-panel" id="deepResearchReport" (click)="$event.stopPropagation()">
 
       <!-- Header -->
       <div class="drp-header">
@@ -669,6 +669,9 @@
           </div>
         </div>
         <div class="drp-header-actions">
+          <button class="drp-export-btn export-ignore" (click)="exportToPDF('deepResearchReport', 'Deep_Analysis_Report')" [disabled]="isDeepInsightLoading" title="Export Dashboard to PDF">
+            <span class="export-icon">📥</span> Export PDF
+          </button>
           <button class="drp-chat-btn" (click)="toggleChat()" title="Ask AI about your data">
             <span class="chat-icon">💬</span> Ask AI
           </button>

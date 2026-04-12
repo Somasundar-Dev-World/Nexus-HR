@@ -249,11 +249,11 @@
           <div class="detail-badge-row">
             <span class="detail-badge">{{ selectedTracker.type }}</span>
             <button class="btn-icon btn-edit-header" (click)="openEditTracker(selectedTracker)" title="Edit Tracker">✏️</button>
-            <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="AI Import Document Data">🪄</button>
+            <button class="btn-icon btn-import-header" (click)="entriesFileInput.click()" title="Import Document Data">🪄</button>
             <button class="btn-icon btn-plaid-header" (click)="connectPlaid()" title="Connect Live Bank Feed">🔌</button>
             <button class="btn-icon btn-delete-tracker" (click)="showDeleteTrackerConfirm = true" title="Delete this Tracker">🗑️</button>
             <span class="institution-badge" *ngIf="connectedInstitution">🏦 {{ connectedInstitution }}</span>
-            <input type="file" accept=".csv,.pdf" multiple #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
+            <input type="file" accept=".csv,.pdf,.xlsx,.xls" multiple #entriesFileInput (change)="onEntriesFileSelected($event)" style="display: none;">
           </div>
         </div>
       </div>
@@ -393,15 +393,15 @@
         </div>
       </div>
 
-      <!-- AI Document Import Section -->
+      <!-- Document Import Section -->
       <div class="ai-import-wrap" *ngIf="!editingTrackerId">
-        <h4 class="section-subtitle">🪄 AI Document Import</h4>
-        <p class="import-desc">Upload a CSV or PDF (e.g. Bank Statement), and AI will autogenerate the tracker schema and populate it.</p>
+        <h4 class="section-subtitle">🪄 Document Import</h4>
+        <p class="import-desc">Upload a CSV, Excel, or PDF (e.g. Bank Statement). Smart Engine handles tabular data, while AI handles unstructured documents.</p>
         
         <div class="import-controls" *ngIf="!isImporting">
           <input type="text" [(ngModel)]="importTrackerName" placeholder="Tracker Name (Optional)" class="import-input">
           <div class="file-upload-row">
-            <input type="file" accept=".csv,.pdf" (change)="onFileSelected($event)" class="file-input">
+            <input type="file" accept=".csv,.xlsx,.xls,.pdf" (change)="onFileSelected($event)" class="file-input">
             <button type="button" class="btn btn-primary" [disabled]="!selectedFile" (click)="autoImportTracker()">Import</button>
           </div>
         </div>

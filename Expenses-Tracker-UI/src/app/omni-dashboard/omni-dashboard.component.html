@@ -120,65 +120,124 @@
         </div>
       </div>
     </div>
-    </div>
-
-    <!-- Dashboard Stat Cards (Dynamic Archetypes) -->
-    <div class="dashboard-stats animate-fade-up" [ngClass]="'archetype-' + appStats.archetype.toLowerCase()">
-      <div class="stat-card" *ngFor="let metric of appStats.primaryMetrics">
-        <div class="stat-card-icon">{{ metric.icon }}</div>
-        <div class="stat-card-info">
-          <span class="stat-card-val">{{ metric.value }}</span>
-          <span class="stat-card-label">{{ metric.label }}</span>
+      <!-- Tab Switcher -->
+      <div class="reporting-tabs animate-fade-in">
+        <div class="report-tab-item" [class.active]="appActiveTab === 'TRACKERS'" (click)="selectAppTab('TRACKERS')">
+          <span>📊</span> Summary
         </div>
-        <div class="stat-card-trend" *ngIf="metric.trend">{{ metric.trend }}</div>
-      </div>
-    </div>
-
-    <div class="dashboard-content-grid">
-      <!-- Activity Feed -->
-      <div class="dashboard-col animate-fade-up">
-        <div class="col-header">
-          <h3>The Pulse</h3>
-          <span class="col-subtitle">Recent activity across trackers</span>
-        </div>
-        <div class="pulse-list" *ngIf="appStats.recentLogs.length">
-          <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
-            <div class="pulse-icon">{{ log.trackerIcon }}</div>
-            <div class="pulse-details">
-              <span class="pulse-tracker">{{ log.trackerName }}</span>
-              <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
-              <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
-          No recent activity to report.
-        </div>
-      </div>
-
-      <!-- Quick Tracker Grid -->
-      <div class="dashboard-col animate-fade-up">
-        <div class="col-header">
-          <h3>Quick Access</h3>
-          <span class="col-subtitle">Manage individual trackers</span>
-        </div>
-        <div class="mini-app-grid">
-          <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
-            <div class="app-icon mini" [style.background]="getGradient(t.type)">
-              <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
-            </div>
-            <span class="app-label mini">{{ t.name }}</span>
-          </div>
-          <!-- Add New Tracker Tile -->
-          <div class="app-icon-wrap mini" (click)="openAddTracker()">
-            <div class="app-icon mini app-icon-add">
-              <span class="add-cross">＋</span>
-            </div>
-            <span class="app-label mini">Add New</span>
-          </div>
+        <div class="report-tab-item" [class.active]="appActiveTab === 'REPORTS'" (click)="selectAppTab('REPORTS')">
+          <span>📉</span> Intelligence Reports
         </div>
       </div>
     </div>
+
+    <!-- TRACKERS TAB CONTENT -->
+    <ng-container *ngIf="appActiveTab === 'TRACKERS'">
+      <!-- Dashboard Stat Cards (Dynamic Archetypes) -->
+      <div class="dashboard-stats animate-fade-up" [ngClass]="'archetype-' + appStats.archetype.toLowerCase()">
+        <div class="stat-card" *ngFor="let metric of appStats.primaryMetrics">
+          <div class="stat-card-icon">{{ metric.icon }}</div>
+          <div class="stat-card-info">
+            <span class="stat-card-val">{{ metric.value }}</span>
+            <span class="stat-card-label">{{ metric.label }}</span>
+          </div>
+          <div class="stat-card-trend" *ngIf="metric.trend">{{ metric.trend }}</div>
+        </div>
+      </div>
+
+      <div class="dashboard-content-grid">
+        <!-- Activity Feed -->
+        <div class="dashboard-col animate-fade-up">
+          <div class="col-header">
+            <h3>The Pulse</h3>
+            <span class="col-subtitle">Recent activity across trackers</span>
+          </div>
+          <div class="pulse-list" *ngIf="appStats.recentLogs.length">
+            <div class="pulse-item" *ngFor="let log of appStats.recentLogs">
+              <div class="pulse-icon">{{ log.trackerIcon }}</div>
+              <div class="pulse-details">
+                <span class="pulse-tracker">{{ log.trackerName }}</span>
+                <span class="pulse-note">{{ log.note || 'New entry logged' }}</span>
+                <span class="pulse-date">{{ log.date | date:'shortTime' }} · {{ log.date | date:'MMM d' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="pulse-empty" *ngIf="!appStats.recentLogs.length">
+            No recent activity to report.
+          </div>
+        </div>
+
+        <!-- Quick Tracker Grid -->
+        <div class="dashboard-col animate-fade-up">
+          <div class="col-header">
+            <h3>Quick Access</h3>
+            <span class="col-subtitle">Manage individual trackers</span>
+          </div>
+          <div class="mini-app-grid">
+            <div class="app-icon-wrap mini" *ngFor="let t of trackers" (click)="goToDetail(t)">
+              <div class="app-icon mini" [style.background]="getGradient(t.type)">
+                <span class="app-emoji mini">{{ t.icon || getIcon(t.type) }}</span>
+              </div>
+              <span class="app-label mini">{{ t.name }}</span>
+            </div>
+            <!-- Add New Tracker Tile -->
+            <div class="app-icon-wrap mini" (click)="openAddTracker()">
+              <div class="app-icon mini app-icon-add">
+                <span class="add-cross">＋</span>
+              </div>
+              <span class="app-label mini">Add New</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- REPORTS TAB CONTENT -->
+    <ng-container *ngIf="appActiveTab === 'REPORTS'">
+      <div class="reports-header animate-fade-in" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
+        <div>
+          <h3>Saved Intelligence</h3>
+          <p class="text-muted text-xs">Persistent AI-architected reports for this app</p>
+        </div>
+        <button class="btn-architect-glow" (click)="openReportArchitect()">
+          <span>🪄</span> Architect New Report
+        </button>
+      </div>
+
+      <!-- Reports List -->
+      <div class="reports-grid animate-fade-up" *ngIf="savedReports.length">
+        <div class="report-card" *ngFor="let report of savedReports" (click)="runReport(report.id)">
+          <div class="report-card-header">
+            <div class="report-visual-icon">
+              <span *ngIf="report.visualType === 'BAR'">📊</span>
+              <span *ngIf="report.visualType === 'PIE'">🍕</span>
+              <span *ngIf="report.visualType === 'LINE'">📈</span>
+              <span *ngIf="report.visualType === 'RADAR'">🕸️</span>
+              <span *ngIf="report.visualType === 'METRIC_GRID'">🔢</span>
+            </div>
+            <div class="report-actions">
+              <button class="btn-icon" (click)="$event.stopPropagation(); deleteReport(report.id)">🗑️</button>
+            </div>
+          </div>
+          <div class="report-info">
+            <h4 class="report-name">{{ report.name }}</h4>
+            <p class="report-desc">{{ report.description }}</p>
+          </div>
+          <div class="report-meta">
+            <span>📅 {{ report.querySpec.groupBy || 'Static' }}</span>
+            <span>🧩 {{ report.querySpec.trackers.length }} Trackers</span>
+          </div>
+          <button class="btn-report-run">Execute Intelligence →</button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="home-empty animate-fade-up" *ngIf="savedReports.length === 0">
+        <div class="empty-emoji">📉</div>
+        <h2>No AI Reports Yet</h2>
+        <p>Use the "Architect New Report" wizard to have AI design deep insights based on your trackers.</p>
+      </div>
+    </ng-container>
   </div>
 
 
@@ -895,6 +954,95 @@
           {{ successData?.isReasoning ? 'Got it' : 'Explore Tracker →' }}
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ════ REPORT ARCHITECT WIZARD ════ -->
+  <div class="modal-overlay" *ngIf="reportArchitectMode" (click)="reportArchitectMode = false">
+    <div class="modal architect-wizard animate-fade-scale" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🪄 Elite Report Architect</h3>
+        <p class="modal-desc">Pick your trackers and let our AI design the perfect multi-tracker intelligence report.</p>
+      </div>
+
+      <div class="architect-body">
+        <label>1. Select Trackers to Analyze</label>
+        <div class="tracker-select-grid">
+          <div class="tracker-select-item" 
+               *ngFor="let t of trackers" 
+               [class.selected]="architectSelectedTrackers.includes(t.id!)"
+               (click)="toggleArchitectTrackerSelection(t.id!)">
+            <span class="tracker-emoji">{{ t.icon || '📊' }}</span>
+            <span class="tracker-name">{{ t.name }}</span>
+            <span class="check-icon" *ngIf="architectSelectedTrackers.includes(t.id!)">✅</span>
+          </div>
+        </div>
+
+        <div class="architect-actions" style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+          <button class="btn-architect-glow" 
+                  [disabled]="architectSelectedTrackers.length === 0 || isArchitecting"
+                  (click)="generateReportSuggestions()">
+            <span *ngIf="!isArchitecting">🚀 Design Intelligence Reports</span>
+            <span *ngIf="isArchitecting" class="btn-spinner"></span>
+            <span *ngIf="isArchitecting"> AI is Architecting...</span>
+          </button>
+        </div>
+
+        <!-- Suggestions List -->
+        <div class="architect-suggestions animate-fade-up" *ngIf="architectSuggestions.length">
+          <label style="display: block; width: 100%; margin-bottom: 1rem;">2. Choose an AI Design</label>
+          <div class="suggestion-card" *ngFor="let s of architectSuggestions" (click)="saveArchitectReport(s)">
+            <div class="suggestion-type-badge">{{ s.visualType }}</div>
+            <h4 class="suggestion-name">{{ s.name }}</h4>
+            <p class="suggestion-desc">{{ s.description }}</p>
+            <div class="suggestion-meta">
+              <span *ngFor="let insight of s.config.suggestedInsights">💡 {{ insight }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ EXECUTIVE REPORT DASHBOARD OVERLAY ════ -->
+  <div class="report-detail-overlay animate-fade-in" *ngIf="activeReportId && !isReportLoading" (click)="closeReportDetail()">
+    <div class="report-detail-panel" (click)="$event.stopPropagation()" id="reportDetailArea">
+      <div class="report-detail-header">
+        <div class="rdh-left">
+          <span class="rdh-badge">EXECUTIVE INTELLIGENCE</span>
+          <h2>{{ activeReportResult?.config?.title || 'Advanced Intelligence Report' }}</h2>
+          <p class="text-muted">{{ activeReportResult?.config?.subtitle || 'Live data architecture and behavioral analysis' }}</p>
+        </div>
+        <div class="rdh-actions">
+          <button class="btn-icon-pill" (click)="exportToPDF('reportDetailArea', 'Intelligence_Report')">📥 Export PDF</button>
+          <button class="btn-close-circle" (click)="closeReportDetail()">✕</button>
+        </div>
+      </div>
+
+      <div class="report-detail-body">
+        <!-- Main Chart -->
+        <div class="report-chart-container glass-premium" style="min-height: 400px;">
+          <div id="report-main-chart"></div>
+        </div>
+
+        <!-- Dynamic Insights / Stats -->
+        <div class="report-stats">
+          <div class="stat-glow-card" *ngFor="let insight of activeReportResult?.config?.suggestedInsights">
+            <div class="stat-glow-label">AI Insight</div>
+            <div class="stat-glow-value" style="font-size: 1rem; line-height: 1.5;">{{ insight }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Loading -->
+  <div class="modal-overlay" *ngIf="isReportLoading">
+    <div class="mini-boot-loader">
+      <div class="concentric-ring"></div>
+      <div class="concentric-ring"></div>
+      <div class="boot-logo-sm">AI</div>
+      <p class="boot-status-sm">Executing Intelligence Engine...</p>
     </div>
   </div>
 </div>

@@ -4,7 +4,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight } from '../omni-tracker.service';
+import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight, AiReport } from '../omni-tracker.service';
 import { OmniApp } from '../omni-app.model';
 
 declare var Plaid: any;
@@ -66,6 +66,17 @@ export class OmniDashboardComponent implements OnInit {
   isDeepInsightOpen = false;
   isDeepInsightLoading = false;
   
+  // Intelligence Reporting State
+  appActiveTab: 'TRACKERS' | 'REPORTS' = 'TRACKERS';
+  savedReports: AiReport[] = [];
+  reportArchitectMode = false;
+  isArchitecting = false;
+  architectSelectedTrackers: number[] = [];
+  architectSuggestions: any[] = [];
+  activeReportId: number | null = null;
+  activeReportResult: any = null;
+  isReportLoading = false;
+
   // AI Chat State
   isChatOpen = false;
   isChatLoading = false;
@@ -996,6 +1007,133 @@ export class OmniDashboardComponent implements OnInit {
         chatBody.scrollTop = chatBody.scrollHeight;
       }
     }, 50);
+  }
+
+  // --- Intelligence Reporting ---
+
+  selectAppTab(tab: 'TRACKERS' | 'REPORTS') {
+    this.appActiveTab = tab;
+    if (tab === 'REPORTS') this.loadReports();
+  }
+
+  loadReports() {
+    if (!this.selectedApp?.id) return;
+    this.omniService.getReportsByApp(this.selectedApp.id).subscribe(reports => {
+      this.savedReports = reports;
+    });
+  }
+
+  openReportArchitect() {
+    this.reportArchitectMode = true;
+    this.architectSelectedTrackers = [];
+    this.architectSuggestions = [];
+  }
+
+  toggleArchitectTrackerSelection(id: number) {
+    const idx = this.architectSelectedTrackers.indexOf(id);
+    if (idx > -1) this.architectSelectedTrackers.splice(idx, 1);
+    else this.architectSelectedTrackers.push(id);
+  }
+
+  generateReportSuggestions() {
+    if (this.architectSelectedTrackers.length === 0 || !this.selectedApp?.id) return;
+    this.isArchitecting = true;
+    this.omniService.suggestReports(this.selectedApp.id, this.architectSelectedTrackers).subscribe({
+      next: (suggestions) => {
+        this.architectSuggestions = suggestions;
+        this.isArchitecting = false;
+      },
+      error: () => this.isArchitecting = false
+    });
+  }
+
+  saveArchitectReport(suggestion: any) {
+    if (!this.selectedApp?.id) return;
+    const report: AiReport = {
+      name: suggestion.name,
+      description: suggestion.description,
+      appId: this.selectedApp.id,
+      visualType: suggestion.visualType,
+      querySpec: suggestion.querySpec,
+      config: suggestion.config
+    };
+    this.omniService.saveReport(report).subscribe(() => {
+      this.reportArchitectMode = false;
+      this.loadReports();
+    });
+  }
+
+  runReport(id: number | undefined) {
+    if (!id) return;
+    this.isReportLoading = true;
+    this.activeReportId = id;
+    this.activeReportResult = null;
+    this.omniService.executeReport(id).subscribe({
+      next: (result) => {
+        this.activeReportResult = result;
+        this.isReportLoading = false;
+        setTimeout(() => this.initializeReportChart(), 100);
+      },
+      error: () => this.isReportLoading = false
+    });
+  }
+
+  closeReportDetail() {
+    this.activeReportId = null;
+    this.activeReportResult = null;
+  }
+
+  deleteReport(id: number | undefined) {
+    if (!id) return;
+    if (confirm('Delete this report?')) {
+      this.omniService.deleteReport(id).subscribe(() => this.loadReports());
+    }
+  }
+
+  private initializeReportChart() {
+    if (!this.activeReportResult || !this.activeReportResult.labels) return;
+    
+    // ApexCharts logic for the report view
+    const ApexCharts = (window as any).ApexCharts;
+    if (!ApexCharts) return;
+
+    const chartEl = document.querySelector('#report-main-chart');
+    if (!chartEl) {
+      setTimeout(() => this.initializeReportChart(), 200);
+      return;
+    }
+
+    const type = this.activeReportResult.visualType.toLowerCase();
+    const config = this.activeReportResult.config || {};
+
+    const options = {
+      series: this.activeReportResult.series,
+      chart: {
+        type: type === 'metric_grid' ? 'bar' : type,
+        height: 350,
+        background: 'transparent',
+        foreColor: '#94a3b8',
+        toolbar: { show: false }
+      },
+      colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+      plotOptions: {
+        bar: { borderRadius: 10, columnWidth: '60%' }
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 3 },
+      xaxis: {
+        categories: this.activeReportResult.labels,
+        title: { text: config.xAxis }
+      },
+      yaxis: {
+        title: { text: config.yAxis }
+      },
+      grid: { borderColor: 'rgba(255,255,255,0.05)' },
+      theme: { mode: 'dark' }
+    };
+
+    const chart = new ApexCharts(chartEl, options);
+    chart.render();
   }
 
   async exportToPDF(elementId: string, filename: string) {

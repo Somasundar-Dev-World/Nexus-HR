@@ -35,11 +35,43 @@ export interface SmartInsight {
   reasoning?: string;
 }
 
+export interface AiReport {
+  id?: number;
+  name: string;
+  description?: string;
+  appId: number;
+  visualType: 'BAR' | 'PIE' | 'LINE' | 'RADAR' | 'METRIC_GRID';
+  querySpec: any;
+  config?: any;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OmniTrackerService {
   private apiUrl = `${environment.apiUrl}/omni`;
+  private reportUrl = `${environment.apiUrl}/reports`;
 
   constructor(private http: HttpClient) { }
+
+  // --- Reports ---
+  suggestReports(appId: number, trackerIds: number[]): Observable<any[]> {
+    return this.http.post<any[]>(`${this.reportUrl}/suggest`, { appId, trackerIds });
+  }
+
+  getReportsByApp(appId: number): Observable<AiReport[]> {
+    return this.http.get<AiReport[]>(`${this.reportUrl}/app/${appId}`);
+  }
+
+  saveReport(report: AiReport): Observable<AiReport> {
+    return this.http.post<AiReport>(`${this.reportUrl}`, report);
+  }
+
+  executeReport(id: number): Observable<any> {
+    return this.http.get<any>(`${this.reportUrl}/${id}/execute`);
+  }
+
+  deleteReport(id: number): Observable<any> {
+    return this.http.delete(`${this.reportUrl}/${id}`);
+  }
 
   // --- Apps ---
   getApps(): Observable<OmniApp[]> {

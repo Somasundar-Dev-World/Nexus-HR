@@ -1132,45 +1132,4 @@
     </div>
   </div>
 
-  <!-- ════ EXECUTIVE REPORT DASHBOARD OVERLAY ════ -->
-  <div class="report-detail-overlay animate-fade-in" *ngIf="activeReportId && !isReportLoading" (click)="closeReportDetail()">
-    <div class="report-detail-panel" (click)="$event.stopPropagation()" id="reportDetailArea">
-      <div class="report-detail-header">
-        <div class="rdh-left">
-          <span class="rdh-badge">EXECUTIVE INTELLIGENCE</span>
-          <h2>{{ activeReportResult?.config?.title || 'Advanced Intelligence Report' }}</h2>
-          <p class="text-muted">{{ activeReportResult?.config?.subtitle || 'Live data architecture and behavioral analysis' }}</p>
-        </div>
-        <div class="rdh-actions">
-          <button class="btn-icon-pill" (click)="exportToPDF('reportDetailArea', 'Intelligence_Report')">📥 Export PDF</button>
-          <button class="btn-close-circle" (click)="closeReportDetail()">✕</button>
-        </div>
-      </div>
-
-      <div class="report-detail-body">
-        <!-- Main Chart -->
-        <div class="report-chart-container glass-premium" style="min-height: 400px;">
-          <div id="report-main-chart"></div>
-        </div>
-
-        <!-- Dynamic Insights / Stats -->
-        <div class="report-stats">
-          <div class="stat-glow-card" *ngFor="let insight of activeReportResult?.config?.suggestedInsights">
-            <div class="stat-glow-label">AI Insight</div>
-            <div class="stat-glow-value" style="font-size: 1rem; line-height: 1.5;">{{ insight }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Report Loading -->
-  <div class="modal-overlay" *ngIf="isReportLoading">
-    <div class="mini-boot-loader">
-      <div class="concentric-ring"></div>
-      <div class="concentric-ring"></div>
-      <div class="boot-logo-sm">AI</div>
-      <p class="boot-status-sm">Executing Intelligence Engine...</p>
-    </div>
-  </div>
 </div>

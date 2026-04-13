@@ -1131,36 +1131,64 @@ export class OmniDashboardComponent implements OnInit {
     const config = this.activeReportResult.config || {};
     const isPie = type === 'pie' || type === 'donut';
     const isRadar = type === 'radar';
+    const labelCount = this.activeReportResult.labels?.length || 0;
 
     // PIE charts need a flat number array; others need the nested series
     const seriesData = isPie
       ? (this.activeReportResult.series[0]?.data || [])
       : this.activeReportResult.series;
 
+    // Dynamic height for large lists (like 66 instruments)
+    let dynamicHeight = 420;
+    if (labelCount > 15 && !isPie && !isRadar) {
+      dynamicHeight = Math.max(420, labelCount * 30 + 100);
+    }
+
     const options: any = {
       series: seriesData,
       chart: {
         type: isPie ? 'pie' : (isRadar ? 'radar' : (type === 'metric_grid' ? 'bar' : type)),
-        height: 420,
+        height: dynamicHeight,
         background: 'transparent',
         foreColor: '#94a3b8',
-        toolbar: { show: false }
+        toolbar: { show: true, tools: { download: true, selection: false, zoom: false, zoomin: false, zoomout: false, pan: false, reset: false } },
+        animations: { enabled: true, easing: 'easeinout', speed: 800 }
       },
       colors: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'],
       plotOptions: {
-        bar: { borderRadius: 8, columnWidth: '55%' }
+        bar: { 
+          borderRadius: 4, 
+          columnWidth: '55%',
+          horizontal: labelCount > 15,
+          dataLabels: { position: 'top' }
+        }
       },
-      dataLabels: { enabled: isPie },
+      dataLabels: { 
+        enabled: isPie || (labelCount < 30 && !isRadar),
+        formatter: (val: any) => val.toLocaleString(),
+        style: { fontSize: '10px', colors: ['#fff'] }
+      },
       stroke: { curve: 'smooth', width: isPie ? 0 : 3 },
       labels: isPie ? this.activeReportResult.labels : undefined,
       xaxis: isPie ? undefined : {
         categories: this.activeReportResult.labels,
         title: { text: config.xAxis, style: { color: '#64748b' } },
-        labels: { style: { colors: '#64748b', fontSize: '11px' } }
+        labels: { 
+          style: { colors: '#64748b', fontSize: '11px' },
+          rotate: -45,
+          rotateAlways: labelCount > 10 && labelCount <= 15
+        }
       },
       yaxis: isPie ? undefined : {
         title: { text: config.yAxis, style: { color: '#64748b' } },
-        labels: { style: { colors: '#64748b' } }
+        labels: { 
+          style: { colors: '#64748b' },
+          formatter: (val: any) => val.toLocaleString()
+        }
+      },
+      tooltip: {
+        theme: 'dark',
+        y: { formatter: (val: any) => '$' + val.toLocaleString() }
       },
       legend: {
         position: isPie ? 'bottom' : 'top',

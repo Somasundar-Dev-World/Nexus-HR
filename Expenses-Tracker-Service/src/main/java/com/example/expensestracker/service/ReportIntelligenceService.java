@@ -149,11 +149,11 @@ public class ReportIntelligenceService {
             
             if ("SUM".equals(aggType)) {
                 result = groupEntries.stream()
-                    .mapToDouble(e -> Double.parseDouble(e.getFieldValues().getOrDefault(aggField, 0).toString()))
+                    .mapToDouble(e -> parseNumericValue(e.getFieldValues().getOrDefault(aggField, 0).toString()))
                     .sum();
             } else if ("AVG".equals(aggType)) {
                 result = groupEntries.stream()
-                    .mapToDouble(e -> Double.parseDouble(e.getFieldValues().getOrDefault(aggField, 0).toString()))
+                    .mapToDouble(e -> parseNumericValue(e.getFieldValues().getOrDefault(aggField, 0).toString()))
                     .average().orElse(0);
             } else if ("COUNT".equals(aggType)) {
                 result = groupEntries.size();
@@ -161,12 +161,32 @@ public class ReportIntelligenceService {
             values.add(result);
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("labels", labels);
-        result.put("series", List.of(Map.of("name", report.getName(), "data", values)));
-        result.put("config", report.getConfig());
-        result.put("visualType", report.getVisualType());
-        
         return result;
+    }
+
+    private double parseNumericValue(String val) {
+        if (val == null || val.trim().isEmpty()) return 0;
+        
+        String clean = val.trim();
+        boolean isNegative = false;
+        
+        // Handle accounting parentheses: ($8.80) -> -8.80
+        if (clean.startsWith("(") && clean.endsWith(")")) {
+            isNegative = true;
+            clean = clean.substring(1, clean.length() - 1);
+        }
+        
+        // Strip common non-numeric chars but keep the decimal point and minus sign
+        clean = clean.replaceAll("[^0-9.\\-]", "");
+        
+        if (clean.isEmpty() || clean.equals(".") || clean.equals("-")) return 0;
+        
+        try {
+            double value = Double.parseDouble(clean);
+            return isNegative ? -Math.abs(value) : value;
+        } catch (NumberFormatException e) {
+            System.err.println("Failed to parse numeric value: " + val + " (cleansed to: " + clean + ")");
+            return 0;
+        }
     }
 }

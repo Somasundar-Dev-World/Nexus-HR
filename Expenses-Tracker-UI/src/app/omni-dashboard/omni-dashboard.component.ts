@@ -1195,8 +1195,7 @@ export class OmniDashboardComponent implements OnInit {
         labels: { colors: '#94a3b8' }
       },
       grid: { borderColor: 'rgba(255,255,255,0.05)' },
-      theme: { mode: 'dark' },
-      tooltip: { theme: 'dark' }
+      theme: { mode: 'dark' }
     };
 
     const chart = new ApexCharts(chartEl, options);

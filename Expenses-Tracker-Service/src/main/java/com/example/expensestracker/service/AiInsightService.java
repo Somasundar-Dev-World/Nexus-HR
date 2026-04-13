@@ -243,6 +243,49 @@ public class AiInsightService {
         }
     }
 
+    public String callAiRaw(Long appId, Long userId, String systemPrompt, String userPrompt) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return "ERROR: User not found";
+
+        String provider = user.getAiProvider() != null ? user.getAiProvider() : "GOOGLE";
+        String model = user.getAiModel() != null ? user.getAiModel() : "gemini-2.0-flash";
+
+        String activeApiKey = null;
+        if ("GOOGLE".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getGeminiApiKey() != null && !user.getGeminiApiKey().isEmpty()) ? user.getGeminiApiKey() : defaultGeminiKey;
+        } else if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getAnthropicApiKey() != null && !user.getAnthropicApiKey().isEmpty()) ? user.getAnthropicApiKey() : defaultAnthropicKey;
+        } else if ("OPENAI".equalsIgnoreCase(provider)) {
+            activeApiKey = (user.getOpenaiApiKey() != null && !user.getOpenaiApiKey().isEmpty()) ? user.getOpenaiApiKey() : defaultOpenaiKey;
+        }
+
+        if (activeApiKey == null || activeApiKey.isEmpty()) {
+            throw new RuntimeException("No active API Key found for " + provider);
+        }
+
+        String rawResponse = "";
+        try {
+            if ("ANTHROPIC".equalsIgnoreCase(provider)) {
+                rawResponse = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            } else if ("OPENAI".equalsIgnoreCase(provider)) {
+                rawResponse = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            } else {
+                rawResponse = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
+            }
+        } catch (HttpStatusCodeException e) {
+            System.err.println("AI Generation Failed (HTTP " + e.getStatusCode() + "): " + e.getResponseBodyAsString());
+            if (e.getStatusCode() == org.springframework.http.HttpStatus.TOO_MANY_REQUESTS) {
+                return "ERROR: AI Quota Exceeded. Please wait 60s or switch API keys.";
+            } else {
+                return "ERROR: AI Service Error (" + e.getStatusCode() + ")";
+            }
+        } catch (Exception e) {
+            System.err.println("AI Generation Failed: " + e.getMessage());
+            return "ERROR: AI Generation failed: " + e.getMessage();
+        }
+        return rawResponse;
+    }
+
     public Map<String, String> chatWithApp(Long appId, Long userId, com.example.expensestracker.dto.ChatRequest request) {
         TrackerApp app = trackerAppRepository.findById(appId).orElse(null);
         if (app == null || !app.getUserId().equals(userId)) return null;
@@ -294,27 +337,7 @@ public class AiInsightService {
         userPromptBuilder.append("ASSISTANT: ");
 
         String userPrompt = userPromptBuilder.toString();
-        String rawResponse = "";
-
-        try {
-            if ("ANTHROPIC".equalsIgnoreCase(provider)) {
-                rawResponse = callClaudeRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-            } else if ("OPENAI".equalsIgnoreCase(provider)) {
-                rawResponse = callOpenAiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-            } else {
-                rawResponse = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
-            }
-        } catch (HttpStatusCodeException e) {
-            System.err.println("Chat Generation Failed (HTTP " + e.getStatusCode() + "): " + e.getResponseBodyAsString());
-            if (e.getStatusCode() == org.springframework.http.HttpStatus.TOO_MANY_REQUESTS) {
-                rawResponse = "ERROR: AI Quota Exceeded. Please wait 60s or switch API keys.";
-            } else {
-                rawResponse = "ERROR: AI Service Error (" + e.getStatusCode() + ")";
-            }
-        } catch (Exception e) {
-            System.err.println("Chat Generation Failed: " + e.getMessage());
-            rawResponse = "ERROR: AI Chat failed: " + e.getMessage();
-        }
+        String rawResponse = callAiRaw(appId, userId, systemPrompt, userPrompt);
 
         Map<String, String> result = new java.util.HashMap<>();
         result.put("reply", rawResponse);

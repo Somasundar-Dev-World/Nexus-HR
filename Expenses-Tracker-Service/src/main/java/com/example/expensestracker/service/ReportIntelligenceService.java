@@ -71,12 +71,7 @@ public class ReportIntelligenceService {
 
         String userPrompt = "SCHEMA CONTEXT:\n" + schemaContext.toString();
         
-        // Wrap for chatWithApp
-        com.example.expensestracker.dto.ChatRequest request = new com.example.expensestracker.dto.ChatRequest();
-        request.setMessage(systemPrompt + "\n\n" + userPrompt);
-        
-        Map<String, String> aiRes = aiInsightService.chatWithApp(appId, userId, request);
-        String rawJson = aiRes.get("reply");
+        String rawJson = aiInsightService.callAiRaw(appId, userId, systemPrompt, userPrompt);
         
         if (rawJson != null && rawJson.startsWith("ERROR:")) {
             throw new RuntimeException(rawJson.substring(6).trim());
@@ -86,15 +81,19 @@ public class ReportIntelligenceService {
     }
 
     private String cleanJson(String aiText) {
+        if (aiText == null) return "[]";
+        
+        // Defensive: Strip chat protocol tags if they leaked through
+        aiText = aiText.replaceAll("\\[SUMMARY\\]", "");
+        aiText = aiText.replaceAll("\\[TABLE\\]", "");
+        aiText = aiText.replaceAll("\\[CHART.*?\\]", "");
+        aiText = aiText.replaceAll("\\[INSIGHT\\]", "");
+        
         if (aiText.contains("```json")) {
             aiText = aiText.substring(aiText.indexOf("```json") + 7, aiText.lastIndexOf("```")).trim();
         } else if (aiText.contains("```")) {
             aiText = aiText.substring(aiText.indexOf("```") + 3, aiText.lastIndexOf("```")).trim();
         } else {
-            // First, strip [SUMMARY] tags if they exist at the start to avoid finding the wrong '['
-            if (aiText.trim().startsWith("[SUMMARY]")) {
-                aiText = aiText.substring(aiText.indexOf("[SUMMARY]") + 9).trim();
-            }
             // Fallback: Find the first '[' and last ']' to extract the JSON array from surrounding text
             int start = aiText.indexOf("[");
             int end = aiText.lastIndexOf("]");

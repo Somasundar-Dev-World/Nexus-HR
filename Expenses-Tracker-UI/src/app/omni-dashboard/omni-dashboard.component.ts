@@ -25,8 +25,8 @@ export class OmniDashboardComponent implements OnInit {
   aiInsights: SmartInsight[] = [];
   loadingInsights = false;
 
-  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports
-  viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' | 'INTELLIGENCE_REPORTS' = 'APP_GRID';
+  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports, 'REPORT_VIEW' is rendered chart
+  viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' | 'INTELLIGENCE_REPORTS' | 'REPORT_VIEW' = 'APP_GRID';
 
   appStats = {
     archetype: 'GENERIC' as 'FINANCE' | 'HEALTH' | 'GENERIC',
@@ -75,6 +75,7 @@ export class OmniDashboardComponent implements OnInit {
   reportNameInput: string = '';
   activeReportId: number | null = null;
   activeReportResult: any = null;
+  activeReportMeta: AiReport | null = null;
   isReportLoading = false;
 
   // AI Chat State
@@ -1069,11 +1070,13 @@ export class OmniDashboardComponent implements OnInit {
     this.isReportLoading = true;
     this.activeReportId = id;
     this.activeReportResult = null;
+    this.activeReportMeta = this.savedReports.find(r => r.id === id) || null;
     this.omniService.executeReport(id).subscribe({
       next: (result) => {
         this.activeReportResult = result;
         this.isReportLoading = false;
-        setTimeout(() => this.initializeReportChart(), 100);
+        this.viewMode = 'REPORT_VIEW';
+        setTimeout(() => this.initializeReportChart(), 300);
       },
       error: (err) => {
         console.error(err);
@@ -1086,6 +1089,8 @@ export class OmniDashboardComponent implements OnInit {
   closeReportDetail() {
     this.activeReportId = null;
     this.activeReportResult = null;
+    this.activeReportMeta = null;
+    this.viewMode = 'INTELLIGENCE_REPORTS';
   }
 
   deleteReport(id: number | undefined) {
@@ -1098,7 +1103,6 @@ export class OmniDashboardComponent implements OnInit {
   private initializeReportChart() {
     if (!this.activeReportResult || !this.activeReportResult.labels) return;
     
-    // ApexCharts logic for the report view
     const ApexCharts = (window as any).ApexCharts;
     if (!ApexCharts) return;
 
@@ -1108,36 +1112,57 @@ export class OmniDashboardComponent implements OnInit {
       return;
     }
 
-    const type = this.activeReportResult.visualType.toLowerCase();
-    const config = this.activeReportResult.config || {};
+    // Destroy any previous chart instance
+    if ((chartEl as any).__apexcharts) {
+      (chartEl as any).__apexcharts.destroy();
+    }
 
-    const options = {
-      series: this.activeReportResult.series,
+    const type = (this.activeReportResult.visualType || 'bar').toLowerCase();
+    const config = this.activeReportResult.config || {};
+    const isPie = type === 'pie' || type === 'donut';
+    const isRadar = type === 'radar';
+
+    // PIE charts need a flat number array; others need the nested series
+    const seriesData = isPie
+      ? (this.activeReportResult.series[0]?.data || [])
+      : this.activeReportResult.series;
+
+    const options: any = {
+      series: seriesData,
       chart: {
-        type: type === 'metric_grid' ? 'bar' : type,
-        height: 350,
+        type: isPie ? 'pie' : (isRadar ? 'radar' : (type === 'metric_grid' ? 'bar' : type)),
+        height: 420,
         background: 'transparent',
         foreColor: '#94a3b8',
         toolbar: { show: false }
       },
-      colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+      colors: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'],
       plotOptions: {
-        bar: { borderRadius: 10, columnWidth: '60%' }
+        bar: { borderRadius: 8, columnWidth: '55%' }
       },
-      dataLabels: { enabled: false },
-      stroke: { curve: 'smooth', width: 3 },
-      xaxis: {
+      dataLabels: { enabled: isPie },
+      stroke: { curve: 'smooth', width: isPie ? 0 : 3 },
+      labels: isPie ? this.activeReportResult.labels : undefined,
+      xaxis: isPie ? undefined : {
         categories: this.activeReportResult.labels,
-        title: { text: config.xAxis }
+        title: { text: config.xAxis, style: { color: '#64748b' } },
+        labels: { style: { colors: '#64748b', fontSize: '11px' } }
       },
-      yaxis: {
-        title: { text: config.yAxis }
+      yaxis: isPie ? undefined : {
+        title: { text: config.yAxis, style: { color: '#64748b' } },
+        labels: { style: { colors: '#64748b' } }
+      },
+      legend: {
+        position: isPie ? 'bottom' : 'top',
+        labels: { colors: '#94a3b8' }
       },
       grid: { borderColor: 'rgba(255,255,255,0.05)' },
-      theme: { mode: 'dark' }
+      theme: { mode: 'dark' },
+      tooltip: { theme: 'dark' }
     };
 
     const chart = new ApexCharts(chartEl, options);
+    (chartEl as any).__apexcharts = chart;
     chart.render();
   }
 

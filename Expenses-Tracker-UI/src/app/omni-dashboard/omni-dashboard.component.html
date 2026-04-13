@@ -257,6 +257,82 @@
 
 
   <!-- ════════════════════════════════════════════════════════
+       VIEW — REPORT DETAIL (Full Chart Page)
+  ════════════════════════════════════════════════════════ -->
+  <div class="home-screen report-view-page animate-slide-in" *ngIf="viewMode === 'REPORT_VIEW'" id="report-detail-export">
+
+    <!-- Header -->
+    <div class="home-header report-view-header">
+      <button class="back-btn-pill" (click)="closeReportDetail()">
+        <span class="back-arrow">←</span> Intelligence Hub
+      </button>
+      <div class="report-view-title-row">
+        <div class="report-view-icon">
+          <span *ngIf="activeReportResult?.visualType === 'BAR'">📊</span>
+          <span *ngIf="activeReportResult?.visualType === 'PIE'">💹</span>
+          <span *ngIf="activeReportResult?.visualType === 'LINE'">📈</span>
+          <span *ngIf="activeReportResult?.visualType === 'RADAR'">🕸️</span>
+          <span *ngIf="activeReportResult?.visualType === 'METRIC_GRID'">🔢</span>
+        </div>
+        <div>
+          <h1 class="report-view-name">{{ activeReportMeta?.name || 'Intelligence Report' }}</h1>
+          <p class="report-view-desc">{{ activeReportMeta?.description || 'Live analytical synthesis from cross-tracker data.' }}</p>
+        </div>
+        <button class="export-ignore btn-export-pdf" (click)="exportToPDF('report-detail-export', activeReportMeta?.name || 'Report')">
+          📄 Export PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="report-loading-state" *ngIf="isReportLoading">
+      <div class="concentric-ring"></div>
+      <p>Synthesizing intelligence...</p>
+    </div>
+
+    <!-- Chart Area -->
+    <div class="report-chart-shell" *ngIf="!isReportLoading && activeReportResult">
+      <div class="report-chart-card">
+        <div id="report-main-chart"></div>
+      </div>
+
+      <!-- Insights Panel -->
+      <div class="report-insights-panel" *ngIf="activeReportResult?.config?.suggestedInsights?.length">
+        <div class="col-header">
+          <h3>🧠 AI Insights</h3>
+        </div>
+        <ul class="report-insight-list">
+          <li *ngFor="let insight of activeReportResult?.config?.suggestedInsights">
+            <span class="insight-dot">✦</span> {{ insight }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Data Summary Table -->
+      <div class="report-data-table" *ngIf="activeReportResult?.labels?.length">
+        <div class="col-header"><h3>📋 Data Breakdown</h3></div>
+        <div class="data-table-scroll">
+          <table class="intel-table">
+            <thead>
+              <tr>
+                <th>{{ activeReportResult?.config?.xAxis || 'Category' }}</th>
+                <th>{{ activeReportResult?.config?.yAxis || 'Value' }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let label of activeReportResult?.labels; let i = index">
+                <td>{{ label }}</td>
+                <td class="intel-table-val">{{ activeReportResult?.series[0]?.data[i] | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
        VIEW — TRACKER GRID (Inside an App) -- KEEP AS FALLBACK OR LEGACY
   ════════════════════════════════════════════════════════ -->
   <div class="home-screen" *ngIf="viewMode === 'TRACKER_GRID' && selectedApp">

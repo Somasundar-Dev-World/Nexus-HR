@@ -1165,6 +1165,7 @@ export class OmniDashboardComponent implements OnInit {
         bar: { 
           borderRadius: 4, 
           columnWidth: '60%',
+          distributed: labelCount < 40, // Multi-color for small/medium sets
           horizontal: isHorizontal,
           dataLabels: { position: isHorizontal ? 'right' : 'top' }
         }
@@ -1175,6 +1176,7 @@ export class OmniDashboardComponent implements OnInit {
         style: { fontSize: '10px', colors: ['#fff'] }
       },
       stroke: { curve: 'smooth', width: isPie ? 0 : 3 },
+      labels: isPie ? this.activeReportResult.labels : undefined,
       xaxis: isPie ? undefined : {
         type: 'category',
         categories: this.activeReportResult.labels,

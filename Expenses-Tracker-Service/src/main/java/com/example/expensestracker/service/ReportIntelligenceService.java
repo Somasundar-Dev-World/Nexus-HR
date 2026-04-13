@@ -161,7 +161,13 @@ public class ReportIntelligenceService {
             values.add(result);
         }
 
-        return result;
+        Map<String, Object> finalResult = new HashMap<>();
+        finalResult.put("labels", labels);
+        finalResult.put("series", List.of(Map.of("name", report.getName(), "data", values)));
+        finalResult.put("config", report.getConfig());
+        finalResult.put("visualType", report.getVisualType());
+        
+        return finalResult;
     }
 
     private double parseNumericValue(String val) {

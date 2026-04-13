@@ -182,9 +182,19 @@ public class ReportIntelligenceService {
             clean = clean.substring(1, clean.length() - 1);
         }
         
+        // Safety Check: If it looks like a Date or Timestamp, don't parse it as a number
+        // e.g. "2024-05-10" or "12:30:45"
+        if (clean.contains("-") && clean.contains(":") || (clean.split("-").length > 2)) {
+            return 0;
+        }
+
         // Strip common non-numeric chars but keep the decimal point and minus sign
         clean = clean.replaceAll("[^0-9.\\-]", "");
         
+        // Final sanity check: if it's too long to be a normal transaction (e.g. > 15 digits) 
+        // and doesn't look like scientific notation, it's likely a hallucinated sum or ID.
+        if (clean.length() > 15 && !clean.contains("E")) return 0;
+
         if (clean.isEmpty() || clean.equals(".") || clean.equals("-")) return 0;
         
         try {

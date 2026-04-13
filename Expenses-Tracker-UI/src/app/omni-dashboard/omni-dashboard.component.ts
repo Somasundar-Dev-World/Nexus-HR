@@ -1082,11 +1082,12 @@ export class OmniDashboardComponent implements OnInit {
     this.activeReportResult = null;
     this.activeReportMeta = this.savedReports.find(r => r.id === id) || null;
     this.omniService.executeReport(id).subscribe({
-      next: (result) => {
-        this.activeReportResult = result;
+      next: (res) => {
+        // Apply Global Sanity Shield to the result before saving it
+        this.activeReportResult = this.applySanityShield(res);
         this.isReportLoading = false;
-        this.viewMode = 'REPORT_VIEW';
-        setTimeout(() => this.initializeReportChart(), 300);
+        // Small delay for DOM to render the chart ID
+        setTimeout(() => this.initializeReportChart(), 100);
       },
       error: (err) => {
         console.error(err);
@@ -1101,6 +1102,31 @@ export class OmniDashboardComponent implements OnInit {
     this.activeReportResult = null;
     this.activeReportMeta = null;
     this.viewMode = 'INTELLIGENCE_REPORTS';
+  }
+
+  private applySanityShield(res: any): any {
+    if (!res || !res.labels) return res;
+    
+    const rawLabels = res.labels || [];
+    const rawData = (res.series[0]?.data || []).map((v: any) => parseFloat(v) || 0);
+    
+    const filteredLabels: string[] = [];
+    const filteredData: number[] = [];
+
+    rawData.forEach((val: number, idx: number) => {
+      const label = rawLabels[idx];
+      // Skip null labels and insane outliers (> 100 Billion)
+      if (label && label !== 'null' && label !== 'undefined' && Math.abs(val) < 100000000000) {
+        filteredLabels.push(label);
+        filteredData.push(val);
+      }
+    });
+
+    return {
+      ...res,
+      labels: filteredLabels,
+      series: [{ ...res.series[0], data: filteredData }]
+    };
   }
 
   deleteReport(id: number | undefined) {
@@ -1132,23 +1158,18 @@ export class OmniDashboardComponent implements OnInit {
       try { (chartEl as any).__apexcharts.destroy(); } catch(e) {}
     }
 
-    // Clean and Sanity-Filter Data (Filter out 'null' labels and astronomical outliers)
-    const rawLabels = this.activeReportResult.labels || [];
-    const rawData = (this.activeReportResult.series[0]?.data || []).map((v: any) => parseFloat(v) || 0);
-    
-    const filteredLabels: string[] = [];
-    const filteredData: number[] = [];
-    rawData.forEach((val, idx) => {
-      const label = rawLabels[idx];
-      if (label && label !== 'null' && label !== 'undefined' && Math.abs(val) < 100000000000) {
-        filteredLabels.push(label);
-        filteredData.push(val);
-      }
-    });
-
-    const seriesData = isPie ? filteredData : [{ name: this.activeReportResult.series[0]?.name || 'Report', data: filteredData }];
-    const labelCount = filteredLabels.length;
+    const type = (this.activeReportResult.visualType || 'bar').toLowerCase();
+    const config = this.activeReportResult.config || {};
+    const isPie = type === 'pie' || type === 'donut';
+    const isRadar = type === 'radar';
+    const labelCount = this.activeReportResult.labels?.length || 0;
     const isHorizontal = labelCount > 15 && !isPie && !isRadar;
+
+    // Use the already filtered data from activeReportResult
+    const labels = this.activeReportResult.labels;
+    const seriesData = isPie 
+      ? this.activeReportResult.series[0].data 
+      : this.activeReportResult.series;
 
     // Dynamic height scaling (Cap at 1200 for stability)
     let dynamicHeight: any = 420;
@@ -1199,16 +1220,16 @@ export class OmniDashboardComponent implements OnInit {
       dataLabels: { 
         enabled: isPie || (labelCount < 25 && !isRadar),
         formatter: (val: any, opts: any) => {
-          if (isPie) return filteredLabels[opts.seriesIndex];
+          if (isPie && this.activeReportResult.labels) return this.activeReportResult.labels[opts.seriesIndex];
           return val.toLocaleString();
         },
         style: { fontSize: '10px', colors: ['#fff'] }
       },
       stroke: { curve: 'smooth', width: isPie ? 2 : 3, colors: isPie ? ['#1e293b'] : undefined },
-      labels: isPie ? filteredLabels : undefined,
+      labels: isPie ? this.activeReportResult.labels : undefined,
       xaxis: isPie ? undefined : {
         type: 'category',
-        categories: filteredLabels,
+        categories: this.activeReportResult.labels,
         title: { text: config.xAxis, style: { color: '#64748b' } },
         labels: { show: true, style: { colors: '#64748b', fontSize: '11px' } }
       },

@@ -1165,7 +1165,7 @@ export class OmniDashboardComponent implements OnInit {
         bar: { 
           borderRadius: 4, 
           columnWidth: '60%',
-          distributed: labelCount < 40, // Multi-color for small/medium sets
+          distributed: labelCount < 100, // Multi-color for high-density sets
           horizontal: isHorizontal,
           dataLabels: { position: isHorizontal ? 'right' : 'top' }
         }

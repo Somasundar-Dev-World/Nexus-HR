@@ -1132,17 +1132,23 @@ export class OmniDashboardComponent implements OnInit {
       try { (chartEl as any).__apexcharts.destroy(); } catch(e) {}
     }
 
-    const type = (this.activeReportResult.visualType || 'bar').toLowerCase();
-    const config = this.activeReportResult.config || {};
-    const isPie = type === 'pie' || type === 'donut';
-    const isRadar = type === 'radar';
-    const labelCount = this.activeReportResult.labels?.length || 0;
-    const isHorizontal = labelCount > 15 && !isPie && !isRadar;
+    // Clean and Sanity-Filter Data (Filter out 'null' labels and astronomical outliers)
+    const rawLabels = this.activeReportResult.labels || [];
+    const rawData = (this.activeReportResult.series[0]?.data || []).map((v: any) => parseFloat(v) || 0);
+    
+    const filteredLabels: string[] = [];
+    const filteredData: number[] = [];
+    rawData.forEach((val, idx) => {
+      const label = rawLabels[idx];
+      if (label && label !== 'null' && label !== 'undefined' && Math.abs(val) < 100000000000) {
+        filteredLabels.push(label);
+        filteredData.push(val);
+      }
+    });
 
-    // PIE charts need a flat number array; others need the nested series
-    const seriesData = isPie
-      ? (this.activeReportResult.series[0]?.data || []).map((v: any) => parseFloat(v) || 0)
-      : this.activeReportResult.series;
+    const seriesData = isPie ? filteredData : [{ name: this.activeReportResult.series[0]?.name || 'Report', data: filteredData }];
+    const labelCount = filteredLabels.length;
+    const isHorizontal = labelCount > 15 && !isPie && !isRadar;
 
     // Dynamic height scaling (Cap at 1200 for stability)
     let dynamicHeight: any = 420;
@@ -1193,16 +1199,16 @@ export class OmniDashboardComponent implements OnInit {
       dataLabels: { 
         enabled: isPie || (labelCount < 25 && !isRadar),
         formatter: (val: any, opts: any) => {
-          if (isPie) return opts.w.globals.labels[opts.seriesIndex];
+          if (isPie) return filteredLabels[opts.seriesIndex];
           return val.toLocaleString();
         },
         style: { fontSize: '10px', colors: ['#fff'] }
       },
       stroke: { curve: 'smooth', width: isPie ? 2 : 3, colors: isPie ? ['#1e293b'] : undefined },
-      labels: isPie ? this.activeReportResult.labels : undefined,
+      labels: isPie ? filteredLabels : undefined,
       xaxis: isPie ? undefined : {
         type: 'category',
-        categories: this.activeReportResult.labels,
+        categories: filteredLabels,
         title: { text: config.xAxis, style: { color: '#64748b' } },
         labels: { show: true, style: { colors: '#64748b', fontSize: '11px' } }
       },

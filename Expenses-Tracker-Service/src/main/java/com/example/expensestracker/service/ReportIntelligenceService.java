@@ -91,6 +91,10 @@ public class ReportIntelligenceService {
         } else if (aiText.contains("```")) {
             aiText = aiText.substring(aiText.indexOf("```") + 3, aiText.lastIndexOf("```")).trim();
         } else {
+            // First, strip [SUMMARY] tags if they exist at the start to avoid finding the wrong '['
+            if (aiText.trim().startsWith("[SUMMARY]")) {
+                aiText = aiText.substring(aiText.indexOf("[SUMMARY]") + 9).trim();
+            }
             // Fallback: Find the first '[' and last ']' to extract the JSON array from surrounding text
             int start = aiText.indexOf("[");
             int end = aiText.lastIndexOf("]");

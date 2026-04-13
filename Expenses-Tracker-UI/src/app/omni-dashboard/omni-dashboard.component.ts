@@ -1141,7 +1141,7 @@ export class OmniDashboardComponent implements OnInit {
 
     // PIE charts need a flat number array; others need the nested series
     const seriesData = isPie
-      ? (this.activeReportResult.series[0]?.data || [])
+      ? (this.activeReportResult.series[0]?.data || []).map((v: any) => parseFloat(v) || 0)
       : this.activeReportResult.series;
 
     // Dynamic height scaling (Cap at 1200 for stability)
@@ -1153,38 +1153,58 @@ export class OmniDashboardComponent implements OnInit {
     const options: any = {
       series: seriesData,
       chart: {
-        type: isPie ? 'pie' : (isRadar ? 'radar' : (type === 'metric_grid' ? 'bar' : type)),
+        type: isPie ? 'donut' : (isRadar ? 'radar' : (type === 'metric_grid' ? 'bar' : type)),
         height: dynamicHeight,
         background: 'transparent',
         foreColor: '#94a3b8',
         toolbar: { show: true },
         animations: { enabled: true, easing: 'easeinout', speed: 800 }
       },
-      colors: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'],
+      colors: [
+        '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899',
+        '#22c55e', '#a855f7', '#f43f5e', '#3b82f6', '#14b8a6', '#eab308', '#f97316', '#d946ef'
+      ],
       plotOptions: {
         bar: { 
           borderRadius: 4, 
           columnWidth: '60%',
-          distributed: labelCount < 100, // Multi-color for high-density sets
+          distributed: labelCount < 100, 
           horizontal: isHorizontal,
           dataLabels: { position: isHorizontal ? 'right' : 'top' }
+        },
+        pie: {
+          donut: {
+            size: '70%',
+            labels: {
+              show: true,
+              total: {
+                show: true,
+                label: 'TOTAL',
+                color: '#94a3b8',
+                formatter: (w: any) => {
+                  const total = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
+                  return '$' + total.toLocaleString();
+                }
+              }
+            }
+          }
         }
       },
       dataLabels: { 
         enabled: isPie || (labelCount < 25 && !isRadar),
-        formatter: (val: any) => val.toLocaleString(),
+        formatter: (val: any, opts: any) => {
+          if (isPie) return opts.w.globals.labels[opts.seriesIndex];
+          return val.toLocaleString();
+        },
         style: { fontSize: '10px', colors: ['#fff'] }
       },
-      stroke: { curve: 'smooth', width: isPie ? 0 : 3 },
+      stroke: { curve: 'smooth', width: isPie ? 2 : 3, colors: isPie ? ['#1e293b'] : undefined },
       labels: isPie ? this.activeReportResult.labels : undefined,
       xaxis: isPie ? undefined : {
         type: 'category',
         categories: this.activeReportResult.labels,
         title: { text: config.xAxis, style: { color: '#64748b' } },
-        labels: { 
-          show: true,
-          style: { colors: '#64748b', fontSize: '11px' }
-        }
+        labels: { show: true, style: { colors: '#64748b', fontSize: '11px' } }
       },
       yaxis: isPie ? undefined : {
         title: { text: config.yAxis, style: { color: '#64748b' } },

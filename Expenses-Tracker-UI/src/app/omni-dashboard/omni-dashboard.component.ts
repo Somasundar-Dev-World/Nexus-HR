@@ -1114,17 +1114,22 @@ export class OmniDashboardComponent implements OnInit {
     if (!this.activeReportResult || !this.activeReportResult.labels) return;
     
     const ApexCharts = (window as any).ApexCharts;
-    if (!ApexCharts) return;
+    if (!ApexCharts) {
+      console.error('ApexCharts library not found on window.');
+      this.architectError = 'Visualization engine not loaded. Please refresh.';
+      return;
+    }
 
     const chartEl = document.querySelector('#report-main-chart');
     if (!chartEl) {
-      setTimeout(() => this.initializeReportChart(), 200);
+      // Retry for up to 2 seconds
+      setTimeout(() => this.initializeReportChart(), 300);
       return;
     }
 
     // Destroy any previous chart instance
     if ((chartEl as any).__apexcharts) {
-      (chartEl as any).__apexcharts.destroy();
+      try { (chartEl as any).__apexcharts.destroy(); } catch(e) {}
     }
 
     const type = (this.activeReportResult.visualType || 'bar').toLowerCase();
@@ -1139,10 +1144,10 @@ export class OmniDashboardComponent implements OnInit {
       ? (this.activeReportResult.series[0]?.data || [])
       : this.activeReportResult.series;
 
-    // Dynamic height for large lists (like 66 instruments)
-    let dynamicHeight = 420;
+    // Dynamic height scaling (Cap at 1200 for stability)
+    let dynamicHeight: any = 420;
     if (isHorizontal) {
-      dynamicHeight = Math.max(420, labelCount * 30 + 100);
+      dynamicHeight = Math.min(1200, labelCount * 35 + 100);
     }
 
     const options: any = {
@@ -1159,31 +1164,30 @@ export class OmniDashboardComponent implements OnInit {
       plotOptions: {
         bar: { 
           borderRadius: 4, 
-          columnWidth: '55%',
+          columnWidth: '60%',
           horizontal: isHorizontal,
           dataLabels: { position: isHorizontal ? 'right' : 'top' }
         }
       },
       dataLabels: { 
-        enabled: isPie || (labelCount < 30 && !isRadar),
+        enabled: isPie || (labelCount < 25 && !isRadar),
         formatter: (val: any) => val.toLocaleString(),
         style: { fontSize: '10px', colors: ['#fff'] }
       },
       stroke: { curve: 'smooth', width: isPie ? 0 : 3 },
-      labels: isPie ? this.activeReportResult.labels : undefined,
       xaxis: isPie ? undefined : {
         type: 'category',
-        categories: isHorizontal ? undefined : this.activeReportResult.labels,
-        title: { text: isHorizontal ? config.yAxis : config.xAxis, style: { color: '#64748b' } },
+        categories: this.activeReportResult.labels,
+        title: { text: config.xAxis, style: { color: '#64748b' } },
         labels: { 
-          style: { colors: '#64748b', fontSize: '11px' },
-          rotate: -45
+          show: true,
+          style: { colors: '#64748b', fontSize: '11px' }
         }
       },
       yaxis: isPie ? undefined : {
-        categories: isHorizontal ? this.activeReportResult.labels : undefined,
-        title: { text: isHorizontal ? config.xAxis : config.yAxis, style: { color: '#64748b' } },
+        title: { text: config.yAxis, style: { color: '#64748b' } },
         labels: { 
+          show: true,
           style: { colors: '#64748b' },
           formatter: (val: any) => val.toLocaleString()
         }
@@ -1200,9 +1204,14 @@ export class OmniDashboardComponent implements OnInit {
       theme: { mode: 'dark' }
     };
 
-    const chart = new ApexCharts(chartEl, options);
-    (chartEl as any).__apexcharts = chart;
-    chart.render();
+    try {
+      const chart = new ApexCharts(chartEl, options);
+      (chartEl as any).__apexcharts = chart;
+      chart.render();
+    } catch (err) {
+      console.error('ApexCharts render error:', err);
+      this.architectError = 'Visualization Render Failed: ' + (err as any).message;
+    }
   }
 
   goBackToDashboard() {

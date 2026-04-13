@@ -77,6 +77,7 @@ export class OmniDashboardComponent implements OnInit {
   activeReportResult: any = null;
   activeReportMeta: AiReport | null = null;
   isReportLoading = false;
+  architectError: string | null = null;
 
   // AI Chat State
   isChatOpen = false;
@@ -1040,12 +1041,21 @@ export class OmniDashboardComponent implements OnInit {
   generateReportSuggestions() {
     if (this.architectSelectedTrackers.length === 0 || !this.selectedApp?.id) return;
     this.isArchitecting = true;
+    this.architectError = null;
     this.omniService.suggestReports(this.selectedApp.id, this.architectSelectedTrackers).subscribe({
       next: (suggestions) => {
         this.architectSuggestions = suggestions;
         this.isArchitecting = false;
       },
-      error: () => this.isArchitecting = false
+      error: (err) => {
+        this.isArchitecting = false;
+        const msg: string = err?.error?.message || err?.message || 'Unknown error occurred.';
+        if (msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('rate limit') || msg.toLowerCase().includes('wait')) {
+          this.architectError = 'quota';
+        } else {
+          this.architectError = msg;
+        }
+      }
     });
   }
 

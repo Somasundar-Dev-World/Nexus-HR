@@ -1088,6 +1088,32 @@
           </button>
         </div>
 
+        <!-- ── AI Error Banner ── -->
+        <div class="architect-error-banner" *ngIf="architectError === 'quota'" [@fadeIn]>
+          <div class="error-orb">⏳</div>
+          <div class="error-content">
+            <h4 class="error-title">AI Cooling Down</h4>
+            <p class="error-msg">Your AI quota has been reached. The Gemini API allows a limited number of requests per minute on the free tier.</p>
+            <div class="error-actions">
+              <span class="error-pill">⏱ Wait ~60 seconds, then try again</span>
+              <span class="error-pill">🔑 Or upgrade your API key tier</span>
+            </div>
+          </div>
+          <button class="error-dismiss" (click)="architectError = null">✕</button>
+        </div>
+
+        <div class="architect-error-banner architect-error-general" *ngIf="architectError && architectError !== 'quota'" [@fadeIn]>
+          <div class="error-orb">⚠️</div>
+          <div class="error-content">
+            <h4 class="error-title">AI Service Error</h4>
+            <p class="error-msg">{{ architectError }}</p>
+            <div class="error-actions">
+              <span class="error-pill">🔄 Select your trackers and try again</span>
+            </div>
+          </div>
+          <button class="error-dismiss" (click)="architectError = null">✕</button>
+        </div>
+
         <!-- Suggestions List -->
         <div class="architect-suggestions animate-fade-up" *ngIf="architectSuggestions.length">
           <label style="display: block; width: 100%; margin: 2rem 0 1rem;" class="zenith-label">2. Choose an AI Design</label>

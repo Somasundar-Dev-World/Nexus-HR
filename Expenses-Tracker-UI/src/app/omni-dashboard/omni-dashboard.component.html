@@ -278,9 +278,14 @@
           <h1 class="report-view-name">{{ activeReportMeta?.name || 'Intelligence Report' }}</h1>
           <p class="report-view-desc">{{ activeReportMeta?.description || 'Live analytical synthesis from cross-tracker data.' }}</p>
         </div>
-        <button class="export-ignore btn-export-pdf" (click)="exportToPDF('report-detail-export', activeReportMeta?.name || 'Report')">
-          📄 Export PDF
-        </button>
+        <div class="report-view-actions" style="margin-left: auto; display: flex; gap: 0.75rem;">
+          <button class="export-ignore btn-refresh-report" [class.spinning]="isReportLoading" (click)="activeReportMeta ? runReport(activeReportMeta.id) : null" title="Refresh Report Data">
+            🔄
+          </button>
+          <button class="export-ignore btn-export-pdf" (click)="exportToPDF('report-detail-export', activeReportMeta?.name || 'Report')">
+            📄 Export PDF
+          </button>
+        </div>
       </div>
     </div>
 

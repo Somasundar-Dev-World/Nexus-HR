@@ -1132,6 +1132,7 @@ export class OmniDashboardComponent implements OnInit {
     const isPie = type === 'pie' || type === 'donut';
     const isRadar = type === 'radar';
     const labelCount = this.activeReportResult.labels?.length || 0;
+    const isHorizontal = labelCount > 15 && !isPie && !isRadar;
 
     // PIE charts need a flat number array; others need the nested series
     const seriesData = isPie
@@ -1140,7 +1141,7 @@ export class OmniDashboardComponent implements OnInit {
 
     // Dynamic height for large lists (like 66 instruments)
     let dynamicHeight = 420;
-    if (labelCount > 15 && !isPie && !isRadar) {
+    if (isHorizontal) {
       dynamicHeight = Math.max(420, labelCount * 30 + 100);
     }
 
@@ -1151,7 +1152,7 @@ export class OmniDashboardComponent implements OnInit {
         height: dynamicHeight,
         background: 'transparent',
         foreColor: '#94a3b8',
-        toolbar: { show: true, tools: { download: true, selection: false, zoom: false, zoomin: false, zoomout: false, pan: false, reset: false } },
+        toolbar: { show: true },
         animations: { enabled: true, easing: 'easeinout', speed: 800 }
       },
       colors: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'],
@@ -1159,8 +1160,8 @@ export class OmniDashboardComponent implements OnInit {
         bar: { 
           borderRadius: 4, 
           columnWidth: '55%',
-          horizontal: labelCount > 15,
-          dataLabels: { position: 'top' }
+          horizontal: isHorizontal,
+          dataLabels: { position: isHorizontal ? 'right' : 'top' }
         }
       },
       dataLabels: { 
@@ -1171,16 +1172,17 @@ export class OmniDashboardComponent implements OnInit {
       stroke: { curve: 'smooth', width: isPie ? 0 : 3 },
       labels: isPie ? this.activeReportResult.labels : undefined,
       xaxis: isPie ? undefined : {
-        categories: this.activeReportResult.labels,
-        title: { text: config.xAxis, style: { color: '#64748b' } },
+        type: 'category',
+        categories: isHorizontal ? undefined : this.activeReportResult.labels,
+        title: { text: isHorizontal ? config.yAxis : config.xAxis, style: { color: '#64748b' } },
         labels: { 
           style: { colors: '#64748b', fontSize: '11px' },
-          rotate: -45,
-          rotateAlways: labelCount > 10 && labelCount <= 15
+          rotate: -45
         }
       },
       yaxis: isPie ? undefined : {
-        title: { text: config.yAxis, style: { color: '#64748b' } },
+        categories: isHorizontal ? this.activeReportResult.labels : undefined,
+        title: { text: isHorizontal ? config.xAxis : config.yAxis, style: { color: '#64748b' } },
         labels: { 
           style: { colors: '#64748b' },
           formatter: (val: any) => val.toLocaleString()

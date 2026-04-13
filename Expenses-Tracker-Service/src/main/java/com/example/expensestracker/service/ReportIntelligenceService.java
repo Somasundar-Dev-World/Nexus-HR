@@ -78,6 +78,10 @@ public class ReportIntelligenceService {
         Map<String, String> aiRes = aiInsightService.chatWithApp(appId, userId, request);
         String rawJson = aiRes.get("reply");
         
+        if (rawJson != null && rawJson.startsWith("ERROR:")) {
+            throw new RuntimeException(rawJson.substring(6).trim());
+        }
+        
         return objectMapper.readValue(cleanJson(rawJson), new TypeReference<List<Map<String, Object>>>() {});
     }
 

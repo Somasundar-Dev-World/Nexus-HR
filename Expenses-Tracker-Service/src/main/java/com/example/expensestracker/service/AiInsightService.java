@@ -304,9 +304,16 @@ public class AiInsightService {
             } else {
                 rawResponse = callGeminiRawForDoc(userPrompt, systemPrompt, activeApiKey, model);
             }
+        } catch (HttpStatusCodeException e) {
+            System.err.println("Chat Generation Failed (HTTP " + e.getStatusCode() + "): " + e.getResponseBodyAsString());
+            if (e.getStatusCode() == org.springframework.http.HttpStatus.TOO_MANY_REQUESTS) {
+                rawResponse = "ERROR: AI Quota Exceeded. Please wait 60s or switch API keys.";
+            } else {
+                rawResponse = "ERROR: AI Service Error (" + e.getStatusCode() + ")";
+            }
         } catch (Exception e) {
             System.err.println("Chat Generation Failed: " + e.getMessage());
-            rawResponse = "AI Chat failed: " + e.getMessage();
+            rawResponse = "ERROR: AI Chat failed: " + e.getMessage();
         }
 
         Map<String, String> result = new java.util.HashMap<>();

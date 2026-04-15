@@ -1086,6 +1086,7 @@ export class OmniDashboardComponent implements OnInit {
         // Apply Global Sanity Shield to the result before saving it
         this.activeReportResult = this.applySanityShield(res);
         this.isReportLoading = false;
+        this.viewMode = 'REPORT_VIEW';
         // Small delay for DOM to render the chart ID
         setTimeout(() => this.initializeReportChart(), 100);
       },

@@ -114,7 +114,13 @@ public class ReportIntelligenceService {
         
         List<Tracker> trackers = trackerRepository.findByAppIdAndUserId(report.getAppId(), report.getUserId());
         List<Tracker> targetTrackers = trackers.stream()
-            .filter(t -> trackerNames.contains(t.getName()))
+            .filter(t -> {
+                String dbName = t.getName().toLowerCase().replace(" ", "");
+                return trackerNames.stream().anyMatch(name -> 
+                    dbName.contains(name.toLowerCase().replace(" ", "")) ||
+                    name.toLowerCase().replace(" ", "").contains(dbName)
+                );
+            })
             .collect(Collectors.toList());
 
         List<TrackerEntry> allEntries = new ArrayList<>();

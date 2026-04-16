@@ -295,8 +295,15 @@
       <p>Synthesizing intelligence...</p>
     </div>
 
+    <!-- Empty State for No Data -->
+    <div class="detail-empty animate-fade-down" *ngIf="!isReportLoading && activeReportResult && activeReportResult.labels?.length === 0">
+      <div class="empty-emoji">🏜️</div>
+      <h3>No Data Found</h3>
+      <p>This report executed successfully, but there is no matching data to display.</p>
+    </div>
+
     <!-- Chart Area -->
-    <div class="report-chart-shell" *ngIf="!isReportLoading && activeReportResult">
+    <div class="report-chart-shell" *ngIf="!isReportLoading && activeReportResult && activeReportResult.labels?.length > 0">
       <div class="report-chart-card">
         <div id="report-main-chart"></div>
       </div>

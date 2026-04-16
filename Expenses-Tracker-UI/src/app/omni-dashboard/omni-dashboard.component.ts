@@ -1230,8 +1230,12 @@ export class OmniDashboardComponent implements OnInit {
                 label: 'TOTAL',
                 color: '#94a3b8',
                 formatter: (w: any) => {
-                  const total = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
-                  return '$' + total.toLocaleString();
+                  try {
+                    const total = w.globals.seriesTotals?.reduce((a: any, b: any) => a + b, 0) || 0;
+                    return '$' + total.toLocaleString();
+                  } catch (e) {
+                    return '$0';
+                  }
                 }
               }
             }
@@ -1241,38 +1245,51 @@ export class OmniDashboardComponent implements OnInit {
       dataLabels: { 
         enabled: isPie || (labelCount < 25 && !isRadar),
         formatter: (val: any, opts: any) => {
-          if (isPie && this.activeReportResult.labels) return this.activeReportResult.labels[opts.seriesIndex];
-          return val.toLocaleString();
+          if (isPie && this.activeReportResult.labels) {
+            return this.activeReportResult.labels[opts.seriesIndex] || '';
+          }
+          return typeof val === 'number' ? val.toLocaleString() : val;
         },
         style: { fontSize: '10px', colors: ['#fff'] }
       },
-      stroke: { curve: 'smooth', width: isPie ? 2 : 3, colors: isPie ? ['#1e293b'] : undefined },
-      labels: isPie ? this.activeReportResult.labels : undefined,
-      xaxis: isPie ? undefined : {
+      stroke: { curve: 'smooth', width: isPie ? 2 : 3, ...(isPie ? { colors: ['#1e293b'] } : {}) }
+    };
+
+    if (isPie) {
+      options.labels = this.activeReportResult.labels;
+    } else {
+      options.xaxis = {
         type: 'category',
         categories: this.activeReportResult.labels,
-        title: { text: config.xAxis, style: { color: '#64748b' } },
         labels: { show: true, style: { colors: '#64748b', fontSize: '11px' } }
-      },
-      yaxis: isPie ? undefined : {
-        title: { text: config.yAxis, style: { color: '#64748b' } },
+      };
+      if (config.xAxis) {
+        options.xaxis.title = { text: config.xAxis, style: { color: '#64748b' } };
+      }
+
+      options.yaxis = {
         labels: { 
           show: true,
           style: { colors: '#64748b' },
           formatter: (val: any) => val.toLocaleString()
         }
-      },
-      tooltip: {
-        theme: 'dark',
-        y: { formatter: (val: any) => '$' + val.toLocaleString() }
-      },
-      legend: {
-        position: isPie ? 'bottom' : 'top',
-        labels: { colors: '#94a3b8' }
-      },
-      grid: { borderColor: 'rgba(255,255,255,0.05)' },
-      theme: { mode: 'dark' }
+      };
+      if (config.yAxis) {
+        options.yaxis.title = { text: config.yAxis, style: { color: '#64748b' } };
+      }
+    }
+
+    // Common options remaining
+    options.tooltip = {
+      theme: 'dark',
+      y: { formatter: (val: any) => '$' + val.toLocaleString() }
     };
+    options.legend = {
+      position: isPie ? 'bottom' : 'top',
+      labels: { colors: '#94a3b8' }
+    };
+    options.grid = { borderColor: 'rgba(255,255,255,0.05)' };
+    options.theme = { mode: 'dark' };
 
     try {
       const chart = new ApexCharts(chartEl, options);

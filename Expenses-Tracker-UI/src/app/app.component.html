@@ -117,6 +117,12 @@
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>
+
+    <!-- Universal Tech Specs Floating Action Button -->
+    <button class="fab-docs animate-fade-up" *ngIf="authService.isAuthenticated && !isPublicPage()" (click)="navigateToDocs()" title="View Technical Implementation Specs">
+      <span class="fab-docs-icon">📖</span>
+      <span class="fab-docs-label">Tech Specs</span>
+    </button>
   </main>
 </div>
 <!-- Deployment Trigger -->

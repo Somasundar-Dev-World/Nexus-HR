@@ -34,4 +34,13 @@ export class AppComponent {
     this.isDropdownOpen = false;
     this.router.navigate(['/']);
   }
+
+  navigateToDocs() {
+    let topic = 'default';
+    if (this.router.url.includes('/track')) topic = 'track';
+    if (this.router.url.includes('deep-research')) topic = 'deep-research';
+    if (this.router.url.includes('/profile')) topic = 'profile';
+
+    this.router.navigate(['/docs'], { queryParams: { topic } });
+  }
 }

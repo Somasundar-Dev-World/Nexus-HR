@@ -1,0 +1,32 @@
+<div class="docs-container animate-fade-up">
+  
+  <div class="docs-header">
+    <div class="docs-icon">📖</div>
+    <div class="docs-title-area">
+      <h1>OmniTracker Platform Engineering</h1>
+      <p class="docs-subtitle">Technical Details & Implementation Specifications</p>
+    </div>
+    
+    <div class="docs-actions">
+      <button class="btn btn-outline" routerLink="/track">← Back to App</button>
+    </div>
+  </div>
+
+  <div class="docs-layout">
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <h3>Context Modules</h3>
+      <nav class="docs-nav">
+        <a routerLink="/docs" [queryParams]="{topic: 'default'}" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Overview</a>
+        <a routerLink="/docs" [queryParams]="{topic: 'track'}" routerLinkActive="active">Architecture</a>
+        <a routerLink="/docs" [queryParams]="{topic: 'deep-research'}" routerLinkActive="active">Deep Research AI</a>
+        <a routerLink="/docs" [queryParams]="{topic: 'profile'}" routerLinkActive="active">Security & Multi-tenant</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <article class="docs-content">
+      <div class="markdown-body" [innerHTML]="renderedHtml"></div>
+    </article>
+  </div>
+</div>

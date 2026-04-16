@@ -304,3 +304,52 @@
   .main-content  { margin-left: 0; }
   .content-area  { padding: 1rem 0.75rem; }
 }
+
+/* ═══════════════════════════════════════
+   UNIVERSAL TECH SPECS FAB
+═══════════════════════════════════════ */
+.fab-docs {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 100;
+  color: #334155;
+}
+
+.fab-docs:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border-color: #cbd5e1;
+}
+
+.fab-docs-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.fab-docs-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+  .fab-docs {
+    bottom: 1.5rem;
+    left: 1.5rem;
+    padding: 0.6rem 1rem;
+  }
+  .fab-docs-label {
+    display: none;
+  }
+}

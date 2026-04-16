@@ -36,11 +36,11 @@ export class DocumentationComponent implements OnInit, AfterViewChecked {
       const topic = params['topic'] || 'default';
       this.topicTitle = (topic.charAt(0).toUpperCase() + topic.slice(1)).replace('-', ' ');
       
-      const filePath = \`assets/docs/\${topic}.md\`;
+      const filePath = `assets/docs/${topic}.md`;
 
       this.http.get(filePath, { responseType: 'text' })
         .pipe(
-          catchError(err => of(\`# Error Loading Document\\n\\nThe requested technical specification (\` + topic + \`) could not be loaded dynamically from \` + filePath + \`. Ensure the Markdown file exists and the server allows static asset retrieval.\`))
+          catchError(err => of(`# Error Loading Document\n\nThe requested technical specification (${topic}) could not be loaded dynamically from ${filePath}. Ensure the Markdown file exists and the server allows static asset retrieval.`))
         )
         .subscribe(rawMarkdown => {
           if (typeof marked !== 'undefined') {

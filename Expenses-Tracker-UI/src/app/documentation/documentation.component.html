@@ -28,7 +28,11 @@
 
     <!-- Main Content -->
     <article class="docs-content">
-      <div class="markdown-body" [innerHTML]="renderedHtml"></div>
+      <div *ngIf="isLoading" class="page-loading">
+        <div class="loader"></div>
+        <p>Fetching 10,000+ line technical specification...</p>
+      </div>
+      <div *ngIf="!isLoading" class="markdown-body animate-fade-down" [innerHTML]="renderedHtml"></div>
     </article>
   </div>
 </div>

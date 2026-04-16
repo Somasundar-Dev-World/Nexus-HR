@@ -40,6 +40,7 @@ export class AppComponent {
     if (this.router.url.includes('/track')) topic = 'track';
     if (this.router.url.includes('deep-research')) topic = 'deep-research';
     if (this.router.url.includes('/profile')) topic = 'profile';
+    if (this.router.url.includes('/reports')) topic = 'reports';
 
     this.router.navigate(['/docs'], { queryParams: { topic } });
   }

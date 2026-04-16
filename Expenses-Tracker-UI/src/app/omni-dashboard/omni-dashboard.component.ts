@@ -1085,10 +1085,15 @@ export class OmniDashboardComponent implements OnInit {
       next: (res) => {
         // Apply Global Sanity Shield to the result before saving it
         this.activeReportResult = this.applySanityShield(res);
-        this.isReportLoading = false;
+        // Switch view FIRST so Angular renders the REPORT_VIEW template
         this.viewMode = 'REPORT_VIEW';
-        // Small delay for DOM to render the chart ID
-        setTimeout(() => this.initializeReportChart(), 100);
+        // Then stop the loading spinner in the next tick — this gives Angular
+        // one full change detection cycle to stamp out the #report-main-chart div
+        setTimeout(() => {
+          this.isReportLoading = false;
+          // Additional delay to ensure the *ngIf block is fully in the DOM
+          setTimeout(() => this.initializeReportChart(), 150);
+        }, 50);
       },
       error: (err) => {
         console.error(err);
@@ -1099,6 +1104,7 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   closeReportDetail() {
+    this.reportChartRetryCount = 0;
     this.activeReportId = null;
     this.activeReportResult = null;
     this.activeReportMeta = null;
@@ -1137,6 +1143,8 @@ export class OmniDashboardComponent implements OnInit {
     }
   }
 
+  private reportChartRetryCount = 0;
+
   private initializeReportChart() {
     if (!this.activeReportResult || !this.activeReportResult.labels) return;
     
@@ -1149,15 +1157,27 @@ export class OmniDashboardComponent implements OnInit {
 
     const chartEl = document.querySelector('#report-main-chart');
     if (!chartEl) {
-      // Retry for up to 2 seconds
-      setTimeout(() => this.initializeReportChart(), 300);
+      // Retry up to 10 times (3 seconds total)
+      if (this.reportChartRetryCount < 10) {
+        this.reportChartRetryCount++;
+        setTimeout(() => this.initializeReportChart(), 300);
+      } else {
+        this.reportChartRetryCount = 0;
+        console.error('Chart element #report-main-chart never appeared in DOM.');
+      }
       return;
     }
 
-    // Destroy any previous chart instance
+    // Reset retry counter on success
+    this.reportChartRetryCount = 0;
+
+    // Destroy previous chart instance (ApexCharts attaches to window._Apex)
     if ((chartEl as any).__apexcharts) {
       try { (chartEl as any).__apexcharts.destroy(); } catch(e) {}
+      (chartEl as any).__apexcharts = null;
     }
+    // Clear any ghost innerHTML from a previous render
+    (chartEl as HTMLElement).innerHTML = '';
 
     const type = (this.activeReportResult.visualType || 'bar').toLowerCase();
     const config = this.activeReportResult.config || {};

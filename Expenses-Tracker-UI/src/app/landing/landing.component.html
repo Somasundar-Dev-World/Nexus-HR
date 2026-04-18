@@ -1,17 +1,17 @@
 <!-- ═══ NAVIGATION HEADER ═══ -->
 <header class="navbar">
   <div class="nav-container">
-    <div class="logo-area">
+    <a [routerLink]="authService.isAuthenticated ? '/track' : '/'" class="logo-area">
       <div class="logo-circ">OT</div>
       <span class="brand-name">OmniTracker</span>
-    </div>
+    </a>
     <div class="nav-ctas">
       <ng-container *ngIf="!authService.isAuthenticated; else loggedInNav">
         <a routerLink="/login" class="nav-link">Log In</a>
         <a routerLink="/register" class="btn btn-nav">Get Started</a>
       </ng-container>
       <ng-template #loggedInNav>
-        <a routerLink="/dashboard" class="btn btn-nav">Go to Dashboard</a>
+        <a routerLink="/track" class="btn btn-nav">Go to Dashboard</a>
       </ng-template>
     </div>
   </div>
@@ -32,7 +32,7 @@
           <a routerLink="/login" class="btn btn-outline-hero">Login to Dashboard</a>
         </ng-container>
         <ng-template #loggedInHero>
-          <a routerLink="/dashboard" class="btn btn-hero">Return to Dashboard</a>
+          <a routerLink="/track" class="btn btn-hero">Return to Dashboard</a>
         </ng-template>
       </div>
       <div class="hero-stats">

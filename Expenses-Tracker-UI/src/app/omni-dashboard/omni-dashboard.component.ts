@@ -4,6 +4,8 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight, AiReport } from '../omni-tracker.service';
 import { OmniApp } from '../omni-app.model';
 
@@ -265,7 +267,7 @@ export class OmniDashboardComponent implements OnInit {
 
   selectedTemplateIndex: number | null = null;
 
-  constructor(private omniService: OmniTrackerService, private fb: FormBuilder) {
+  constructor(private omniService: OmniTrackerService, private fb: FormBuilder, private router: Router) {
     this.appForm = this.fb.group({
       name: ['', Validators.required],
       icon: ['🚀', Validators.required],
@@ -278,6 +280,17 @@ export class OmniDashboardComponent implements OnInit {
       fieldDefinitions: this.fb.array([])
     });
     this.entryForm = this.fb.group({ fieldValues: this.fb.group({}) });
+
+    // Listen for global navigation to /track to reset view to APP_GRID
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      filter((event: any) => event.url === '/track' || event.urlAfterRedirects === '/track')
+    ).subscribe(() => {
+      this.viewMode = 'APP_GRID';
+      this.selectedApp = undefined;
+      this.selectedTracker = undefined;
+      this.trackers = [];
+    });
   }
 
   ngOnInit() { this.loadData(); }
@@ -436,7 +449,9 @@ export class OmniDashboardComponent implements OnInit {
       this.viewMode = 'APP_DASHBOARD';
       this.selectedTracker = undefined;
       this.entries = [];
-    } else if (this.viewMode === 'TRACKER_GRID' || this.viewMode === 'APP_DASHBOARD') {
+    } else if (this.viewMode === 'INTELLIGENCE_REPORTS' || this.viewMode === 'TRACKER_GRID') {
+      this.viewMode = 'APP_DASHBOARD';
+    } else if (this.viewMode === 'APP_DASHBOARD') {
       this.viewMode = 'APP_GRID';
       this.selectedApp = undefined;
       this.trackers = [];

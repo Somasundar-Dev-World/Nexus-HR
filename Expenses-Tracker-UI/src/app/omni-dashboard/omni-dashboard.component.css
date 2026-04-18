@@ -1677,7 +1677,30 @@
   gap: 1.5rem;
   position: relative;
 }
-.import-success-card .success-icon {
+/* --- Unified OQ Section in Intelligence Hub --- */
+.oq-unified-section {
+  margin-top: 5rem;
+  padding-top: 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.oq-unified-section .oq-console-card {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.oq-unified-section .results-header h3 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  background: linear-gradient(to right, #fff, rgba(255,255,255,0.4));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
+}
+
+/* Success Toast refined */
+.success-toast {
   font-size: 2.5rem;
 }
 .import-success-card h3 {

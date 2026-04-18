@@ -31,8 +31,8 @@ export class OmniDashboardComponent implements OnInit {
   aiInsights: SmartInsight[] = [];
   loadingInsights = false;
 
-  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports, 'REPORT_VIEW' is rendered chart
-  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'TRACKER_DETAIL' | 'APP_DASHBOARD' | 'INTELLIGENCE_REPORTS' | 'DEEP_RESEARCH' | 'DETAIL' | 'REPORT_VIEW' = 'APP_GRID';
+  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports, 'REPORT_VIEW' is rendered chart, 'QUERY_CONSOLE' is the SQL engine
+  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'TRACKER_DETAIL' | 'APP_DASHBOARD' | 'INTELLIGENCE_REPORTS' | 'DEEP_RESEARCH' | 'QUERY_CONSOLE' | 'DETAIL' | 'REPORT_VIEW' = 'APP_GRID';
   
   // --- OmniQuery State ---
   oqString: string = '';
@@ -1624,7 +1624,7 @@ export class OmniDashboardComponent implements OnInit {
   //  OMNI QUERY (SOQL) ENGINE
   // ══════════════════════════════════════════════════════════
   openQueryConsole() {
-    this.viewMode = 'INTELLIGENCE_REPORTS';
+    this.viewMode = 'QUERY_CONSOLE';
     if (this.selectedTracker) {
       this.oqString = `SELECT * FROM "${this.selectedTracker.name}" LIMIT 10`;
     } else {
@@ -1687,7 +1687,7 @@ export class OmniDashboardComponent implements OnInit {
       next: (data) => {
         this.oqResults = data.results;
         this.oqString = data.query;
-        this.viewMode = 'INTELLIGENCE_REPORTS';
+        this.viewMode = 'QUERY_CONSOLE';
         this.oqIsExecuting = false;
         if (this.oqResults.length > 0) {
           this.oqColumns = Object.keys(this.oqResults[0]).filter(k => k !== 'id');

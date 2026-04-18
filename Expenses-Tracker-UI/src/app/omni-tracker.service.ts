@@ -43,6 +43,7 @@ export interface AiReport {
   visualType: 'BAR' | 'PIE' | 'LINE' | 'RADAR' | 'METRIC_GRID';
   querySpec: any;
   config?: any;
+  omniQuery?: string;
 }
 
 @Injectable({ providedIn: 'root' })

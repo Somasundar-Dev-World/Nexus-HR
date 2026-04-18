@@ -3995,3 +3995,168 @@
   70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
+
+/* ══ ULTRA MODERN LUXURY OMNIQUERY UI ════════════════════════ */
+:root {
+  --lux-midnight: #020617;
+  --lux-indigo: #6366f1;
+  --lux-purple: #a855f7;
+  --lux-emerald: #10b981;
+  --lux-glass: rgba(255, 255, 255, 0.03);
+  --lux-border: rgba(255, 255, 255, 0.08);
+}
+
+.oq-console-card {
+  background: var(--lux-midnight);
+  border: 1px solid var(--lux-border);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.1);
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+}
+
+.oq-console-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.oq-card-header {
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--lux-border);
+}
+
+.status-msg {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 2px;
+  color: #f1f5f9;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.oq-editor-wrap {
+  border-radius: 0;
+  background: #000;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.oq-textarea {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.15rem;
+  color: #93c5fd;
+  text-shadow: 0 0 5px rgba(147, 197, 253, 0.2);
+  line-height: 1.8;
+}
+
+.oq-actions {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 2rem;
+}
+
+.oq-run-btn {
+  background: linear-gradient(135deg, var(--lux-indigo), var(--lux-purple));
+  border: none !important;
+  padding: 1rem 2.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  color: white;
+  border-radius: 12px;
+}
+
+.oq-run-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.5), 0 0 15px var(--lux-indigo);
+}
+
+.oq-save-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+/* Results Table - Luxury Refinement */
+.results-header h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.record-count {
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--lux-indigo);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.oq-results-table-wrap {
+  border-radius: 24px !important;
+  background: rgba(2, 6, 23, 0.6) !important;
+  border: 1px solid var(--lux-border) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(40px) saturate(180%);
+}
+
+.oq-table {
+  color: #cbd5e1 !important;
+}
+
+.oq-table th {
+  font-family: 'Outfit', sans-serif;
+  background: rgba(99, 102, 241, 0.03) !important;
+  color: #f1f5f9 !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 1.5rem !important;
+  border-bottom: 1px solid var(--lux-border) !important;
+}
+
+.oq-table tr {
+  background: transparent !important;
+  border-bottom: 1px solid var(--lux-border) !important;
+}
+
+.oq-table tr:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+  box-shadow: inset 4px 0 0 var(--lux-indigo) !important;
+}
+
+.cell-content {
+  font-family: 'Inter', sans-serif;
+  color: #e2e8f0;
+}
+
+.save-oq-modal {
+  background: rgba(15, 23, 42, 0.9) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 32px !important;
+  box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.7) !important;
+}
+
+.oq-empty-state h3 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  color: white;
+}

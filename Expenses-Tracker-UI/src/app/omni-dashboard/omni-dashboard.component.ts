@@ -41,6 +41,7 @@ export class OmniDashboardComponent implements OnInit {
   oqError: string | null = null;
   showSaveOqModal: boolean = false;
   oqReportName: string = '';
+  oqEditorExpanded: boolean = true;
   successToastMsg: string = '';
   oqColumns: string[] = [];
   savedOqReports: any[] = [];
@@ -1625,6 +1626,7 @@ export class OmniDashboardComponent implements OnInit {
   // ══════════════════════════════════════════════════════════
   openQueryConsole() {
     this.viewMode = 'QUERY_CONSOLE';
+    this.oqEditorExpanded = true;
     if (this.selectedTracker) {
       this.oqString = `SELECT * FROM "${this.selectedTracker.name}" LIMIT 10`;
     } else {
@@ -1688,6 +1690,7 @@ export class OmniDashboardComponent implements OnInit {
         this.oqResults = data.results;
         this.oqString = data.query;
         this.viewMode = 'QUERY_CONSOLE';
+        this.oqEditorExpanded = false;
         this.oqIsExecuting = false;
         if (this.oqResults.length > 0) {
           this.oqColumns = Object.keys(this.oqResults[0]).filter(k => k !== 'id');

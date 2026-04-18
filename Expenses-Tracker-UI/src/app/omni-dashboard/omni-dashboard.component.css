@@ -4680,3 +4680,35 @@
   border-color: rgba(255, 255, 255, 0.2) !important;
   transform: translateX(-5px) !important;
 }
+
+.results-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.btn-lux-edit {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(5px);
+}
+
+.btn-lux-edit:hover {
+  background: rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+  border-color: #a78bfa;
+}
+
+.btn-lux-edit:active {
+  transform: translateY(0);
+}

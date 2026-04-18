@@ -1224,7 +1224,7 @@
       <p>Execute Salesforce-style queries (OQ) across your trackers and save them as recurring intelligence reports.</p>
     </div>
 
-    <div class="oq-console-card glass-premium animate-fade-up">
+    <div class="oq-console-card glass-premium animate-fade-up" *ngIf="oqEditorExpanded">
       <div class="oq-card-header">
         <div class="oq-status-line">
           <span class="pulse-dot"></span> 
@@ -1258,7 +1258,12 @@
 
     <div class="oq-results-section animate-fade-up" *ngIf="oqResults.length > 0">
       <div class="results-header">
-        <h3><span class="sparkle-icon">✨</span> Synthesis Results</h3>
+        <div class="results-title-row">
+          <h3><span class="sparkle-icon">✨</span> Synthesis Results</h3>
+          <button class="btn-lux-edit" (click)="oqEditorExpanded = !oqEditorExpanded">
+            {{ oqEditorExpanded ? '🙈 Hide Logic' : '📝 Edit Logic' }}
+          </button>
+        </div>
         <span class="record-count">{{ oqResults.length }} records converged</span>
       </div>
       <div class="oq-results-table-wrap glass-premium">

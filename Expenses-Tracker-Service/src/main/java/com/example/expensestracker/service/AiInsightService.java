@@ -357,7 +357,11 @@ public class AiInsightService {
                 for (Object def : t.getFieldDefinitions()) {
                     if (def instanceof Map) {
                         Map<?, ?> m = (Map<?, ?>) def;
-                        sb.append(m.get("name")).append("(").append(m.get("type")).append(") ");
+                        sb.append(m.get("name")).append("(").append(m.get("type")).append(")");
+                        if ("RELATIONSHIP".equals(m.get("type")) && m.get("relatedTrackerId") != null) {
+                            sb.append("->LinksTo:Tracker#").append(m.get("relatedTrackerId"));
+                        }
+                        sb.append(" ");
                     }
                 }
             }
@@ -594,7 +598,7 @@ public class AiInsightService {
                 "Your task is to:\n" +
                 "1. Infer a logical Tracker Schema to hold this data. If the user provided a name, use it, otherwise invent an appropriate one.\n" +
                 "2. Determine the 'type' of tracker: FINANCE, HEALTH, STOCK, or CUSTOM.\n" +
-                "3. Define the 'fieldDefinitions' which must be an array of objects. Available types for fields: NUMBER, CURRENCY, TEXT, LONG_TEXT, DATE, TIME, BOOLEAN, SELECT, RATING.\n" +
+                "3. Define the 'fieldDefinitions' which must be an array of objects. Available types for fields: NUMBER, CURRENCY, TEXT, LONG_TEXT, DATE, TIME, BOOLEAN, SELECT, RATING, RELATIONSHIP.\n" +
                 "4. Extract ALL logical rows of data from the raw text as 'entries'. Each entry should map string field names exactly to string/number values.\n" +
                 "Return ONLY a raw JSON object with this exact structure:\n" +
                 "{\n" +

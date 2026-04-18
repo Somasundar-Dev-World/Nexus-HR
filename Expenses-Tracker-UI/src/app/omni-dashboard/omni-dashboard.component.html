@@ -473,7 +473,12 @@
           <div class="log-fields">
             <div class="log-field" *ngFor="let key of getFieldKeys(entry)">
               <span class="field-key">{{ key }}</span>
-              <span class="field-val">{{ formatFieldValue(entry.fieldValues[key], getFieldDef(key)) }}</span>
+              <span class="field-val" *ngIf="getFieldDef(key)?.type !== 'RELATIONSHIP'">
+                {{ formatFieldValue(entry.fieldValues[key], getFieldDef(key)) }}
+              </span>
+              <span class="field-val lookup-pill" *ngIf="getFieldDef(key)?.type === 'RELATIONSHIP'">
+                🔗 {{ getEntryLabel(entry.fieldValues[key], getFieldDef(key).relatedTrackerId) }}
+              </span>
             </div>
           </div>
           <p class="log-note-text" *ngIf="entry.note">💬 {{ entry.note }}</p>
@@ -609,9 +614,22 @@
                 <option value="BOOLEAN">Yes / No</option>
                 <option value="SELECT">Dropdown (Select)</option>
                 <option value="RATING">Rating (1-5 Stars)</option>
+                <option value="RELATIONSHIP">🔗 Relationship (Lookup)</option>
               </select>
               <input formControlName="unit" placeholder="Unit (e.g. kg, %)" *ngIf="field.get('type')?.value === 'NUMBER'">
               <input formControlName="options" placeholder="Options (comma-separated)" *ngIf="field.get('type')?.value === 'SELECT'">
+              
+              <!-- Relationship selector -->
+              <select formControlName="relatedTrackerId" *ngIf="field.get('type')?.value === 'RELATIONSHIP'" class="w-100 mt-2">
+                <option [ngValue]="null">-- Select Tracker to Link --</option>
+                <optgroup *ngFor="let app of apps" [label]="app.name">
+                  <ng-container *ngFor="let t of allTrackers">
+                    <option *ngIf="t.appId === app.id && t.id !== editingTrackerId" [ngValue]="t.id">
+                      {{ t.icon }} {{ t.name }}
+                    </option>
+                  </ng-container>
+                </optgroup>
+              </select>
               <button type="button" class="btn-icon" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
             </div>
           </div>
@@ -669,6 +687,14 @@
                   <option value="5">⭐⭐⭐⭐⭐ (5)</option>
                 </select>
               </div>
+
+              <!-- Relationship Selection -->
+              <select *ngSwitchCase="'RELATIONSHIP'" [formControlName]="field.name">
+                <option value="" disabled>-- Select Related Record --</option>
+                <option *ngFor="let relEntry of relatedEntriesMap[field.relatedTrackerId]" [value]="relEntry.id">
+                  {{ getEntryLabel(relEntry.id, field.relatedTrackerId) }}
+                </option>
+              </select>
 
               <input *ngSwitchDefault [formControlName]="field.name">
             </ng-container>

@@ -21,9 +21,9 @@ declare var Plaid: any;
 export class OmniDashboardComponent implements OnInit {
   trackers: Tracker[] = [];
   selectedTracker?: Tracker;
-  apps: OmniApp[] = [];
-  selectedApp?: OmniApp;
   entries: TrackerEntry[] = [];
+  allTrackers: Tracker[] = [];
+  relatedEntriesMap: { [trackerId: number]: TrackerEntry[] } = {};
   aiInsights: SmartInsight[] = [];
   loadingInsights = false;
 
@@ -296,6 +296,7 @@ export class OmniDashboardComponent implements OnInit {
   ngOnInit() { this.loadData(); }
 
   loadData() {
+    this.omniService.getTrackers().subscribe(data => this.allTrackers = data);
     this.isLoading = true;
     this.omniService.getApps().subscribe({
       next: (appsData) => { 
@@ -510,7 +511,8 @@ export class OmniDashboardComponent implements OnInit {
       name: [initialValues.name || '', Validators.required],
       type: [initialValues.type || 'NUMBER', Validators.required],
       unit: [initialValues.unit || ''],
-      options: [initialValues.options || ''] // Comma-separated for SELECT type
+      options: [initialValues.options || ''], // Comma-separated for SELECT type
+      relatedTrackerId: [initialValues.relatedTrackerId || null]
     }));
   }
 
@@ -706,9 +708,12 @@ export class OmniDashboardComponent implements OnInit {
   openAddEntry() {
     if (!this.selectedTracker) return;
     const fg = this.fb.group({});
-    this.selectedTracker.fieldDefinitions?.forEach(f =>
-      fg.addControl(f.name, this.fb.control('', Validators.required))
-    );
+    this.selectedTracker.fieldDefinitions?.forEach(f => {
+      fg.addControl(f.name, this.fb.control('', Validators.required));
+      if (f.type === 'RELATIONSHIP' && f.relatedTrackerId) {
+        this.fetchRelatedEntries(f.relatedTrackerId);
+      }
+    });
     this.entryForm.setControl('fieldValues', fg);
     this.newEntryNote = '';
     this.editingEntryId = null;
@@ -720,11 +725,36 @@ export class OmniDashboardComponent implements OnInit {
     const fg = this.fb.group({});
     this.selectedTracker.fieldDefinitions?.forEach(f => {
       fg.addControl(f.name, this.fb.control(entry.fieldValues?.[f.name] || '', Validators.required));
+      if (f.type === 'RELATIONSHIP' && f.relatedTrackerId) {
+        this.fetchRelatedEntries(f.relatedTrackerId);
+      }
     });
     this.entryForm.setControl('fieldValues', fg);
     this.newEntryNote = entry.note || '';
     this.editingEntryId = entry.id!;
     this.isAddingEntry = true;
+  }
+
+  fetchRelatedEntries(trackerId: number) {
+    if (this.relatedEntriesMap[trackerId]) return;
+    this.omniService.getEntries(trackerId).subscribe(data => {
+      this.relatedEntriesMap[trackerId] = data;
+    });
+  }
+
+  getEntryLabel(entryId: any, trackerId: number): string {
+    const entries = this.relatedEntriesMap[trackerId];
+    if (!entries) return 'Loading...';
+    const entry = entries.find(e => e.id == entryId);
+    if (!entry) return 'Item #' + entryId;
+    
+    // Find best field for label (first non-empty text or number field)
+    const tracker = this.allTrackers.find(t => t.id === trackerId);
+    const labelField = tracker?.fieldDefinitions?.[0]?.name;
+    if (labelField && entry.fieldValues[labelField]) {
+      return entry.fieldValues[labelField];
+    }
+    return 'Record #' + entryId;
   }
 
   addEntry() {

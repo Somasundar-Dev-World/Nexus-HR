@@ -21,9 +21,10 @@ public class OmniQueryService {
     }
 
     public List<Map<String, Object>> executeQuery(String query, Long userId) {
-        // Syntax: SELECT field1, field2 FROM TrackerName WHERE ... ORDER BY ... LIMIT ...
-        Pattern pattern = Pattern.compile("(?i)SELECT (.*) FROM ([^\\s]*) (?:WHERE (.*))? (?:ORDER BY (.*))? (?:LIMIT (\\d+))?");
-        Matcher matcher = pattern.matcher(query.trim());
+        String cleanQuery = query.trim().replaceAll("\\n", " ").replaceAll("\\s+", " ");
+        // Syntax: SELECT field1, field2 FROM "Tracker Name" WHERE ... ORDER BY ... LIMIT ...
+        Pattern pattern = Pattern.compile("(?i)SELECT\\s+(.+?)\\s+FROM\\s+(\".+?\"|[^\\s]+)(?:\\s+WHERE\\s+(.+?))?(?:\\s+ORDER\\s+BY\\s+(.+?))?(?:\\s+LIMIT\\s+(\\d+))?");
+        Matcher matcher = pattern.matcher(cleanQuery);
 
         if (!matcher.find()) {
             throw new RuntimeException("Invalid OmniQuery syntax. Expected: SELECT <fields> FROM <tracker> [WHERE <condition>] [ORDER BY <field>] [LIMIT <n>]");
@@ -146,3 +147,4 @@ public class OmniQueryService {
         }).collect(Collectors.toList());
     }
 }
+// Hotfix: Regex for quoted identifiers - cb00014

@@ -1278,6 +1278,20 @@
       <h3>Advanced Analytical Engine</h3>
       <p>OQ v1.0 is waiting for your command. Run a query to synthesize data across your personal trackers.</p>
     </div>
+
+    <!-- Saved Queries Quick Access -->
+    <div class="saved-oq-section animate-fade-up" *ngIf="savedReports.length > 0">
+      <div class="results-header">
+        <h3><span class="pill-icon-sm">📂</span> Saved Explorations</h3>
+        <p class="record-count">Quickly re-run your most frequent syntheses</p>
+      </div>
+      <div class="saved-oq-grid">
+        <div class="saved-oq-pill" *ngFor="let report of savedReports" 
+             (click)="runSavedOqReport(report.id!)">
+          <span class="pill-icon-sm">⚡</span> {{ report.name }}
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Custom Save Report Modal -->

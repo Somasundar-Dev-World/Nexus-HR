@@ -4250,3 +4250,56 @@
   50% { transform: rotate(180deg) scale(1.2); }
   100% { transform: rotate(360deg) scale(1); }
 }
+
+.status-msg {
+  color: #1e293b !important;
+  text-shadow: none !important;
+  opacity: 0.8;
+}
+
+.oq-shortcut {
+  color: #475569 !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  font-weight: 700;
+}
+
+.saved-oq-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.saved-oq-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.saved-oq-pill {
+  padding: 0.6rem 1.2rem;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 30px;
+  color: #818cf8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.saved-oq-pill:hover {
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pill-icon-sm {
+  font-size: 1rem;
+}

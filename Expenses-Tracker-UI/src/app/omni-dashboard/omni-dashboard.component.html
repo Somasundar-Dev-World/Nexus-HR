@@ -243,12 +243,19 @@
           <span *ngIf="report.visualType === 'METRIC_GRID'">🔢</span>
         </div>
         <div class="luxury-info">
-          <h4 class="report-name">{{ report.name }}</h4>
-          <p class="report-desc">{{ report.description }}</p>
+          <h4 class="report-name">{{ report.name || 'Untitled Report' }}</h4>
+          <p class="report-desc">{{ report.description || 'No description provided.' }}</p>
         </div>
         <div class="luxury-meta">
-          <div class="meta-pill"><span class="meta-dot blue"></span> {{ report.querySpec.groupBy || 'Static' }}</div>
-          <div class="meta-pill"><span class="meta-dot"></span> {{ report.querySpec.trackers.length }} Metrics</div>
+          <div class="meta-pill" *ngIf="report.querySpec">
+            <span class="meta-dot blue"></span> {{ report.querySpec?.groupBy || 'Static' }}
+          </div>
+          <div class="meta-pill" *ngIf="report.querySpec">
+            <span class="meta-dot"></span> {{ report.querySpec?.trackers?.length || 0 }} Metrics
+          </div>
+          <div class="meta-pill" *ngIf="report.omniQuery">
+            <span class="meta-dot blue"></span> Manual OQ
+          </div>
         </div>
         <div class="report-card-footer">
           <span>Run Synthesis</span>

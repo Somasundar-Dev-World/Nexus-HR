@@ -1151,10 +1151,18 @@ export class OmniDashboardComponent implements OnInit {
 
   runReport(id: number | undefined) {
     if (!id) return;
+    
+    // Check if this is an OmniQuery Report
+    const report = this.savedReports.find(r => r.id === id);
+    if (report && report.omniQuery) {
+      this.runSavedOqReport(id);
+      return;
+    }
+
     this.isReportLoading = true;
     this.activeReportId = id;
     this.activeReportResult = null;
-    this.activeReportMeta = this.savedReports.find(r => r.id === id) || null;
+    this.activeReportMeta = report || null;
     this.omniService.executeReport(id).subscribe({
       next: (res) => {
         // Apply Global Sanity Shield to the result before saving it

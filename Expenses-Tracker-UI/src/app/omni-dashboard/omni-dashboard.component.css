@@ -4804,3 +4804,46 @@
   transform: scale(1.002) translateY(-1px);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
 }
+
+/* -- FORCED DARK THEME FOR EXECUTIVE ANALYTICS -------------- */
+.home-screen[*ngIf*='viewMode === ''QUERY_CONSOLE'''] {
+  background: #020617 !important;
+}
+
+/* Wait, CSS selector cannot see ngIf. I will use a class in HTML. */
+
+.executive-dark-mode {
+  background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;
+  min-height: 100vh !important;
+  color: #fff !important;
+  padding-top: 5rem !important;
+}
+
+/* -- REFINED REACTIONARY REPORT UX -------------------------- */
+.results-header h3 {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 3.5rem !important;
+  font-weight: 900 !important;
+  background: linear-gradient(to right, #ffffff, #818cf8) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  letter-spacing: -2px !important;
+  margin: 0 !important;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+.oq-results-table-wrap {
+  background: rgba(30, 41, 59, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(24px) !important;
+  border-radius: 40px !important;
+  padding: 3rem !important;
+  margin-top: 2rem !important;
+  animation: cardEntrance 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards !important;
+}
+
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

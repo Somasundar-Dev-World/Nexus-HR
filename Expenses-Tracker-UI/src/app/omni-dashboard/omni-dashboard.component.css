@@ -4303,3 +4303,86 @@
 .pill-icon-sm {
   font-size: 1rem;
 }
+
+/* ══ LUXURY OMNIQUERY HEADER ══════════════════════════════ */
+.oq-header-card {
+  background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 32px !important;
+  padding: 3rem !important;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.6) !important;
+  margin-bottom: 2rem !important;
+}
+
+.oq-header-card::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.oq-engine-badge {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #10b981 !important;
+  font-family: monospace;
+  padding: 0.4rem 1rem !important;
+  letter-spacing: 2px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3) !important;
+  border-radius: 50px !important;
+  display: inline-block !important;
+  margin-bottom: 1.5rem !important;
+  font-size: 0.7rem !important;
+  text-transform: uppercase;
+}
+
+.oq-header-card h1 {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 3.5rem !important;
+  font-weight: 900 !important;
+  background: linear-gradient(to right, #ffffff, #94a3b8) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  margin: 0 !important;
+  letter-spacing: -1.5px !important;
+}
+
+.oq-header-card p {
+  color: #64748b !important;
+  font-size: 1.1rem !important;
+  max-width: 600px !important;
+  margin-top: 1rem !important;
+  line-height: 1.6 !important;
+}
+
+.back-btn-lux {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+  padding: 0.6rem 1.2rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  margin-bottom: 2rem !important;
+  width: fit-content !important;
+  text-decoration: none !important;
+}
+
+.back-btn-lux:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateX(-5px) !important;
+}

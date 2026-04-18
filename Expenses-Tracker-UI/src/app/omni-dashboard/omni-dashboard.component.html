@@ -1205,17 +1205,13 @@
   <!--  OMNI QUERY CONSOLE — (SOQL FOR PERSONAL OS)               -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div class="home-screen animate-fade-in" *ngIf="viewMode === 'QUERY_CONSOLE'">
-    <div class="detail-header">
-      <div class="header-nav-row">
-        <button class="back-btn-pill" (click)="viewMode = 'APP_DASHBOARD'">
-          <span class="back-arrow">←</span> App Dashboard
-        </button>
-        <div class="oq-engine-badge">OMNIQUERY ENGINE v1.0</div>
-      </div>
-      <div class="header-title-row">
-        <h1>Analytical Synthesis</h1>
-        <p class="modal-desc">Execute Salesforce-style queries (OQ) across your trackers and save them as recurring reports.</p>
-      </div>
+    <div class="oq-header-card animate-fade-down">
+      <button class="back-btn-lux" (click)="viewMode = 'APP_DASHBOARD'">
+        <span>←</span> App Dashboard
+      </button>
+      <div class="oq-engine-badge">OmniQuery Engine v1.0</div>
+      <h1>Analytical Synthesis</h1>
+      <p>Execute Salesforce-style queries (OQ) across your trackers and save them as recurring intelligence reports.</p>
     </div>
 
     <div class="oq-console-card glass-premium animate-fade-up">

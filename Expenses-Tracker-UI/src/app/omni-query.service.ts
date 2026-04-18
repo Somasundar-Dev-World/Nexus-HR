@@ -7,7 +7,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class OmniQueryService {
-  private apiUrl = `${environment.apiUrl}/api/omni/query`;
+  private apiUrl = `${environment.apiUrl}/omni/query`;
 
   constructor(private http: HttpClient) { }
 

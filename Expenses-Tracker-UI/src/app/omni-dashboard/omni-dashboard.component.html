@@ -1259,7 +1259,7 @@
     <div class="oq-results-section animate-fade-up" *ngIf="oqResults.length > 0">
       <div class="results-header">
         <div class="results-title-row">
-          <h3><span class="sparkle-icon">✨</span> Synthesis Results</h3>
+          <h3><span class="sparkle-icon">✨</span> {{ activeOqReportName || 'Intelligence Synthesis' }}</h3>
           <button class="btn-lux-edit" (click)="oqEditorExpanded = !oqEditorExpanded">
             {{ oqEditorExpanded ? '🙈 Hide Logic' : '📝 Edit Logic' }}
           </button>

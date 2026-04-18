@@ -45,6 +45,7 @@ export class OmniDashboardComponent implements OnInit {
   successToastMsg: string = '';
   oqColumns: string[] = [];
   savedOqReports: any[] = [];
+  activeOqReportName: string = '';
 
   appStats = {
     archetype: 'GENERIC' as 'FINANCE' | 'HEALTH' | 'GENERIC',
@@ -1627,6 +1628,7 @@ export class OmniDashboardComponent implements OnInit {
   openQueryConsole() {
     this.viewMode = 'QUERY_CONSOLE';
     this.oqEditorExpanded = true;
+    this.activeOqReportName = 'New Research Synthesis';
     if (this.selectedTracker) {
       this.oqString = `SELECT * FROM "${this.selectedTracker.name}" LIMIT 10`;
     } else {
@@ -1695,6 +1697,10 @@ export class OmniDashboardComponent implements OnInit {
         if (this.oqResults.length > 0) {
           this.oqColumns = Object.keys(this.oqResults[0]).filter(k => k !== 'id');
         }
+        
+        // Find the report name
+        const rep = this.savedReports.find(r => r.id === reportId);
+        if (rep) this.activeOqReportName = rep.name;
       },
       error: (err) => {
         alert('Failed to run saved report: ' + err.message);

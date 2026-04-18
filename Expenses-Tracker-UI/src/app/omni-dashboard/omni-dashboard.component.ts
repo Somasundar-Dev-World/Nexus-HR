@@ -21,6 +21,8 @@ declare var Plaid: any;
 export class OmniDashboardComponent implements OnInit {
   trackers: Tracker[] = [];
   selectedTracker?: Tracker;
+  apps: OmniApp[] = [];
+  selectedApp?: OmniApp;
   entries: TrackerEntry[] = [];
   allTrackers: Tracker[] = [];
   relatedEntriesMap: { [trackerId: number]: TrackerEntry[] } = {};

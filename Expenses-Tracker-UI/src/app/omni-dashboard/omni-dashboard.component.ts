@@ -42,6 +42,7 @@ export class OmniDashboardComponent implements OnInit {
   oqError: string | null = null;
   showSaveOqModal: boolean = false;
   oqReportName: string = '';
+  successToastMsg: string = '';
   oqColumns: string[] = [];
   savedOqReports: any[] = [];
 
@@ -1660,9 +1661,16 @@ export class OmniDashboardComponent implements OnInit {
     this.oqService.saveReport(report).subscribe(saved => {
       this.showSaveOqModal = false;
       this.oqReportName = '';
-      alert('Intelligence Report saved successfully!');
+      this.showSuccessToast('Intelligence Report saved successfully!');
       this.loadReports(); 
     });
+  }
+
+  showSuccessToast(msg: string) {
+    this.successToastMsg = msg;
+    setTimeout(() => {
+      this.successToastMsg = '';
+    }, 4000);
   }
 
   runSavedOqReport(reportId: number) {

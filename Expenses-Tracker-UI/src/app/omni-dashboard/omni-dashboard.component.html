@@ -11,6 +11,18 @@
     </div>
   </div>
 
+  <!-- Luxury Success Notification Toast -->
+  <div class="luxury-toast animate-slide-in-right" *ngIf="successToastMsg">
+    <div class="toast-content glass-premium">
+      <div class="toast-icon">✨</div>
+      <div class="toast-text">
+        <span class="toast-title">Success</span>
+        <span class="toast-desc">{{ successToastMsg }}</span>
+      </div>
+      <button class="toast-close" (click)="successToastMsg = ''">✕</button>
+    </div>
+  </div>
+
   <!-- ════════════════════════════════════════════════════════
        VIEW — APP GRID (Top Level)
   ════════════════════════════════════════════════════════ -->

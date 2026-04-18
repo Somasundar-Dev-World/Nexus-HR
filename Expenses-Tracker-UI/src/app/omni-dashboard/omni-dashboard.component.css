@@ -3805,23 +3805,23 @@
 .oq-table {
   width: 100%;
   border-collapse: collapse;
-  color: #f8fafc;
+  color: #1e293b; /* High-contrast dark text */
 }
 
 .oq-table th {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.08); /* Semi-transparent dark header */
   padding: 1rem;
   text-align: left;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #94a3b8;
-  border-bottom: 2px solid #334155;
+  color: #475569;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
 }
 
 .oq-table td {
   padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   font-size: 0.95rem;
 }
 

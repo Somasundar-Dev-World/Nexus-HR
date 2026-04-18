@@ -603,7 +603,7 @@
           <h4>Custom Fields <button type="button" class="btn btn-sm btn-outline pull-right" (click)="addField()">+ Add Field</button></h4>
           <div *ngFor="let field of fieldDefinitions.controls; let i=index" [formGroupName]="i" class="field-item">
             <input formControlName="name" placeholder="Field Name (e.g. Weight)" class="w-100">
-            <div class="field-row">
+            <div class="field-row" [class.field-row-wrap]="field.get('type')?.value === 'RELATIONSHIP'">
               <select formControlName="type">
                 <option value="NUMBER">Number</option>
                 <option value="CURRENCY">Currency ($)</option>
@@ -620,17 +620,20 @@
               <input formControlName="options" placeholder="Options (comma-separated)" *ngIf="field.get('type')?.value === 'SELECT'">
               
               <!-- Relationship selector -->
-              <select formControlName="relatedTrackerId" *ngIf="field.get('type')?.value === 'RELATIONSHIP'" class="w-100 mt-2">
-                <option [ngValue]="null">-- Select Tracker to Link --</option>
-                <optgroup *ngFor="let app of apps" [label]="app.name">
-                  <ng-container *ngFor="let t of allTrackers">
-                    <option *ngIf="t.appId === app.id && t.id !== editingTrackerId" [ngValue]="t.id">
-                      {{ t.icon }} {{ t.name }}
-                    </option>
-                  </ng-container>
-                </optgroup>
-              </select>
-              <button type="button" class="btn-icon" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
+              <div class="relationship-select-wrap" *ngIf="field.get('type')?.value === 'RELATIONSHIP'">
+                <label class="text-xs text-muted" style="display: block; margin-bottom: 4px;">Connect to Tracker:</label>
+                <select formControlName="relatedTrackerId" class="w-100">
+                  <option [ngValue]="null">-- Select Tracker to Link --</option>
+                  <optgroup *ngFor="let app of apps" [label]="app.name">
+                    <ng-container *ngFor="let t of allTrackers">
+                      <option *ngIf="t.appId === app.id && t.id !== editingTrackerId" [ngValue]="t.id">
+                        {{ t.icon }} {{ t.name }}
+                      </option>
+                    </ng-container>
+                  </optgroup>
+                </select>
+              </div>
+              <button type="button" class="btn-icon field-delete-btn" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
             </div>
           </div>
         </div>

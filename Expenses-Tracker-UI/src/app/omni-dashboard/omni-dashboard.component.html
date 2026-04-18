@@ -66,6 +66,9 @@
         <span class="app-emoji-large">{{ selectedApp.icon }}</span>
         <h1>{{ selectedApp.name }} Dashboard</h1>
         <button class="btn-icon btn-edit-header" (click)="openEditApp(selectedApp)" title="Edit App">✏️</button>
+        <button class="btn btn-outline btn-sm oq-pill-header" (click)="openQueryConsole()" title="Open OmniQuery Console">
+          <span class="pill-icon">⚡</span> OmniQuery
+        </button>
       </div>
       <p class="home-subtitle">{{ selectedApp.description || 'Intelligent insights across all your trackers.' }}</p>
 
@@ -1183,6 +1186,71 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!--  OMNI QUERY CONSOLE — (SOQL FOR PERSONAL OS)               -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="home-screen animate-fade-in" *ngIf="viewMode === 'QUERY_CONSOLE'">
+    <div class="detail-header">
+      <div class="header-nav-row">
+        <button class="back-btn-pill" (click)="viewMode = 'APP_DASHBOARD'">
+          <span class="back-arrow">←</span> App Dashboard
+        </button>
+        <div class="oq-engine-badge">OMNIQUERY ENGINE v1.0</div>
+      </div>
+      <div class="header-title-row">
+        <h1>Analytical Synthesis</h1>
+        <p class="modal-desc">Execute Salesforce-style queries (OQ) across your trackers and save them as recurring reports.</p>
+      </div>
+    </div>
+
+    <div class="oq-console-card glass-premium">
+      <div class="oq-editor-wrap">
+        <textarea [(ngModel)]="oqString" 
+                  placeholder="SELECT * FROM TrackerName WHERE Field = 'Value' ORDER BY Date DESC LIMIT 10" 
+                  class="oq-textarea"></textarea>
+      </div>
+      <div class="oq-actions">
+        <button class="btn btn-primary oq-run-btn" (click)="runOmniQuery()" [disabled]="oqIsExecuting">
+          <span *ngIf="!oqIsExecuting">▶ Run Query</span>
+          <span *ngIf="oqIsExecuting">⚡ Executing...</span>
+        </button>
+        <button class="btn btn-outline oq-save-btn" (click)="saveQueryAsReport()" [disabled]="oqResults.length === 0">
+          💾 Save as Report
+        </button>
+      </div>
+    </div>
+
+    <div class="oq-error-box animate-fade-up" *ngIf="oqError">
+      <p>❌ {{ oqError }}</p>
+    </div>
+
+    <div class="oq-results-section animate-fade-up" *ngIf="oqResults.length > 0">
+      <div class="results-header">
+        <h3>Query Results ({{ oqResults.length }} records)</h3>
+      </div>
+      <div class="oq-results-table-wrap glass-premium">
+        <table class="oq-table">
+          <thead>
+            <tr>
+              <th *ngFor="let col of oqColumns">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of oqResults">
+              <td *ngFor="let col of oqColumns">{{ row[col] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="oq-empty-state animate-fade-up" *ngIf="!oqIsExecuting && !oqError && oqResults.length === 0">
+      <div class="oq-empty-icon">📊</div>
+      <h3>Query Engine Ready</h3>
+      <p>Enter an OQ string to begin multi-tracker data synthesis.</p>
     </div>
   </div>
 

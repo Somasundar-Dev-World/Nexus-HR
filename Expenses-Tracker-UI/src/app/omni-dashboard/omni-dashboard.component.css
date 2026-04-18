@@ -3737,3 +3737,115 @@
 .field-delete-btn {
   margin-left: auto;
 }
+
+
+/* -- OMNI QUERY CONSOLE -------------------------------------- */
+.oq-pill-header {
+  margin-left: 1rem;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.05);
+  color: #6366f1;
+  padding: 0.4rem 1rem;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.oq-pill-header:hover {
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
+}
+
+.oq-engine-badge {
+  background: #1e293b;
+  color: #fbbf24;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.oq-console-card {
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.oq-editor-wrap {
+  background: #0f172a;
+  padding: 1.5rem;
+}
+
+.oq-textarea {
+  width: 100%;
+  height: 120px;
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  font-family: 'Fira Code', monospace;
+  font-size: 1.1rem;
+  resize: none;
+  outline: none;
+}
+
+.oq-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.oq-results-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.oq-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #f8fafc;
+}
+
+.oq-table th {
+  background: rgba(15, 23, 42, 0.8);
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  border-bottom: 2px solid #334155;
+}
+
+.oq-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.95rem;
+}
+
+.oq-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.oq-error-box {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.oq-empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #94a3b8;
+}
+
+.oq-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}

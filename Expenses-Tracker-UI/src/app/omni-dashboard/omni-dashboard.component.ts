@@ -7,6 +7,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Va
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { OmniTrackerService, Tracker, TrackerEntry, SmartInsight, AiReport } from '../omni-tracker.service';
+import { OmniQueryService } from '../omni-query.service';
+import { AuthService } from '../auth.service';
 import { OmniApp } from '../omni-app.model';
 
 declare var Plaid: any;
@@ -30,7 +32,15 @@ export class OmniDashboardComponent implements OnInit {
   loadingInsights = false;
 
   // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports, 'REPORT_VIEW' is rendered chart
-  viewMode: 'APP_GRID' | 'APP_DASHBOARD' | 'TRACKER_GRID' | 'DETAIL' | 'INTELLIGENCE_REPORTS' | 'REPORT_VIEW' = 'APP_GRID';
+  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'TRACKER_DETAIL' | 'APP_DASHBOARD' | 'INTELLIGENCE_REPORTS' | 'DEEP_RESEARCH' | 'QUERY_CONSOLE' = 'APP_GRID';
+  
+  // --- OmniQuery State ---
+  oqString: string = '';
+  oqResults: any[] = [];
+  oqIsExecuting: boolean = false;
+  oqError: string | null = null;
+  oqColumns: string[] = [];
+  savedOqReports: any[] = [];
 
   appStats = {
     archetype: 'GENERIC' as 'FINANCE' | 'HEALTH' | 'GENERIC',
@@ -269,7 +279,13 @@ export class OmniDashboardComponent implements OnInit {
 
   selectedTemplateIndex: number | null = null;
 
-  constructor(private omniService: OmniTrackerService, private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private omniService: OmniTrackerService,
+    private oqService: OmniQueryService,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.appForm = this.fb.group({
       name: ['', Validators.required],
       icon: ['🚀', Validators.required],

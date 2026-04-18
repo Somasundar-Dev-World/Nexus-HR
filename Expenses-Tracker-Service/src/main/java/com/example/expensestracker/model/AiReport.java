@@ -37,6 +37,9 @@ public class AiReport {
     @Column(length = 2000)
     private Map<String, Object> config; // Visual config like chart colors, labels, axis titles
 
+    @Column(length = 2000)
+    private String omniQuery; // Raw SOQL-like query string
+
     private LocalDateTime createdAt;
 
     public AiReport() {
@@ -69,6 +72,9 @@ public class AiReport {
     public void setQuerySpec(Map<String, Object> querySpec) { this.querySpec = querySpec; }
     public Map<String, Object> getConfig() { return config; }
     public void setConfig(Map<String, Object> config) { this.config = config; }
+    public String getOmniQuery() { return omniQuery; }
+    public void setOmniQuery(String omniQuery) { this.omniQuery = omniQuery; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

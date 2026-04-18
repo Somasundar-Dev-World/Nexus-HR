@@ -1152,9 +1152,10 @@ export class OmniDashboardComponent implements OnInit {
   runReport(id: number | undefined) {
     if (!id) return;
     
-    // Check if this is an OmniQuery Report
+    // Aggressively check if this is an OmniQuery Report or requires the OQ Engine
     const report = this.savedReports.find(r => r.id === id);
-    if (report && report.omniQuery) {
+    if (report && (report.omniQuery || !report.querySpec)) {
+      console.log('OQ Engine required for report:', report.name);
       this.runSavedOqReport(id);
       return;
     }

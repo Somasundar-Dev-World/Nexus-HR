@@ -23,7 +23,7 @@ public class OmniQueryController {
     }
 
     @PostMapping("/execute")
-    public ResponseEntity<?> executeQuery(@RequestBody Map<String, String> request, @RequestParam Long userId) {
+    public ResponseEntity<?> executeQuery(@RequestBody Map<String, String> request, @RequestAttribute("userId") Long userId) {
         String query = request.get("query");
         if (query == null || query.isEmpty()) {
             return ResponseEntity.badRequest().body("Query is required");
@@ -37,14 +37,14 @@ public class OmniQueryController {
     }
 
     @PostMapping("/save-report")
-    public ResponseEntity<AiReport> saveQueryReport(@RequestBody AiReport report, @RequestParam Long userId) {
+    public ResponseEntity<AiReport> saveQueryReport(@RequestBody AiReport report, @RequestAttribute("userId") Long userId) {
         report.setUserId(userId);
         AiReport saved = aiReportRepository.save(report);
         return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/run-report/{reportId}")
-    public ResponseEntity<?> runSavedReport(@PathVariable Long reportId, @RequestParam Long userId) {
+    public ResponseEntity<?> runSavedReport(@PathVariable Long reportId, @RequestAttribute("userId") Long userId) {
         AiReport report = aiReportRepository.findById(reportId).orElse(null);
         if (report == null || !report.getUserId().equals(userId)) {
             return ResponseEntity.notFound().build();

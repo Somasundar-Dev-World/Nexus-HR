@@ -1629,14 +1629,7 @@ export class OmniDashboardComponent implements OnInit {
     this.oqError = null;
     this.oqResults = [];
 
-    const user = this.authService.getUser();
-    if (!user) {
-      this.oqError = 'User authentication required.';
-      this.oqIsExecuting = false;
-      return;
-    }
-
-    this.oqService.executeQuery(this.oqString, user.id).subscribe({
+    this.oqService.executeQuery(this.oqString).subscribe({
       next: (res) => {
         this.oqResults = res;
         this.oqIsExecuting = false;
@@ -1656,9 +1649,6 @@ export class OmniDashboardComponent implements OnInit {
     const reportName = prompt('Enter a name for this SQL Report:', 'Custom Report');
     if (!reportName) return;
 
-    const user = this.authService.getUser();
-    if (!user) return;
-
     const report = {
       name: reportName,
       appId: this.selectedApp?.id || null,
@@ -1667,18 +1657,15 @@ export class OmniDashboardComponent implements OnInit {
       description: 'OQ Generated Report'
     };
 
-    this.oqService.saveReport(report, user.id).subscribe(saved => {
+    this.oqService.saveReport(report).subscribe(saved => {
       alert('Report saved successfully!');
       this.loadReports(); 
     });
   }
 
   runSavedOqReport(reportId: number) {
-    const user = this.authService.getUser();
-    if (!user) return;
-    
     this.oqIsExecuting = true;
-    this.oqService.runReport(reportId, user.id).subscribe({
+    this.oqService.runReport(reportId).subscribe({
       next: (data) => {
         this.oqResults = data.results;
         this.oqString = data.query;

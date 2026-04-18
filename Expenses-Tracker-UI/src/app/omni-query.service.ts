@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -11,18 +11,15 @@ export class OmniQueryService {
 
   constructor(private http: HttpClient) { }
 
-  executeQuery(query: string, userId: number): Observable<any[]> {
-    const params = new HttpParams().set('userId', userId.toString());
-    return this.http.post<any[]>(`${this.apiUrl}/execute`, { query }, { params });
+  executeQuery(query: string): Observable<any[]> {
+    return this.http.post<any[]>(`${this.apiUrl}/execute`, { query });
   }
 
-  saveReport(report: any, userId: number): Observable<any> {
-    const params = new HttpParams().set('userId', userId.toString());
-    return this.http.post<any>(`${this.apiUrl}/save-report`, report, { params });
+  saveReport(report: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/save-report`, report);
   }
 
-  runReport(reportId: number, userId: number): Observable<any> {
-    const params = new HttpParams().set('userId', userId.toString());
-    return this.http.get<any>(`${this.apiUrl}/run-report/${reportId}`, { params });
+  runReport(reportId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/run-report/${reportId}`);
   }
 }

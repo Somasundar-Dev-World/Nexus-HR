@@ -40,6 +40,8 @@ export class OmniDashboardComponent implements OnInit {
   oqResults: any[] = [];
   oqIsExecuting: boolean = false;
   oqError: string | null = null;
+  showSaveOqModal: boolean = false;
+  oqReportName: string = '';
   oqColumns: string[] = [];
   savedOqReports: any[] = [];
 
@@ -1645,12 +1647,10 @@ export class OmniDashboardComponent implements OnInit {
   }
 
   saveQueryAsReport() {
-    if (!this.oqString || this.oqResults.length === 0) return;
-    const reportName = prompt('Enter a name for this SQL Report:', 'Custom Report');
-    if (!reportName) return;
+    if (!this.oqString || this.oqResults.length === 0 || !this.oqReportName) return;
 
     const report = {
-      name: reportName,
+      name: this.oqReportName,
       appId: this.selectedApp?.id || null,
       visualType: 'METRIC_GRID',
       omniQuery: this.oqString,
@@ -1658,7 +1658,9 @@ export class OmniDashboardComponent implements OnInit {
     };
 
     this.oqService.saveReport(report).subscribe(saved => {
-      alert('Report saved successfully!');
+      this.showSaveOqModal = false;
+      this.oqReportName = '';
+      alert('Intelligence Report saved successfully!');
       this.loadReports(); 
     });
   }

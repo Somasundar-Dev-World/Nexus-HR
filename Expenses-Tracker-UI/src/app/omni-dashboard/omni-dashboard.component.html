@@ -1206,19 +1206,30 @@
       </div>
     </div>
 
-    <div class="oq-console-card glass-premium">
+    <div class="oq-console-card glass-premium animate-fade-up">
+      <div class="oq-card-header">
+        <div class="oq-status-line">
+          <span class="pulse-dot"></span> 
+          <span class="status-msg">OmniQuery Engine Ready</span>
+        </div>
+        <div class="oq-shortcut">Cmd + Enter to run</div>
+      </div>
       <div class="oq-editor-wrap">
+        <div class="line-numbers">
+          <span>1</span><span>2</span><span>3</span>
+        </div>
         <textarea [(ngModel)]="oqString" 
                   placeholder="SELECT * FROM TrackerName WHERE Field = 'Value' ORDER BY Date DESC LIMIT 10" 
                   class="oq-textarea"></textarea>
       </div>
       <div class="oq-actions">
         <button class="btn btn-primary oq-run-btn" (click)="runOmniQuery()" [disabled]="oqIsExecuting">
-          <span *ngIf="!oqIsExecuting">▶ Run Query</span>
-          <span *ngIf="oqIsExecuting">⚡ Executing...</span>
+          <span class="btn-glow"></span>
+          <span *ngIf="!oqIsExecuting">▶ Run Synthesis</span>
+          <span *ngIf="oqIsExecuting">⚡ Synthesizing...</span>
         </button>
-        <button class="btn btn-outline oq-save-btn" (click)="saveQueryAsReport()" [disabled]="oqResults.length === 0">
-          💾 Save as Report
+        <button class="btn btn-glass oq-save-btn" (click)="showSaveOqModal = true" [disabled]="oqResults.length === 0">
+          💾 Save as Intelligence Report
         </button>
       </div>
     </div>
@@ -1229,7 +1240,8 @@
 
     <div class="oq-results-section animate-fade-up" *ngIf="oqResults.length > 0">
       <div class="results-header">
-        <h3>Query Results ({{ oqResults.length }} records)</h3>
+        <h3><span class="sparkle-icon">✨</span> Synthesis Results</h3>
+        <span class="record-count">{{ oqResults.length }} records converged</span>
       </div>
       <div class="oq-results-table-wrap glass-premium">
         <table class="oq-table">
@@ -1240,7 +1252,9 @@
           </thead>
           <tbody>
             <tr *ngFor="let row of oqResults">
-              <td *ngFor="let col of oqColumns">{{ row[col] }}</td>
+              <td *ngFor="let col of oqColumns" [attr.data-col]="col">
+                <span class="cell-content">{{ row[col] }}</span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -1248,9 +1262,33 @@
     </div>
 
     <div class="oq-empty-state animate-fade-up" *ngIf="!oqIsExecuting && !oqError && oqResults.length === 0">
-      <div class="oq-empty-icon">📊</div>
-      <h3>Query Engine Ready</h3>
-      <p>Enter an OQ string to begin multi-tracker data synthesis.</p>
+      <div class="oq-empty-icon">⌘</div>
+      <h3>Advanced Analytical Engine</h3>
+      <p>OQ v1.0 is waiting for your command. Run a query to synthesize data across your personal trackers.</p>
+    </div>
+  </div>
+
+  <!-- Custom Save Report Modal -->
+  <div class="modal-overlay animate-fade-in" *ngIf="showSaveOqModal" (click)="showSaveOqModal = false">
+    <div class="modal save-oq-modal glass-premium animate-fade-scale" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="header-icon">💾</div>
+        <h2>Save Intelligent Report</h2>
+        <p>Give your OmniQuery synthesis a name to access it anytime from the Intelligence Dashboard.</p>
+      </div>
+      <div class="modal-body">
+        <div class="zenith-form-group">
+          <label class="zenith-label">Report Name</label>
+          <input type="text" class="zenith-input" [(ngModel)]="oqReportName" 
+                 placeholder="e.g. Monthly Performance Convergence" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="showSaveOqModal = false">Cancel</button>
+        <button class="btn btn-primary" (click)="saveQueryAsReport()" [disabled]="!oqReportName">
+          💾 Confirm & Save
+        </button>
+      </div>
     </div>
   </div>
 

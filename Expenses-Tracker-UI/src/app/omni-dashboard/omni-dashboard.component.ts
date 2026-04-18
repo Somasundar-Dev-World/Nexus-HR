@@ -32,7 +32,8 @@ export class OmniDashboardComponent implements OnInit {
   loadingInsights = false;
 
   // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports, 'REPORT_VIEW' is rendered chart
-  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'TRACKER_DETAIL' | 'APP_DASHBOARD' | 'INTELLIGENCE_REPORTS' | 'DEEP_RESEARCH' | 'QUERY_CONSOLE' = 'APP_GRID';
+  // View state — 'APP_GRID' is apps, 'APP_DASHBOARD' is app-level graphs/stats, 'TRACKER_GRID' is grid inside app, 'DETAIL' is logs, 'INTELLIGENCE_REPORTS' is dynamic AI reports, 'REPORT_VIEW' is rendered chart, 'QUERY_CONSOLE' is the SQL engine
+  viewMode: 'APP_GRID' | 'TRACKER_GRID' | 'TRACKER_DETAIL' | 'APP_DASHBOARD' | 'INTELLIGENCE_REPORTS' | 'DEEP_RESEARCH' | 'QUERY_CONSOLE' | 'DETAIL' | 'REPORT_VIEW' = 'APP_GRID';
   
   // --- OmniQuery State ---
   oqString: string = '';
@@ -1606,5 +1607,91 @@ export class OmniDashboardComponent implements OnInit {
     const fieldDef = this.selectedTracker.fieldDefinitions[0];
     const val = this.entries[0]?.fieldValues?.[fieldDef.name];
     return this.formatFieldValue(val, fieldDef);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  OMNI QUERY (SOQL) ENGINE
+  // ══════════════════════════════════════════════════════════
+  openQueryConsole() {
+    this.viewMode = 'QUERY_CONSOLE';
+    if (this.selectedTracker) {
+      this.oqString = `SELECT * FROM "${this.selectedTracker.name}" LIMIT 10`;
+    } else {
+      this.oqString = 'SELECT * FROM TrackerName WHERE ...';
+    }
+    this.oqResults = [];
+    this.oqError = null;
+  }
+
+  runOmniQuery() {
+    if (!this.oqString.trim()) return;
+    this.oqIsExecuting = true;
+    this.oqError = null;
+    this.oqResults = [];
+
+    const user = this.authService.getUser();
+    if (!user) {
+      this.oqError = 'User authentication required.';
+      this.oqIsExecuting = false;
+      return;
+    }
+
+    this.oqService.executeQuery(this.oqString, user.id).subscribe({
+      next: (res) => {
+        this.oqResults = res;
+        this.oqIsExecuting = false;
+        if (res.length > 0) {
+          this.oqColumns = Object.keys(res[0]).filter(k => k !== 'id');
+        }
+      },
+      error: (err) => {
+        this.oqError = err.error || 'Query failed. Please check syntax.';
+        this.oqIsExecuting = false;
+      }
+    });
+  }
+
+  saveQueryAsReport() {
+    if (!this.oqString || this.oqResults.length === 0) return;
+    const reportName = prompt('Enter a name for this SQL Report:', 'Custom Report');
+    if (!reportName) return;
+
+    const user = this.authService.getUser();
+    if (!user) return;
+
+    const report = {
+      name: reportName,
+      appId: this.selectedApp?.id || null,
+      visualType: 'METRIC_GRID',
+      omniQuery: this.oqString,
+      description: 'OQ Generated Report'
+    };
+
+    this.oqService.saveReport(report, user.id).subscribe(saved => {
+      alert('Report saved successfully!');
+      this.loadReports(); 
+    });
+  }
+
+  runSavedOqReport(reportId: number) {
+    const user = this.authService.getUser();
+    if (!user) return;
+    
+    this.oqIsExecuting = true;
+    this.oqService.runReport(reportId, user.id).subscribe({
+      next: (data) => {
+        this.oqResults = data.results;
+        this.oqString = data.query;
+        this.viewMode = 'QUERY_CONSOLE';
+        this.oqIsExecuting = false;
+        if (this.oqResults.length > 0) {
+          this.oqColumns = Object.keys(this.oqResults[0]).filter(k => k !== 'id');
+        }
+      },
+      error: (err) => {
+        alert('Failed to run saved report: ' + err.message);
+        this.oqIsExecuting = false;
+      }
+    });
   }
 }

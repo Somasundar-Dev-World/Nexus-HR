@@ -514,7 +514,8 @@ export class OmniDashboardComponent implements OnInit {
       type: [initialValues.type || 'NUMBER', Validators.required],
       unit: [initialValues.unit || ''],
       options: [initialValues.options || ''], // Comma-separated for SELECT type
-      relatedTrackerId: [initialValues.relatedTrackerId || null]
+      relatedTrackerId: [initialValues.relatedTrackerId || null],
+      relatedDisplayField: [initialValues.relatedDisplayField || '']
     }));
   }
 
@@ -744,19 +745,25 @@ export class OmniDashboardComponent implements OnInit {
     });
   }
 
-  getEntryLabel(entryId: any, trackerId: number): string {
+  getFieldsForTracker(id: number | string): any[] {
+    const tracker = this.allTrackers.find(t => t.id == id);
+    return tracker ? tracker.fieldDefinitions : [];
+  }
+
+  getEntryLabel(entryId: any, trackerId: number, preferredField?: string): string {
+    if (!entryId || !trackerId) return '---';
     const entries = this.relatedEntriesMap[trackerId];
     if (!entries) return 'Loading...';
-    const entry = entries.find(e => e.id == entryId);
-    if (!entry) return 'Item #' + entryId;
     
-    // Find best field for label (first non-empty text or number field)
-    const tracker = this.allTrackers.find(t => t.id === trackerId);
-    const labelField = tracker?.fieldDefinitions?.[0]?.name;
-    if (labelField && entry.fieldValues[labelField]) {
-      return entry.fieldValues[labelField];
+    const entry = entries.find(e => e.id == entryId);
+    if (!entry) return 'Record not found';
+
+    if (preferredField && entry.fieldValues[preferredField]) {
+      return entry.fieldValues[preferredField];
     }
-    return 'Record #' + entryId;
+
+    const values = Object.values(entry.fieldValues);
+    return values.length > 0 ? values[0] + '' : 'Untitled Record';
   }
 
   addEntry() {

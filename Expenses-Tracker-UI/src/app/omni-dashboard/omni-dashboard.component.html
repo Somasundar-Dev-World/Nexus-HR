@@ -477,7 +477,7 @@
                 {{ formatFieldValue(entry.fieldValues[key], getFieldDef(key)) }}
               </span>
               <span class="field-val lookup-pill" *ngIf="getFieldDef(key)?.type === 'RELATIONSHIP'">
-                🔗 {{ getEntryLabel(entry.fieldValues[key], getFieldDef(key).relatedTrackerId) }}
+                🔗 {{ getEntryLabel(entry.fieldValues[key], getFieldDef(key).relatedTrackerId, getFieldDef(key).relatedDisplayField) }}
               </span>
             </div>
           </div>
@@ -621,17 +621,30 @@
               
               <!-- Relationship selector -->
               <div class="relationship-select-wrap" *ngIf="field.get('type')?.value === 'RELATIONSHIP'">
-                <label class="text-xs text-muted" style="display: block; margin-bottom: 4px;">Connect to Tracker:</label>
-                <select formControlName="relatedTrackerId" class="w-100">
-                  <option [ngValue]="null">-- Select Tracker to Link --</option>
-                  <optgroup *ngFor="let app of apps" [label]="app.name">
-                    <ng-container *ngFor="let t of allTrackers">
-                      <option *ngIf="t.appId === app.id && t.id !== editingTrackerId" [ngValue]="t.id">
-                        {{ t.icon }} {{ t.name }}
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="text-xs text-muted" style="display: block; margin-bottom: 4px;">Connect to Tracker:</label>
+                    <select formControlName="relatedTrackerId" class="w-100">
+                      <option [ngValue]="null">-- Select Tracker --</option>
+                      <optgroup *ngFor="let app of apps" [label]="app.name">
+                        <ng-container *ngFor="let t of allTrackers">
+                          <option *ngIf="t.appId === app.id && t.id !== editingTrackerId" [ngValue]="t.id">
+                            {{ t.icon }} {{ t.name }}
+                          </option>
+                        </ng-container>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <div class="col-md-6" *ngIf="field.get('relatedTrackerId')?.value">
+                    <label class="text-xs text-muted" style="display: block; margin-bottom: 4px;">Display Column:</label>
+                    <select formControlName="relatedDisplayField" class="w-100">
+                      <option value="">-- Use Default --</option>
+                      <option *ngFor="let f of getFieldsForTracker(field.get('relatedTrackerId')?.value)" [value]="f.name">
+                        {{ f.name }}
                       </option>
-                    </ng-container>
-                  </optgroup>
-                </select>
+                    </select>
+                  </div>
+                </div>
               </div>
               <button type="button" class="btn-icon field-delete-btn" (click)="removeField(i)" *ngIf="fieldDefinitions.length > 1">✕</button>
             </div>
@@ -695,7 +708,7 @@
               <select *ngSwitchCase="'RELATIONSHIP'" [formControlName]="field.name">
                 <option value="" disabled>-- Select Related Record --</option>
                 <option *ngFor="let relEntry of relatedEntriesMap[field.relatedTrackerId]" [value]="relEntry.id">
-                  {{ getEntryLabel(relEntry.id, field.relatedTrackerId) }}
+                  {{ getEntryLabel(relEntry.id, field.relatedTrackerId, field.relatedDisplayField) }}
                 </option>
               </select>
 

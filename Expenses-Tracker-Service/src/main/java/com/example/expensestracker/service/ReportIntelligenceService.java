@@ -108,9 +108,17 @@ public class ReportIntelligenceService {
      * The Intelligence Engine: Executes a stored QuerySpec against live data.
      */
     public Map<String, Object> executeReport(AiReport report) {
-        List<Long> trackerIds = new ArrayList<>();
         Map<String, Object> spec = report.getQuerySpec();
+        if (spec == null) {
+            throw new RuntimeException("This report requires the OmniQuery Engine to execute. Please use the /api/omni/query/run-report endpoint.");
+        }
+        
         List<String> trackerNames = (List<String>) spec.get("trackers");
+        if (trackerNames == null) {
+            throw new RuntimeException("QuerySpec is missing tracker definitions.");
+        }
+        
+        List<Long> trackerIds = new ArrayList<>();
         
         List<Tracker> trackers = trackerRepository.findByAppIdAndUserId(report.getAppId(), report.getUserId());
         List<Tracker> targetTrackers = trackers.stream()

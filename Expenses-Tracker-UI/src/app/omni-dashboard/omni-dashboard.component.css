@@ -4806,11 +4806,7 @@
 }
 
 /* -- FORCED DARK THEME FOR EXECUTIVE ANALYTICS -------------- */
-.home-screen[*ngIf*='viewMode === ''QUERY_CONSOLE'''] {
-  background: #020617 !important;
-}
 
-/* Wait, CSS selector cannot see ngIf. I will use a class in HTML. */
 
 .executive-dark-mode {
   background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;

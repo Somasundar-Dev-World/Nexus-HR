@@ -4863,3 +4863,91 @@
   border-color: rgba(99, 102, 241, 0.4) !important;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.15) !important;
 }
+
+/* Discovery Hub Controls */
+.history-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 2rem !important;
+  padding-bottom: 1.5rem !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  flex-wrap: wrap !important;
+  gap: 1.5rem !important;
+}
+
+.discovery-controls {
+  display: flex !important;
+  gap: 1rem !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+.discovery-search {
+  position: relative !important;
+  min-width: 250px !important;
+}
+
+.search-icon {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  opacity: 0.5 !important;
+}
+
+.discovery-input {
+  width: 100% !important;
+  padding: 0.8rem 1rem 0.8rem 2.5rem !important;
+  background: rgba(0,0,0,0.03) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 12px !important;
+  font-size: 0.9rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.discovery-input:focus {
+  background: #fff !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+  outline: none !important;
+}
+
+.discovery-sort {
+  display: flex !important;
+  background: rgba(0,0,0,0.03) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.discovery-select {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.8rem 1rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+.sort-order-btn {
+  background: rgba(0,0,0,0.05) !important;
+  border: none !important;
+  padding: 0 1rem !important;
+  border-left: 1px solid rgba(0,0,0,0.05) !important;
+  cursor: pointer !important;
+  font-weight: bold !important;
+  transition: all 0.2s !important;
+}
+
+.sort-order-btn:hover { background: rgba(0,0,0,0.1) !important; }
+
+.discovery-badge {
+  font-size: 0.75rem !important;
+  color: #6366f1 !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-top: 0.25rem !important;
+}

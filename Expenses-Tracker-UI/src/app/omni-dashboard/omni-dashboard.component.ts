@@ -98,6 +98,12 @@ export class OmniDashboardComponent implements OnInit {
   isReportLoading = false;
   architectError: string | null = null;
 
+  // History Discovery State
+  historyFilter = '';
+  historySortField = 'date';
+  historySortOrder: 'ASC' | 'DESC' = 'DESC';
+  isHistoryAdvancedFilterOpen = false;
+
   // AI Chat State
   isChatOpen = false;
   isChatLoading = false;
@@ -1613,6 +1619,52 @@ export class OmniDashboardComponent implements OnInit {
 
   getFieldDef(key: string): any {
     return this.selectedTracker?.fieldDefinitions.find(f => f.name === key);
+  }
+
+  get filteredEntries(): TrackerEntry[] {
+    let result = [...this.entries];
+
+    // 1. Filter
+    if (this.historyFilter.trim()) {
+      const q = this.historyFilter.toLowerCase().trim();
+      result = result.filter(e => {
+        // Search in date
+        if (e.date && e.date.toString().toLowerCase().includes(q)) return true;
+        // Search in note
+        if (e.note && e.note.toLowerCase().includes(q)) return true;
+        // Search in all field values
+        return Object.values(e.fieldValues).some(v => 
+          v && v.toString().toLowerCase().includes(q)
+        );
+      });
+    }
+
+    // 2. Sort
+    result.sort((a, b) => {
+      let valA: any, valB: any;
+      
+      if (this.historySortField === 'date') {
+        valA = new Date(a.date).getTime();
+        valB = new Date(b.date).getTime();
+      } else {
+        valA = a.fieldValues[this.historySortField];
+        valB = b.fieldValues[this.historySortField];
+      }
+
+      if (valA === undefined || valA === null) return 1;
+      if (valB === undefined || valB === null) return -1;
+
+      let comparison = 0;
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        comparison = valA - valB;
+      } else {
+        comparison = valA.toString().localeCompare(valB.toString());
+      }
+
+      return this.historySortOrder === 'ASC' ? comparison : -comparison;
+    });
+
+    return result;
   }
 
   getLatestValue(): string {

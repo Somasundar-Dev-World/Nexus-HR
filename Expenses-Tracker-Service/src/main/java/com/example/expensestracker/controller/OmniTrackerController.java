@@ -178,7 +178,7 @@ public class OmniTrackerController {
 
     @GetMapping("/entries/tracker/{trackerId}")
     public List<TrackerEntry> getEntriesByTracker(@RequestAttribute("userId") Long userId, @PathVariable Long trackerId) {
-        return entryRepository.findByTrackerIdOrderByDateAsc(trackerId);
+        return entryRepository.findByTrackerIdOrderByDateDesc(trackerId);
     }
 
     @PostMapping("/entries")

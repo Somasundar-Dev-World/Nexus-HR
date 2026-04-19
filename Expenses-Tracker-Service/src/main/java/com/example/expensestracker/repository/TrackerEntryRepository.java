@@ -8,5 +8,6 @@ public interface TrackerEntryRepository extends JpaRepository<TrackerEntry, Long
     List<TrackerEntry> findByTrackerId(Long trackerId);
     List<TrackerEntry> findByUserId(Long userId);
     List<TrackerEntry> findByTrackerIdOrderByDateAsc(Long trackerId);
+    List<TrackerEntry> findByTrackerIdOrderByDateDesc(Long trackerId);
     List<TrackerEntry> findByTrackerIdAndUserId(Long trackerId, Long userId);
 }

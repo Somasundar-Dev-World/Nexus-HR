@@ -22,48 +22,82 @@ public class OmniQueryService {
 
     public List<Map<String, Object>> executeQuery(String query, Long userId) {
         String cleanQuery = query.trim().replaceAll("\\n", " ").replaceAll("\\s+", " ");
-        // Syntax: SELECT field1, field2 FROM "Tracker Name" WHERE ... ORDER BY ... LIMIT ...
-        Pattern pattern = Pattern.compile("(?i)SELECT\\s+(.+?)\\s+FROM\\s+(\".+?\"|[^\\s]+)(?:\\s+WHERE\\s+(.+?))?(?:\\s+ORDER\\s+BY\\s+(.+?))?(?:\\s+LIMIT\\s+(\\d+))?");
+        // Syntax: SELECT <fields> FROM <trackerA> [JOIN <trackerB> ON <keyA> = <keyB>] [WHERE <condition>] [ORDER BY <field>] [LIMIT <n>]
+        Pattern pattern = Pattern.compile("(?i)SELECT\\s+(.+?)\\s+FROM\\s+(\".+?\"|[^\\s]+)(?:\\s+JOIN\\s+(\".+?\"|[^\\s]+)\\s+ON\\s+(.+?)\\s*=\\s*(.+?))?(?:\\s+WHERE\\s+(.+?))?(?:\\s+ORDER\\s+BY\\s+(.+?))?(?:\\s+LIMIT\\s+(\\d+))?");
         Matcher matcher = pattern.matcher(cleanQuery);
 
         if (!matcher.find()) {
-            throw new RuntimeException("Invalid OmniQuery syntax. Expected: SELECT <fields> FROM <tracker> [WHERE <condition>] [ORDER BY <field>] [LIMIT <n>]");
+            throw new RuntimeException("Invalid OmniQuery syntax. Expected: SELECT <fields> FROM <tracker> [JOIN <trackerB> ON <keyA>=<keyB>] [WHERE <condition>] [ORDER BY <field>] [LIMIT <n>]");
         }
 
         String fieldsPart = matcher.group(1).trim();
-        String trackerName = matcher.group(2).trim();
-        String wherePart = matcher.group(3);
-        String orderByPart = matcher.group(4);
-        String limitPart = matcher.group(5);
+        String trackerAName = matcher.group(2).trim();
+        String trackerBName = matcher.group(3);
+        String joinKeyA = matcher.group(4);
+        String joinKeyB = matcher.group(5);
+        String wherePart = matcher.group(6);
+        String orderByPart = matcher.group(7);
+        String limitPart = matcher.group(8);
 
-        // 1. Resolve Tracker
-        Tracker tracker = findTrackerByName(trackerName, userId);
-        if (tracker == null) {
-            throw new RuntimeException("Tracker not found: " + trackerName);
+        // 1. Resolve Primary Tracker
+        Tracker trackerA = findTrackerByName(trackerAName, userId);
+        if (trackerA == null) throw new RuntimeException("Primary Tracker not found: " + trackerAName);
+        List<TrackerEntry> entriesA = trackerEntryRepository.findByTrackerIdOrderByDateAsc(trackerA.getId());
+
+        List<Map<String, Object>> convergedResults = new ArrayList<>();
+
+        if (trackerBName != null) {
+            // 2. Perform JOIN Logic
+            Tracker trackerB = findTrackerByName(trackerBName, userId);
+            if (trackerB == null) throw new RuntimeException("Joined Tracker not found: " + trackerBName);
+            List<TrackerEntry> entriesB = trackerEntryRepository.findByTrackerIdOrderByDateAsc(trackerB.getId());
+
+            // Simple Hash Join
+            for (TrackerEntry a : entriesA) {
+                Object valA = a.getFieldValues().get(joinKeyA.trim());
+                if (valA == null) continue;
+
+                for (TrackerEntry b : entriesB) {
+                    Object valB = b.getFieldValues().get(joinKeyB.trim());
+                    if (valB != null && valA.toString().equalsIgnoreCase(valB.toString())) {
+                        Map<String, Object> joined = new LinkedHashMap<>();
+                        // Prefix fields to avoid collisions
+                        a.getFieldValues().forEach((k, v) -> joined.put(trackerA.getName() + " " + k, v));
+                        b.getFieldValues().forEach((k, v) -> joined.put(trackerB.getName() + " " + k, v));
+                        joined.put("_dateA", a.getDate());
+                        joined.put("_dateB", b.getDate());
+                        convergedResults.add(joined);
+                    }
+                }
+            }
+        } else {
+            // Standard Single Tracker Case
+            for (TrackerEntry a : entriesA) {
+                Map<String, Object> row = new LinkedHashMap<>(a.getFieldValues());
+                row.put("id", a.getId());
+                row.put("date", a.getDate());
+                convergedResults.add(row);
+            }
         }
 
-        // 2. Fetch Entries
-        List<TrackerEntry> entries = trackerEntryRepository.findByTrackerIdOrderByDateAsc(tracker.getId());
-
         // 3. Filter (WHERE)
-        List<TrackerEntry> filtered = entries;
         if (wherePart != null && !wherePart.isEmpty()) {
-            filtered = applyFilters(entries, wherePart);
+            convergedResults = applyFiltersOnList(convergedResults, wherePart);
         }
 
         // 4. Sort (ORDER BY)
         if (orderByPart != null && !orderByPart.isEmpty()) {
-            applySorting(filtered, orderByPart);
+            applySortingOnList(convergedResults, orderByPart);
         }
 
         // 5. Limit
         if (limitPart != null) {
             int limit = Integer.parseInt(limitPart);
-            filtered = filtered.stream().limit(limit).collect(Collectors.toList());
+            convergedResults = convergedResults.stream().limit(limit).collect(Collectors.toList());
         }
 
         // 6. Project Fields (SELECT)
-        return projectFields(filtered, fieldsPart, tracker);
+        return projectFieldsFromList(convergedResults, fieldsPart);
     }
 
     private Tracker findTrackerByName(String name, Long userId) {
@@ -76,20 +110,18 @@ public class OmniQueryService {
                 .orElse(null);
     }
 
-    private List<TrackerEntry> applyFilters(List<TrackerEntry> entries, String whereClause) {
-        // Simple filter: field = value, field > value, field < value
-        // Pattern: ([a-zA-Z0-9_]+) (=|>|<|!=|LIKE) (.*)
+    private List<Map<String, Object>> applyFiltersOnList(List<Map<String, Object>> results, String whereClause) {
         Pattern p = Pattern.compile("(?i)([a-zA-Z0-9_\\s]+) (=|>|<|!=|LIKE) (.*)");
         Matcher m = p.matcher(whereClause.trim());
 
-        if (!m.find()) return entries;
+        if (!m.find()) return results;
 
         String field = m.group(1).trim();
         String op = m.group(2).trim();
         String val = m.group(3).trim().replace("\"", "").replace("'", "");
 
-        return entries.stream().filter(e -> {
-            Object actual = e.getFieldValues().get(field);
+        return results.stream().filter(row -> {
+            Object actual = row.get(field);
             if (actual == null) return false;
 
             String sActual = actual.toString();
@@ -104,14 +136,14 @@ public class OmniQueryService {
         }).collect(Collectors.toList());
     }
 
-    private void applySorting(List<TrackerEntry> entries, String orderBy) {
+    private void applySortingOnList(List<Map<String, Object>> results, String orderBy) {
         String[] parts = orderBy.trim().split("\\s+");
         String field = parts[0];
         boolean desc = parts.length > 1 && parts[1].equalsIgnoreCase("DESC");
 
-        entries.sort((a, b) -> {
-            Object valA = a.getFieldValues().get(field);
-            Object valB = b.getFieldValues().get(field);
+        results.sort((a, b) -> {
+            Object valA = a.get(field);
+            Object valB = b.get(field);
             if (valA == null || valB == null) return 0;
             
             int res;
@@ -124,23 +156,16 @@ public class OmniQueryService {
         });
     }
 
-    private List<Map<String, Object>> projectFields(List<TrackerEntry> entries, String fieldsPart, Tracker tracker) {
-        boolean selectAll = fieldsPart.equals("*");
-        String[] selectedFields = selectAll ? new String[0] : fieldsPart.split(",");
-
-        return entries.stream().map(e -> {
+    private List<Map<String, Object>> projectFieldsFromList(List<Map<String, Object>> results, String fieldsPart) {
+        if (fieldsPart.equals("*")) return results;
+        
+        String[] selectedFields = fieldsPart.split(",");
+        return results.stream().map(row -> {
             Map<String, Object> projected = new LinkedHashMap<>();
-            projected.put("id", e.getId());
-            projected.put("date", e.getDate());
-
-            if (selectAll) {
-                projected.putAll(e.getFieldValues());
-            } else {
-                for (String f : selectedFields) {
-                    String cleanF = f.trim();
-                    if (e.getFieldValues().containsKey(cleanF)) {
-                        projected.put(cleanF, e.getFieldValues().get(cleanF));
-                    }
+            for (String f : selectedFields) {
+                String cleanF = f.trim();
+                if (row.containsKey(cleanF)) {
+                    projected.put(cleanF, row.get(cleanF));
                 }
             }
             return projected;

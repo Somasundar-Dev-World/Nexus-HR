@@ -1100,7 +1100,9 @@
 
   <!-- ════ MODERN SUCCESS / STATUS MODAL ════ -->
   <div class="modal-overlay success-modal-overlay" *ngIf="showSuccessModal" (click)="showSuccessModal = false">
-    <div class="success-card glass-premium animate-fade-scale" (click)="$event.stopPropagation()">
+    <div class="success-card glass-premium animate-fade-scale" 
+         [class.reasoning-card]="successData?.isReasoning"
+         (click)="$event.stopPropagation()">
       <div class="success-glow" [class.error-glow]="successData?.isError" [class.reasoning-glow]="successData?.isReasoning"></div>
       
       <div class="success-icon-wrap" [class.success]="!successData?.isError && !successData?.isReasoning" 

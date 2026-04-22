@@ -106,12 +106,6 @@ export class OmniDashboardComponent implements OnInit {
 
   architectSelectedSuggestions: number[] = [];
 
-  // History Discovery State
-  historyFilter = '';
-  historySortField = 'date';
-  historySortOrder: 'ASC' | 'DESC' = 'DESC';
-  isHistoryAdvancedFilterOpen = false;
-
   // AI Chat State
   isChatOpen = false;
   isChatLoading = false;

@@ -4992,7 +4992,7 @@
 }
 
 .custom-checkbox.checked::after {
-  content: " ?\ !important;
+  content: "\2713" !important;
  position: absolute !important;
  color: white !important;
  font-weight: bold !important;

@@ -1221,16 +1221,40 @@
 
         <!-- Suggestions List -->
         <div class="architect-suggestions animate-fade-up" *ngIf="architectSuggestions.length">
-          <label style="display: block; width: 100%; margin: 2rem 0 1rem;" class="zenith-label">2. Choose an AI Design</label>
-          <div class="suggestion-card" *ngFor="let s of architectSuggestions" (click)="saveArchitectReport(s)">
-            <div class="suggestion-header">
-              <div class="suggestion-type-badge">{{ s.visualType }}</div>
-              <h4 class="suggestion-name">{{ s.name }}</h4>
+          <div class="suggestions-header-row">
+            <label class="zenith-label">2. Choose your AI Multi-Tracker Designs</label>
+            <p class="selection-count" *ngIf="architectSelectedSuggestions.length > 0">
+              {{ architectSelectedSuggestions.length }} Designs Selected
+            </p>
+          </div>
+
+          <div class="suggestion-card-modern" *ngFor="let s of architectSuggestions; let i = index"
+               [class.selected]="architectSelectedSuggestions.includes(i)"
+               (click)="toggleArchitectSuggestionSelection(i)">
+            
+            <div class="suggestion-selection-check">
+              <div class="custom-checkbox" [class.checked]="architectSelectedSuggestions.includes(i)"></div>
             </div>
-            <p class="suggestion-desc">{{ s.description }}</p>
-            <div class="suggestion-meta">
-              <span *ngFor="let insight of s.config.suggestedInsights" class="suggestion-pill">💡 {{ insight }}</span>
+
+            <div class="suggestion-content">
+              <div class="suggestion-header-row">
+                <div class="suggestion-type-tag">{{ s.visualType }}</div>
+                <input type="text" class="suggestion-name-input" 
+                       [(ngModel)]="s.name" 
+                       (click)="$event.stopPropagation()"
+                       placeholder="Report Name">
+              </div>
+              <p class="suggestion-desc">{{ s.description }}</p>
+              <div class="suggestion-meta">
+                <span *ngFor="let insight of s.config.suggestedInsights" class="suggestion-pill">💡 {{ insight }}</span>
+              </div>
             </div>
+          </div>
+
+          <div class="batch-save-actions" *ngIf="architectSelectedSuggestions.length > 0">
+            <button class="btn-architect-glow batch-save-btn" (click)="batchSaveArchitectReports()">
+              💎 Save {{ architectSelectedSuggestions.length }} Selected Reports
+            </button>
           </div>
         </div>
       </div>

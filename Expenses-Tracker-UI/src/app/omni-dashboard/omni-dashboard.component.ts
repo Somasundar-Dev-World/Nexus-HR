@@ -104,6 +104,14 @@ export class OmniDashboardComponent implements OnInit {
   historySortOrder: 'ASC' | 'DESC' = 'DESC';
   isHistoryAdvancedFilterOpen = false;
 
+  architectSelectedSuggestions: number[] = [];
+
+  // History Discovery State
+  historyFilter = '';
+  historySortField = 'date';
+  historySortOrder: 'ASC' | 'DESC' = 'DESC';
+  isHistoryAdvancedFilterOpen = false;
+
   // AI Chat State
   isChatOpen = false;
   isChatLoading = false;
@@ -1140,19 +1148,40 @@ export class OmniDashboardComponent implements OnInit {
     });
   }
 
-  saveArchitectReport(suggestion: any) {
-    if (!this.selectedApp?.id) return;
-    const report: AiReport = {
-      name: this.reportNameInput || suggestion.name,
-      description: suggestion.description,
-      appId: this.selectedApp.id,
-      visualType: suggestion.visualType,
-      querySpec: suggestion.querySpec,
-      config: suggestion.config
-    };
-    this.omniService.saveReport(report).subscribe(() => {
-      this.reportArchitectMode = false;
-      this.loadReports();
+  toggleArchitectSuggestionSelection(index: number) {
+    const idx = this.architectSelectedSuggestions.indexOf(index);
+    if (idx > -1) this.architectSelectedSuggestions.splice(idx, 1);
+    else this.architectSelectedSuggestions.push(index);
+  }
+
+  batchSaveArchitectReports() {
+    if (!this.selectedApp?.id || this.architectSelectedSuggestions.length === 0) return;
+    
+    // Save each selected suggestion
+    const saves = this.architectSelectedSuggestions.map(index => {
+      const s = this.architectSuggestions[index];
+      const report: AiReport = {
+        name: s.name,
+        description: s.description,
+        appId: this.selectedApp!.id!,
+        visualType: s.visualType,
+        querySpec: s.querySpec,
+        config: s.config
+      };
+      return this.omniService.saveReport(report);
+    });
+
+    // ForkJoin or multiple subscribes? Simple multiple for now.
+    let completed = 0;
+    saves.forEach(obs => {
+      obs.subscribe(() => {
+        completed++;
+        if (completed === saves.length) {
+          this.reportArchitectMode = false;
+          this.architectSelectedSuggestions = [];
+          this.loadReports();
+        }
+      });
     });
   }
 

@@ -4951,3 +4951,105 @@
   letter-spacing: 1px !important;
   margin-top: 0.25rem !important;
 }
+
+/* Multi-Selection Architect UI */
+.suggestion-card-modern {
+  display: flex !important;
+  gap: 1.5rem !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 20px !important;
+  padding: 1.5rem !important;
+  margin-bottom: 1.25rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+}
+
+.suggestion-card-modern.selected {
+  background: rgba(99, 102, 241, 0.08) !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15) !important;
+}
+
+.suggestion-selection-check {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.custom-checkbox {
+  width: 24px !important;
+  height: 24px !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+}
+
+.custom-checkbox.checked {
+  background: #6366f1 !important;
+  border-color: #6366f1 !important;
+}
+
+.custom-checkbox.checked::after {
+  content: " ?\ !important;
+ position: absolute !important;
+ color: white !important;
+ font-weight: bold !important;
+ left: 50% !important;
+ top: 50% !important;
+ transform: translate(-50%, -50%) !important;
+ font-size: 14px !important;
+}
+
+.suggestion-content { flex: 1 !important; }
+
+.suggestion-header-row {
+ display: flex !important;
+ justify-content: space-between !important;
+ align-items: center !important;
+ margin-bottom: 1rem !important;
+ gap: 1rem !important;
+}
+
+.suggestion-type-tag {
+ padding: 0.2rem 0.6rem !important;
+ background: rgba(139, 92, 246, 0.2) !important;
+ border: 1px solid rgba(139, 92, 246, 0.3) !important;
+ border-radius: 6px !important;
+ color: #a78bfa !important;
+ font-size: 0.7rem !important;
+ font-weight: 800 !important;
+ text-transform: uppercase !important;
+}
+
+.suggestion-name-input {
+ background: transparent !important;
+ border: none !important;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+ color: white !important;
+ font-size: 1.1rem !important;
+ font-weight: 700 !important;
+ padding: 0.25rem 0 !important;
+ flex: 1 !important;
+ outline: none !important;
+ transition: all 0.3s ease !important;
+}
+
+.suggestion-name-input:focus {
+ border-bottom-color: #6366f1 !important;
+ background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.batch-save-actions {
+ margin-top: 2rem !important;
+ animation: slideUp 0.4s ease !important;
+}
+
+.selection-count {
+ font-size: 0.8rem !important;
+ font-weight: 800 !important;
+ color: #10b981 !important;
+ text-transform: uppercase !important;
+ letter-spacing: 1px !important;
+}
